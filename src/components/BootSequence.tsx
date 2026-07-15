@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 const bootText = [
-    'Ren BIOS v1.0.4 (C) 2024-2026',
+    'M BIOS v2.0.4 (C) 2026-2030',
     'CPU: Intel(R) Coffee Powered @ 4.20GHz',
     'Memory Test: 32768MB OK',
     '',
@@ -11,7 +11,7 @@ const bootText = [
     'Initializing Global Modules... DONE',
     'Searching for User Profiles... FOUND',
     '',
-    'Starting RenOS v2.1.0...',
+    'Starting MOS v3.1.0...',
 ];
 
 export const BootSequence = ({ onComplete }: { onComplete: () => void }) => {
@@ -37,11 +37,11 @@ export const BootSequence = ({ onComplete }: { onComplete: () => void }) => {
             <div className="text-white mb-4 sm:mb-8 w-full overflow-hidden">
                 <pre className="text-[8px] leading-[8px] sm:text-xs">
                     {`
-   ____                 ___  ____  
-  |  _ \\ ___ _ __      / _ \\/ ___| 
-  | |_) / _ \\ '_ \\    | | | \\___ \\ 
-  |  _ <  __/ | | |   | |_| |___) |
-  |_| \\_\\___|_| |_|    \\___/|____/ 
+   ___   ____       ___  ____ 
+  |   \\ //  |    /  _ \\/ ___| 
+  |  |\\//|  |    | | | \\___ \\ 
+  |  |    |  |    | |_| |___) |
+  |__|    |__|    \\___/|____/ 
 `}
                 </pre>
             </div>

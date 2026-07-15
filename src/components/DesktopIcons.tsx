@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { User, Folder, Trash2, Ghost, Smile } from 'lucide-react';
+import { User, Trash2, File } from 'lucide-react';
 
 interface DesktopIconProps {
     icon: any;
@@ -7,9 +7,10 @@ interface DesktopIconProps {
     command: string;
     onDoubleClick: (command: string) => void;
     initialPos: { x: number; y: number };
+    iconSrc?: string;
 }
 
-const DesktopIcon = ({ icon: Icon, label, command, onDoubleClick, initialPos }: DesktopIconProps) => {
+const DesktopIcon = ({ icon: Icon, label, command, onDoubleClick, initialPos, iconSrc }: DesktopIconProps) => {
     const [pos, setPos] = useState(initialPos);
     const [isDragging, setIsDragging] = useState(false);
     const dragStart = useRef({ x: 0, y: 0 });
@@ -20,6 +21,12 @@ const DesktopIcon = ({ icon: Icon, label, command, onDoubleClick, initialPos }: 
             x: e.clientX - pos.x,
             y: e.clientY - pos.y
         };
+    };
+
+    const handleClick = (e: React.MouseEvent) => {
+        if (!isDragging) {
+            onDoubleClick(command);
+        }
     };
 
     useEffect(() => {
@@ -56,10 +63,14 @@ const DesktopIcon = ({ icon: Icon, label, command, onDoubleClick, initialPos }: 
             }}
             className={`flex flex-col items-center w-16 p-1.5 cursor-pointer select-none group rounded-md hover:bg-white/10 transition-colors ${isDragging ? 'opacity-70' : ''}`}
             onMouseDown={handleMouseDown}
-            onDoubleClick={() => onDoubleClick(command)}
+            onClick={handleClick}
         >
             <div className="w-10 h-10 flex items-center justify-center bg-blue-500/20 rounded-lg border border-blue-400/30 group-hover:bg-blue-500/30 group-hover:border-blue-400/50 backdrop-blur-sm transition-all shadow-lg">
-                <Icon className="w-6 h-6 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
+                {iconSrc ? (
+                    <img src={iconSrc} alt={label} className="w-6 h-6 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
+                ) : (
+                    <Icon className="w-6 h-6 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
+                )}
             </div>
             <span className="mt-1 text-[10px] font-medium text-white text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] px-1 py-0.5 rounded leading-tight">
                 {label}
@@ -69,17 +80,18 @@ const DesktopIcon = ({ icon: Icon, label, command, onDoubleClick, initialPos }: 
 };
 
 export const DesktopIcons = ({ onIconClick }: { onIconClick: (command: string) => void }) => {
+    const projectsIconSrc = `${import.meta.env.BASE_URL}assets/icons/projects.png`;
+
     const icons = [
         { icon: User, label: 'About Me', command: 'about', pos: { x: 20, y: 20 } },
-        { icon: Folder, label: 'Projects', command: 'projects', pos: { x: 20, y: 120 } },
-        { icon: Ghost, label: 'Waifu', command: 'waifu', pos: { x: 20, y: 220 } },
-        { icon: Smile, label: 'Joke', command: 'joke', pos: { x: 20, y: 320 } },
-        { icon: Trash2, label: 'Recycle Bin', command: 'clear', pos: { x: 20, y: 420 } },
+        { icon: null, label: 'Projects', command: 'projects', pos: { x: 20, y: 120 }, iconSrc: projectsIconSrc },
+        { icon: File, label: 'Resume', command: 'resume', pos: { x: 20, y: 220 } },
+        { icon: Trash2, label: 'Recycle Bin', command: 'clear', pos: { x: 20, y: 400 } },
     ];
 
     return (
         <div className="absolute inset-0 z-0 pointer-events-none">
-            <div className="relative w-full h-full pointer-events-auto">
+            <div className="relative w-full h-full pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                 {icons.map((icon, idx) => (
                     <DesktopIcon
                         key={idx}
@@ -88,6 +100,7 @@ export const DesktopIcons = ({ onIconClick }: { onIconClick: (command: string) =
                         command={icon.command}
                         onDoubleClick={onIconClick}
                         initialPos={icon.pos}
+                        iconSrc={icon.iconSrc}
                     />
                 ))}
             </div>

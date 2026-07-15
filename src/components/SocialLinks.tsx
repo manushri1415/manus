@@ -1,4 +1,4 @@
-import { Github, Mail, Palette, Image as ImageIcon, LayoutGrid, LogOut } from 'lucide-react';
+import { Github, Mail, Palette, Image as ImageIcon, LayoutGrid, LogOut, LinkedinIcon } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import {
   DropdownMenu,
@@ -20,8 +20,9 @@ import {
 import { Button } from "@/components/ui/button";
 
 const links = [
-  { icon: Github, href: 'https://github.com', label: 'GitHub' },
-  { icon: Mail, href: 'mailto:hello@developer.dev', label: 'Email' },
+  { icon: Github, href: 'https://github.com/manushri1415', label: 'GitHub' },
+  { icon: Mail, href: 'mailto:manushrimkumar@gmail.com', label: 'Email' },
+  { icon: LinkedinIcon, href:'linkedin.com/in/manushrimurugakumar', label: 'LinkedIn' },
 ];
 
 const themes = [
@@ -77,8 +78,8 @@ export const SocialLinks = ({
                     O
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-white">Ovi ren</div>
-                    <div className="text-[11px] text-white/50">Writer • Script Author</div>
+                    <div className="text-sm font-semibold text-white">Manushri Muruga Kumar</div>
+                    <div className="text-[11px] text-white/50">Software Developer</div>
                   </div>
                 </div>
               </div>

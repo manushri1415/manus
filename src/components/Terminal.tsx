@@ -7,8 +7,7 @@ interface TerminalLine {
   content: string | React.ReactNode;
 }
 
-const WELCOME_MESSAGE = `Hello, World! I'm Ovi ren
-I'm a writer, i write scripts.
+const WELCOME_MESSAGE = `Hello, World! I'm Manushri
 
 Type 'help' to see available commands.`;
 
@@ -25,8 +24,6 @@ Available commands:
   whoami    - Display current user
   date      - Show current date and time
   clear     - Clear the terminal
-  waifu     - Show a random waifu image
-  joke      - Tell a random joke
 `,
   },
   about: {
@@ -35,18 +32,17 @@ Available commands:
       <div className="my-4 space-y-4">
         <div className="border border-border rounded-lg overflow-hidden w-64 bg-secondary/50 shadow-lg">
           <img
-            src="https://iamovi.github.io/assets/sword.jpg"
-            alt="Ovi Ren Profile"
+            alt="Manushri Profile"
             className="w-full h-auto object-cover"
           />
         </div>
         <div className="font-mono leading-relaxed bg-secondary/30 p-4 border border-border rounded-lg">
           <div className="text-terminal-cyan font-bold mb-2">┌ ABOUT ME ┐</div>
           <p className="mb-4 text-foreground/90">
-            Hi! I'm a hobby programmer. I love building things and exploring new technologies in my free time.
+            I am a Computer Science graduate from Arizona State University interested in full-stack, backend, and product-focused software engineering
           </p>
           <p className="text-foreground/90">
-            When i was in high school i started programming as my hobby, that's how it all started.
+            I am interested in software that helps real people communicate, organize information, and make better decisions
           </p>
           <div className="mt-4 text-muted-foreground text-xs italic">
             Currently working on exciting projects and always looking for new challenges.
@@ -67,7 +63,6 @@ Available commands:
 │  • TypeScript                                               │
 │  • JavaScript                                               │
 │  • Python                                                   │
-│  • Rust                                                     │
 │                                                             │
 │  Frameworks & Libraries                                     │
 │  ─────────────────────────────────────────                  │
@@ -78,7 +73,7 @@ Available commands:
 │                                                             │
 │  Tools & Platforms                                          │
 │  ─────────────────────────────────────────                  │
-│  • Git, Docker, AWS, Vercel, PostgreSQL, Redis              │
+│  • Git, Docker, AWS, Vercel, PostgreSQL                     │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 `,
@@ -114,12 +109,10 @@ Available commands:
 │  CONTACT                                                    │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  📧 Email      fornet.ovi@email.com                         │
-│  🐙 GitHub     github.com/iamovi                            │
-│  🐦 Twitter    x.com/hahahaovi                              │
-│  🎮 Itch.io    iamovi.itch.io                               │
-│  🌐 Website    iamovi.github.io                             │
-│                                                             │
+│  📧 Email      manushrimkumar@gmail.com                     |    
+│  🐙 GitHub     github.com/manushri1415                      │
+│  🌐 Website    <update later>                               │
+│                                                             
 │  I'm always open to collaborating on interesting            │
 │  projects or just chatting about code or anime!             │
 │                                                             │
@@ -128,105 +121,16 @@ Available commands:
   },
   whoami: {
     description: 'Display current user',
-    action: () => 'ren@portfolio',
+    action: () => 'Manu@portfolio',
   },
   date: {
     description: 'Show current date and time',
-    action: () => new Date().toLocaleString(),
+    action: () => new Date('2005-02-15T09:19:00').toLocaleString(),
   },
   clear: {
     description: 'Clear the terminal',
     action: () => 'CLEAR',
   },
-  waifu: {
-    description: 'Show a random waifu image',
-    action: () => <WaifuImage />,
-  },
-  joke: {
-    description: 'Tell a random joke',
-    action: () => <JokeDisplay />,
-  },
-};
-
-const JokeDisplay = () => {
-  const [joke, setJoke] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch('https://v2.jokeapi.dev/joke/Any')
-      .then(res => res.json())
-      .then(data => {
-        setJoke(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError('Failed to fetch joke');
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) return <div className="animate-pulse text-terminal-cyan">Fetching a joke for you...</div>;
-  if (error) return <div className="text-terminal-red">{error}</div>;
-
-  return (
-    <div className="my-4 p-4 border border-border rounded-lg bg-secondary/30 max-w-lg font-mono leading-relaxed">
-      <div className="text-terminal-yellow font-bold mb-2">┌ JOKE ┐</div>
-      {joke.type === 'single' ? (
-        <p className="text-foreground/90">{joke.joke}</p>
-      ) : (
-        <div className="space-y-4">
-          <p className="text-foreground/90 italic">"{joke.setup}"</p>
-          <p className="text-terminal-cyan font-bold">{joke.delivery}</p>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const WaifuImage = () => {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isApiLoading, setIsApiLoading] = useState(true);
-  const [isImageLoading, setIsImageLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('https://api.waifu.pics/sfw/waifu')
-      .then(res => res.json())
-      .then(data => {
-        setImageUrl(data.url);
-        setIsApiLoading(false);
-      })
-      .catch(err => {
-        setError('Failed to fetch waifu image');
-        setIsApiLoading(false);
-      });
-  }, []);
-
-  const isLoading = isApiLoading || isImageLoading;
-
-  if (error) return <div className="text-terminal-red">{error}</div>;
-
-  return (
-    <div className="my-4">
-      {isLoading && (
-        <div className="flex items-center gap-2 text-terminal-cyan font-mono animate-pulse">
-          <span className="inline-block animate-bounce">/</span>
-          <span>Fetching waifu...</span>
-        </div>
-      )}
-      {imageUrl && (
-        <div className={`border border-border rounded-lg overflow-hidden w-64 bg-secondary/50 shadow-lg transition-opacity duration-500 ${isImageLoading ? 'opacity-0 h-0' : 'opacity-100'}`}>
-          <img
-            src={imageUrl}
-            alt="Waifu"
-            className="w-full h-auto object-cover"
-            onLoad={() => setIsImageLoading(false)}
-          />
-        </div>
-      )}
-    </div>
-  );
 };
 
 export const Terminal = forwardRef(({ themeId = 'powershell' }: { themeId?: string }, ref) => {
@@ -238,14 +142,14 @@ export const Terminal = forwardRef(({ themeId = 'powershell' }: { themeId?: stri
           text: '#00FF41',
           prompt: 'neo@matrix:~$',
           header: 'Matrix Core',
-          welcome: `Wake up, Neo...\n\nHello, World! I'm Ovi ren\nI'm a writer, i write scripts.`,
+          welcome: `Wake up, Neo...\n\nHello, World! I'm Manushri Muruga Kumar\n I am a software engineer`,
           caret: '#00FF41'
         };
       case 'ubuntu':
         return {
           bg: '#300a24',
           text: '#ffffff',
-          prompt: 'ren@ubuntu:~$',
+          prompt: 'Manu@ubuntu:~$',
           header: 'Terminal (Ubuntu)',
           welcome: WELCOME_MESSAGE,
           caret: '#ffffff'
@@ -263,7 +167,7 @@ export const Terminal = forwardRef(({ themeId = 'powershell' }: { themeId?: stri
         return {
           bg: '#000000',
           text: '#ffffff',
-          prompt: 'C:\\Users\\ren>',
+          prompt: 'C:\\Users\\Manu>',
           header: 'Command Prompt',
           welcome: WELCOME_MESSAGE,
           caret: '#ffffff'
@@ -272,7 +176,7 @@ export const Terminal = forwardRef(({ themeId = 'powershell' }: { themeId?: stri
         return {
           bg: '#012456',
           text: '#ffffff',
-          prompt: 'PS C:\\Users\\ren>',
+          prompt: 'PS C:\\Users\\Manu>',
           header: 'Windows PowerShell',
           welcome: WELCOME_MESSAGE,
           caret: '#ffffff'
