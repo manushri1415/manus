@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
-import { Minus, Square, X, Copy } from 'lucide-react';
+import { Minus, Square, Copy } from 'lucide-react';
 
 interface TerminalLine {
   id: number;
@@ -18,9 +18,11 @@ const COMMANDS: Record<string, { description: string; action: () => string | Rea
 Available commands:
   help      - Show this help message
   about     - Learn about me
+  experience - Open my experience page
   skills    - View my technical skills
   projects  - Browse my projects
   contact   - Get my contact information
+  resume    - Open my resume
   whoami    - Display current user
   date      - Show current date and time
   clear     - Clear the terminal
@@ -133,7 +135,15 @@ Available commands:
   },
 };
 
-export const Terminal = forwardRef(({ themeId = 'powershell' }: { themeId?: string }, ref) => {
+type TerminalProps = {
+  themeId?: string;
+  onOpenExperience?: () => void;
+  onOpenResume?: () => void;
+};
+
+const EXTRA_COMMANDS = ['experience', 'resume'];
+
+export const Terminal = forwardRef(({ themeId = 'powershell', onOpenExperience, onOpenResume }: TerminalProps, ref) => {
   const getThemeConfig = (id: string) => {
     switch (id) {
       case 'matrix':
@@ -185,6 +195,7 @@ export const Terminal = forwardRef(({ themeId = 'powershell' }: { themeId?: stri
   };
 
   const theme = getThemeConfig(themeId);
+  const resumePdfPath = `${import.meta.env.BASE_URL}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`;
 
   const [lines, setLines] = useState<TerminalLine[]>([]);
 
@@ -197,7 +208,7 @@ export const Terminal = forwardRef(({ themeId = 'powershell' }: { themeId?: stri
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [size, setSize] = useState({ width: 800, height: 500 });
+  const [size, setSize] = useState({ width: 600, height: 400 });
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
@@ -326,6 +337,40 @@ export const Terminal = forwardRef(({ themeId = 'powershell' }: { themeId?: stri
       return;
     }
 
+    if (trimmedInput === 'experience') {
+      onOpenExperience?.();
+      newLines.push({
+        id: lineIdRef.current++,
+        type: 'success',
+        content: 'Opening experience page...',
+      });
+      setLines((prev) => [...prev, ...newLines]);
+      return;
+    }
+
+    if (trimmedInput === 'resume') {
+      onOpenResume?.();
+      newLines.push({
+        id: lineIdRef.current++,
+        type: 'success',
+        content: (
+          <span>
+            Opening resume viewer...{' '}
+            <a
+              href={resumePdfPath}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-terminal-cyan"
+            >
+              Open PDF in a new tab
+            </a>
+          </span>
+        ),
+      });
+      setLines((prev) => [...prev, ...newLines]);
+      return;
+    }
+
     // Execute command
     const command = COMMANDS[trimmedInput];
     if (command) {
@@ -371,7 +416,7 @@ export const Terminal = forwardRef(({ themeId = 'powershell' }: { themeId?: stri
       } else if (e.key === 'Tab') {
         e.preventDefault();
         // Auto-complete
-        const matches = Object.keys(COMMANDS).filter((cmd) =>
+        const matches = [...Object.keys(COMMANDS), ...EXTRA_COMMANDS].filter((cmd) =>
           cmd.startsWith(currentInput.toLowerCase())
         );
         if (matches.length === 1) {

@@ -90,7 +90,7 @@ export const DesktopIcons = ({ onIconClick }: { onIconClick: (command: string) =
         { icon: null, label: 'Projects', command: 'projects', pos: { x: 20, y: 110 }, iconSrc: projectsIconSrc },
         { icon: null, label: 'Experience', command: 'experience', pos: { x: 20, y: 210 }, iconSrc: experienceIconSrc },
         { icon: null, label: 'Resume', command: 'resume', pos: { x: 20, y: 310 },iconSrc: resumeIconSrc },
-        { icon: null, label: 'Contact', command: 'contact', pos: { x: 20, y: 410 }, iconSrc: phoneIconSrc },
+        { icon: null, label: 'Contact', command: 'contact', pos: { x: 20, y: 400 }, iconSrc: phoneIconSrc },
     ];
 
     return (

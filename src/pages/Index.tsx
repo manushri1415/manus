@@ -10,6 +10,30 @@ import { AboutPage } from '@/components/browser/pages/AboutPage';
 import { ExperiencePage } from '@/components/browser/pages/ExperiencePage';
 import { ContactPage } from '@/components/browser/pages/ContactPage';
 
+const TASKBAR_HEIGHT = 40;
+const WORKSPACE_PADDING = 16;
+const BROWSER_CHROME_HEIGHT = 62;
+const DEFAULT_BROWSER_WIDTH = 920;
+const DEFAULT_BROWSER_HEIGHT = 580;
+const MIN_BROWSER_WIDTH = 680;
+const MIN_BROWSER_HEIGHT = 420;
+
+type WorkspaceSize = {
+  width: number;
+  height: number;
+};
+
+const getInitialWorkspaceSize = (): WorkspaceSize => {
+  if (typeof window === 'undefined') {
+    return { width: 1050, height: 580 };
+  }
+
+  return {
+    width: Math.max(0, window.innerWidth - WORKSPACE_PADDING * 2),
+    height: Math.max(0, window.innerHeight - TASKBAR_HEIGHT - WORKSPACE_PADDING * 2),
+  };
+};
+
 const Index = () => {
   // Resolve the correct path for the default wallpaper based on the base URL
   const DEFAULT_WALLPAPER = `${import.meta.env.BASE_URL}frieren.jpg`;
@@ -21,12 +45,37 @@ const Index = () => {
   const [openWindows, setOpenWindows] = useState<BrowserPageKey[]>([]);
   const [minimizedWindows, setMinimizedWindows] = useState<Set<BrowserPageKey>>(new Set());
   const terminalRef = useRef<any>(null);
+  const workspaceRef = useRef<HTMLDivElement>(null);
+  const [workspaceSize, setWorkspaceSize] = useState<WorkspaceSize>(getInitialWorkspaceSize);
 
   useEffect(() => {
     const savedWallpaper = localStorage.getItem('terminal-wallpaper');
     if (savedWallpaper) {
       setWallpaper(savedWallpaper);
     }
+  }, []);
+
+  useEffect(() => {
+    const workspace = workspaceRef.current;
+    if (!workspace) return;
+
+    const updateWorkspaceSize = () => {
+      setWorkspaceSize({
+        width: workspace.clientWidth,
+        height: workspace.clientHeight,
+      });
+    };
+
+    updateWorkspaceSize();
+
+    const resizeObserver = new ResizeObserver(updateWorkspaceSize);
+    resizeObserver.observe(workspace);
+    window.addEventListener('resize', updateWorkspaceSize);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateWorkspaceSize);
+    };
   }, []);
 
   const handleWallpaperChange = useCallback((newWallpaper: string) => {
@@ -101,6 +150,42 @@ const Index = () => {
     }
   }, [openOrFocusPage]);
 
+  const getInitialWindowState = useCallback((pageKey: BrowserPageKey) => {
+    const fallbackSize = { width: DEFAULT_BROWSER_WIDTH, height: DEFAULT_BROWSER_HEIGHT };
+    const fallbackPosition = { x: 40, y: 40 };
+    const page = BROWSER_PAGES[pageKey];
+
+    if (!workspaceSize.width || !workspaceSize.height) {
+      return { size: fallbackSize, position: fallbackPosition };
+    }
+
+    const width = Math.round(Math.min(DEFAULT_BROWSER_WIDTH, workspaceSize.width));
+    const contentBaseSize = page?.contentBaseSize;
+    const widthScale = contentBaseSize
+      ? Math.min(width / contentBaseSize.width, 1)
+      : 1;
+    const preferredHeight = contentBaseSize
+      ? Math.round(contentBaseSize.height * widthScale + BROWSER_CHROME_HEIGHT)
+      : DEFAULT_BROWSER_HEIGHT;
+    const height = Math.round(
+      Math.max(
+        Math.min(MIN_BROWSER_HEIGHT, workspaceSize.height),
+        Math.min(preferredHeight, workspaceSize.height)
+      )
+    );
+
+    const maxX = Math.max(0, workspaceSize.width - width);
+    const maxY = Math.max(0, workspaceSize.height - height);
+
+    return {
+      size: { width, height },
+      position: {
+        x: Math.round(maxX / 2),
+        y: Math.round(maxY / 2),
+      },
+    };
+  }, [workspaceSize]);
+
   if (appState === 'booting') {
     return <BootSequence onComplete={handleBootComplete} />;
   }
@@ -133,24 +218,44 @@ const Index = () => {
       <DesktopIcons onIconClick={handleIconClick} />
 
       {/* Main Content (Terminal & Browser Windows) */}
-      <main className="h-[calc(100vh-40px)] relative flex items-center justify-center p-4 overflow-hidden z-10 pointer-events-none">
-        <div className="w-full max-w-4xl h-full flex items-center justify-center pointer-events-auto">
-          <Terminal ref={terminalRef} themeId={currentTheme} />
+      <main
+        className="relative overflow-hidden z-10 pointer-events-none"
+        style={{ height: `calc(100vh - ${TASKBAR_HEIGHT}px)` }}
+      >
+        <div className="relative z-0 flex h-full w-full items-center justify-center p-4 pointer-events-none">
+          <div className="w-full max-w-4xl h-full flex items-center justify-center pointer-events-auto">
+            <Terminal
+              ref={terminalRef}
+              themeId={currentTheme}
+              onOpenExperience={() => openOrFocusPage('experience')}
+              onOpenResume={() => openOrFocusPage('resume')}
+            />
+          </div>
         </div>
 
-        {/* Browser Windows */}
-        {openWindows.map((pageKey, idx) => {
-          const page = BROWSER_PAGES[pageKey];
-          if (!page) return null;
-          const { Component } = page;
-          return (
-            <div key={pageKey} className="absolute pointer-events-auto">
+        <div
+          ref={workspaceRef}
+          className="absolute z-20 pointer-events-none"
+          style={{
+            inset: `${WORKSPACE_PADDING}px`,
+          }}
+        >
+          {/* Browser Windows */}
+          {openWindows.map((pageKey, idx) => {
+            const page = BROWSER_PAGES[pageKey];
+            if (!page) return null;
+            const { Component } = page;
+            const initialWindowState = getInitialWindowState(pageKey);
+
+            return (
               <BrowserWindow
+                key={pageKey}
                 title={page.title}
                 url={page.url}
-                initialPosition={{ x: 40 + idx * 40, y: 40 + idx * 40 }}
-                initialSize={{ width: 1050, height: 580 }}
-                windowKey={pageKey}
+                initialPosition={initialWindowState.position}
+                initialSize={initialWindowState.size}
+                workspaceSize={workspaceSize}
+                contentBaseSize={page.contentBaseSize}
                 zIndex={20 + idx}
                 isMinimized={minimizedWindows.has(pageKey)}
                 onMinimizedChange={(v) => handleWindowMinimize(pageKey, v)}
@@ -176,9 +281,9 @@ const Index = () => {
                   <Component />
                 )}
               </BrowserWindow>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </main>
 
       {/* Windows Taskbar */}
