@@ -52,7 +52,7 @@ export const LoginScreen = ({ onLogin, wallpaper }: { onLogin: () => void, wallp
                         onClick={handleLogin}
                         className="group mt-4 flex items-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 px-8 py-3 rounded-md transition-all duration-300 transform hover:scale-105"
                     >
-                        <span className="text-white font-medium">Login</span>
+                        <span className="text-white font-medium">Enter Portfolio</span>
                         <LogIn className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />
                     </button>
                 )}

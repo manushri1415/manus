@@ -14,7 +14,7 @@ interface BrowserWindowProps {
   initialPosition: WindowPosition;
   initialSize: WindowSize;
   workspaceSize: WindowSize;
-  contentBaseSize?: WindowSize;
+  minSize?: Partial<WindowSize>;
   onClose: () => void;
   isMinimized?: boolean;
   onMinimizedChange?: (v: boolean) => void;
@@ -30,12 +30,15 @@ const clampValue = (value: number, min: number, max: number) => {
 const normalizeWindowState = (
   position: WindowPosition,
   size: WindowSize,
-  workspaceSize: WindowSize
+  workspaceSize: WindowSize,
+  minSize?: Partial<WindowSize>
 ) => {
-  const maxWidth = Math.max(MIN_WINDOW_WIDTH, workspaceSize.width || MIN_WINDOW_WIDTH);
-  const maxHeight = Math.max(MIN_WINDOW_HEIGHT, workspaceSize.height || MIN_WINDOW_HEIGHT);
-  const width = clampValue(size.width, MIN_WINDOW_WIDTH, maxWidth);
-  const height = clampValue(size.height, MIN_WINDOW_HEIGHT, maxHeight);
+  const minWidth = Math.max(MIN_WINDOW_WIDTH, minSize?.width ?? MIN_WINDOW_WIDTH);
+  const minHeight = Math.max(MIN_WINDOW_HEIGHT, minSize?.height ?? MIN_WINDOW_HEIGHT);
+  const maxWidth = Math.max(minWidth, workspaceSize.width || minWidth);
+  const maxHeight = Math.max(minHeight, workspaceSize.height || minHeight);
+  const width = clampValue(size.width, minWidth, maxWidth);
+  const height = clampValue(size.height, minHeight, maxHeight);
   const maxX = Math.max(0, workspaceSize.width - width);
   const maxY = Math.max(0, workspaceSize.height - height);
 
@@ -55,14 +58,14 @@ export const BrowserWindow = ({
   initialPosition,
   initialSize,
   workspaceSize,
-  contentBaseSize,
+  minSize,
   onClose,
   isMinimized = false,
   onMinimizedChange,
   onFocus,
   zIndex = 20,
 }: BrowserWindowProps) => {
-  const initialState = normalizeWindowState(initialPosition, initialSize, workspaceSize);
+  const initialState = normalizeWindowState(initialPosition, initialSize, workspaceSize, minSize);
   const [position, setPosition] = useState(initialState.position);
   const [size, setSize] = useState(initialState.size);
   const [isMaximized, setIsMaximized] = useState(false);
@@ -71,32 +74,7 @@ export const BrowserWindow = ({
   const dragStart = useRef({ x: 0, y: 0 });
   const resizeStart = useRef({ x: 0, y: 0, w: 0, h: 0 });
   const windowRef = useRef<HTMLDivElement>(null);
-  const contentViewportRef = useRef<HTMLDivElement>(null);
   const appliedInitialState = useRef('');
-  const [contentViewportSize, setContentViewportSize] = useState<WindowSize>({ width: 0, height: 0 });
-
-  useEffect(() => {
-    if (!contentBaseSize) return;
-
-    const viewport = contentViewportRef.current;
-    if (!viewport) return;
-
-    const updateViewportSize = () => {
-      setContentViewportSize({
-        width: viewport.clientWidth,
-        height: viewport.clientHeight,
-      });
-    };
-
-    updateViewportSize();
-
-    const resizeObserver = new ResizeObserver(updateViewportSize);
-    resizeObserver.observe(viewport);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [contentBaseSize, isMaximized, size.height, size.width]);
 
   useEffect(() => {
     if (isMaximized) return;
@@ -108,12 +86,14 @@ export const BrowserWindow = ({
       initialSize.height,
       workspaceSize.width,
       workspaceSize.height,
+      minSize?.width ?? '',
+      minSize?.height ?? '',
     ].join(':');
 
     if (appliedInitialState.current === initialStateKey) return;
     appliedInitialState.current = initialStateKey;
 
-    const nextState = normalizeWindowState(initialPosition, initialSize, workspaceSize);
+    const nextState = normalizeWindowState(initialPosition, initialSize, workspaceSize, minSize);
     setPosition(nextState.position);
     setSize(nextState.size);
   }, [
@@ -123,6 +103,8 @@ export const BrowserWindow = ({
     initialSize.height,
     workspaceSize.width,
     workspaceSize.height,
+    minSize?.width,
+    minSize?.height,
     isMaximized,
   ]);
 
@@ -158,7 +140,8 @@ export const BrowserWindow = ({
               y: e.clientY - dragStart.current.y,
             },
             size,
-            workspaceSize
+            workspaceSize,
+            minSize
           ).position
         );
       }
@@ -171,7 +154,8 @@ export const BrowserWindow = ({
             width: resizeStart.current.w + deltaX,
             height: resizeStart.current.h + deltaY,
           },
-          workspaceSize
+          workspaceSize,
+          minSize
         );
         setPosition(nextState.position);
         setSize(nextState.size);
@@ -192,12 +176,12 @@ export const BrowserWindow = ({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, isMaximized, position, size, workspaceSize]);
+  }, [isDragging, isResizing, isMaximized, minSize, position, size, workspaceSize]);
 
   useEffect(() => {
     if (isMaximized) return;
 
-    const nextState = normalizeWindowState(position, size, workspaceSize);
+    const nextState = normalizeWindowState(position, size, workspaceSize, minSize);
     if (
       nextState.position.x !== position.x ||
       nextState.position.y !== position.y ||
@@ -207,22 +191,11 @@ export const BrowserWindow = ({
       setPosition(nextState.position);
       setSize(nextState.size);
     }
-  }, [isMaximized, position, size, workspaceSize]);
+  }, [isMaximized, minSize, position, size, workspaceSize]);
 
   if (isMinimized) {
     return null;
   }
-
-  const contentScale = contentBaseSize && contentViewportSize.width
-    ? Math.min(contentViewportSize.width / contentBaseSize.width, 1)
-    : 1;
-
-  const scaledContentWidth = contentBaseSize
-    ? Math.round(contentBaseSize.width * contentScale)
-    : undefined;
-  const scaledContentHeight = contentBaseSize
-    ? Math.round(contentBaseSize.height * contentScale)
-    : undefined;
 
   return (
     <div
@@ -298,34 +271,9 @@ export const BrowserWindow = ({
 
       {/* Content Area */}
       <div
-        ref={contentViewportRef}
-        className={`flex-1 bg-white ${contentBaseSize ? 'overflow-y-auto overflow-x-hidden' : 'overflow-y-auto'}`}
+        className="flex-1 min-h-0 overflow-auto bg-white"
       >
-        {contentBaseSize ? (
-          <div className="min-h-full w-full overflow-hidden bg-white">
-            <div
-              className="mx-auto"
-              style={{
-                width: `${scaledContentWidth ?? contentBaseSize.width}px`,
-                height: `${scaledContentHeight ?? contentBaseSize.height}px`,
-                minHeight: '100%',
-              }}
-            >
-              <div
-                style={{
-                  width: `${contentBaseSize.width}px`,
-                  height: `${contentBaseSize.height}px`,
-                  transform: `scale(${contentScale})`,
-                  transformOrigin: 'top left',
-                }}
-              >
-                {children}
-              </div>
-            </div>
-          </div>
-        ) : (
-          children
-        )}
+        {children}
       </div>
 
       {/* Resize Handle */}

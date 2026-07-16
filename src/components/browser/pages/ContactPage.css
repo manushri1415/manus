@@ -3,9 +3,10 @@
    ======================================== */
 .manupress-page {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
+  container-type: inline-size;
   background-color: #ececec;
   color: #333333;
   font-family: Georgia, 'Times New Roman', Times, serif;
@@ -34,7 +35,7 @@
    ======================================== */
 .manupress-panel {
   background-color: #ffffff;
-  max-width: 90%;
+  width: min(100%, 980px);
   margin: 0 auto;
   border: 1px solid #cccccc;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
@@ -396,6 +397,48 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   width: fit-content;
+}
+
+@container (max-width: 920px) {
+  .manupress-page {
+    padding: 16px 10px;
+  }
+
+  .manupress-panel {
+    padding: 18px;
+  }
+
+  .manupress-columns {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .manupress-col-right {
+    padding-left: 0;
+  }
+
+  .manupress-divider {
+    display: none;
+  }
+}
+
+@container (max-width: 640px) {
+  .manupress-page {
+    padding: 12px 8px;
+  }
+
+  .manupress-panel {
+    padding: 14px;
+  }
+
+  .manupress-section-title {
+    font-size: 15px;
+  }
+
+  .manupress-form-submit,
+  .manupress-cta-button {
+    width: 100%;
+  }
 }
 
 /* ========================================

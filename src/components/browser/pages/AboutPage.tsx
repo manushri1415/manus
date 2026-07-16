@@ -27,6 +27,10 @@ export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
   };
 
   const basePath = import.meta.env.BASE_URL;
+  const resumePdfPath = `${basePath}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`;
+  const childhoodVideoUrl = 'https://www.youtube.com/watch?v=5-MCFJZabrE';
+  const contactMailto = 'mailto:manushrimkumar@gmail.com?subject=Portfolio%20Hello';
+  const helpMailto = 'mailto:manushrimkumar@gmail.com?subject=MTube%20Help';
 
   return (
     <div className="mtube-page">
@@ -46,13 +50,13 @@ export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
         </div>
         <div className="mtube-masthead-right">
           <div className="mtube-links-section">
-            <a href="#" className="mtube-link-blue">Sign Up</a>
+            <a href={contactMailto} className="mtube-link-blue">Sign Up</a>
             <span className="mtube-link-separator">|</span>
-            <a href="#" className="mtube-link-blue">Log In</a>
+            <button type="button" className="mtube-link-blue" onClick={() => onNavigate?.('experience')}>Log In</button>
             <span className="mtube-link-separator">|</span>
-            <a href="#" className="mtube-link-blue">Viewing History</a>
+            <a href="#my-story-in-pictures" className="mtube-link-blue">Viewing History</a>
             <span className="mtube-link-separator">|</span>
-            <a href="#" className="mtube-link-blue">Help</a>
+            <a href={helpMailto} className="mtube-link-blue">Help</a>
           </div>
         </div>
       </div>
@@ -110,9 +114,9 @@ export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
                       </div>
 
                       <div className="mtube-action-buttons">
-                        <a href="#" className="mtube-action-link">Save to Favorites</a>
-                        <a href="#" className="mtube-action-link">Add to Groups</a>
-                        <a href="#" className="mtube-action-link">Share Video</a>
+                        <a href="#my-story-in-pictures" className="mtube-action-link">Save to Favorites</a>
+                        <a href="#building-under-pressure" className="mtube-action-link">Add to Groups</a>
+                        <a href={childhoodVideoUrl} target="_blank" rel="noopener noreferrer" className="mtube-action-link">Share Video</a>
                       </div>
 
                       <div className="mtube-video-metadata">
@@ -252,7 +256,7 @@ export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
             </div>
 
             {/* Recent Comments */}
-            <div className="mtube-section">
+            <div className="mtube-section" id="recent-comments">
               <h2 className="mtube-section-title">Recent Comments (6)</h2>
               <div className="mtube-comments">
                 {RECENT_COMMENTS.map((comment) => (
@@ -264,7 +268,12 @@ export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
                     <p className="mtube-comment-text">{comment.text}</p>
                     <div className="mtube-comment-footer">
                       <span className="mtube-comment-number">#{comment.commentNumber}</span>
-                      <a href="#" className="mtube-comment-reply">Reply</a>
+                      <a
+                        href={`mailto:manushrimkumar@gmail.com?subject=Reply%20to%20comment%20%23${comment.commentNumber}`}
+                        className="mtube-comment-reply"
+                      >
+                        Reply
+                      </a>
                     </div>
                   </div>
                 ))}
@@ -274,7 +283,7 @@ export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
 
           {/* Right Column - Related Videos Sidebar */}
           <div className="mtube-sidebar">
-            <div className="mtube-sidebar-section">
+            <div className="mtube-sidebar-section" id="my-story-in-pictures">
               <h3 className="mtube-sidebar-title">My Story: In pictures</h3>
               <div className="mtube-life-chapters-grid">
                 {DIRECTOR_VIDEOS.map((video) => (
@@ -309,13 +318,13 @@ export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
             LinkedIn
           </a>
           {' | '}
-          <a href={`${basePath}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`} target="_blank" rel="noopener noreferrer" className="mtube-link">
+          <a href={resumePdfPath} target="_blank" rel="noopener noreferrer" className="mtube-link">
             Resume
           </a>
           {' | '}
-          <a href="#" className="mtube-link">
+          <button type="button" className="mtube-link" onClick={() => onNavigate?.('projects')}>
             Projects
-          </a>
+          </button>
           {' | '}
           <a href="mailto:manushrimkumar@gmail.com" className="mtube-link">
             Contact

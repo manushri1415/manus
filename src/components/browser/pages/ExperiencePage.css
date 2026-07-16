@@ -6,15 +6,16 @@
 .experience-profile-page {
   --themanubook-blue: #395899;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
+  container-type: inline-size;
   background-color: #ffffff;
   color: #333333;
   font-family: Arial, Verdana, Tahoma, sans-serif;
   font-size: 11px;
   line-height: 1.4;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* ========================================
@@ -25,6 +26,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   padding: 4px 12px;
   background-color: var(--themanubook-blue);
   border-bottom: 1px solid #1a3a5c;
@@ -41,10 +43,11 @@
 .themanubook-nav {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 4px;
   font-size: 10px;
-  white-space: nowrap;
   flex: 1;
+  min-width: 0;
 }
 
 .themanubook-nav-link, .themanubook-nav-current {
@@ -85,6 +88,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 16px;
   padding: 4px 40px;
   background-color: var(--themanubook-blue);
   border-bottom: 1px solid #1a3a5c;
@@ -109,30 +114,30 @@
 
 .themanubook-content {
   display: flex;
-  flex: 1;
+  flex: 1 0 auto;
   gap: 12px;
   padding: 12px;
   max-width: 1000px;
   margin: 0 auto;
   width: 100%;
-  overflow: hidden;
+  align-items: flex-start;
+  overflow: visible;
 }
 
 .themanubook-section-left {
-  width: 35%;
-  min-width: 200px;
+  width: min(35%, 320px);
+  min-width: 220px;
   flex-shrink: 0;
   position: sticky;
-  top: 0;
+  top: 12px;
   height: fit-content;
-  max-height: calc(100vh - 80px);
-  overflow-y: auto;
+  overflow: visible;
 }
 
 .themanubook-section-right {
   flex: 1;
-  min-width: 300px;
-  overflow-y: auto;
+  min-width: 0;
+  overflow: visible;
   padding-right: 8px;
 }
 
@@ -453,4 +458,55 @@
 
 .themanubook-entry-divider {
   border-top: none;
+}
+
+@container (max-width: 860px) {
+  .themanubook-subheader {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .themanubook-content {
+    flex-direction: column;
+  }
+
+  .themanubook-section-left,
+  .themanubook-section-right {
+    width: 100%;
+  }
+
+  .themanubook-section-left {
+    position: static;
+    min-width: 0;
+  }
+
+  .themanubook-section-right {
+    padding-right: 0;
+  }
+}
+
+@container (max-width: 660px) {
+  .themanubook-header {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .themanubook-subheader {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .themanubook-content {
+    padding: 10px;
+  }
+
+  .themanubook-info-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .themanubook-info-label {
+    min-width: 0;
+    margin-right: 0;
+  }
 }

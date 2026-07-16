@@ -1,189 +1,249 @@
-import { Github, Mail, Palette, Image as ImageIcon, LayoutGrid, LogOut, LinkedinIcon } from 'lucide-react';
-import { useState, useCallback } from 'react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+  BriefcaseBusiness,
+  FileText,
+  FolderOpen,
+  Github,
+  LinkedinIcon,
+  Mail,
+  Phone,
+  UserRound,
+} from 'lucide-react';
+import { useState } from 'react';
+import type { BrowserPageKey } from './browser/pages/registry';
 
-const links = [
-  { icon: Github, href: 'https://github.com/manushri1415', label: 'GitHub' },
-  { icon: Mail, href: 'mailto:manushrimkumar@gmail.com', label: 'Email' },
-  { icon: LinkedinIcon, href:'linkedin.com/in/manushrimurugakumar', label: 'LinkedIn' },
-];
-
-const themes = [
-  { name: 'PowerShell', color: '#012456', id: 'powershell' },
-  { name: 'Classic CMD', color: '#000000', id: 'cmd' },
-  { name: 'Matrix', color: '#000500', id: 'matrix' },
-  { name: 'Ubuntu', color: '#300a24', id: 'ubuntu' },
-  { name: 'Dracula', color: '#282a36', id: 'dracula' },
+const socialLinks = [
+  {
+    icon: Github,
+    href: 'https://github.com/manushri1415',
+    label: 'GitHub',
+  },
+  {
+    icon: Mail,
+    href: 'mailto:manushrimkumar@gmail.com',
+    label: 'Email',
+  },
+  {
+    icon: LinkedinIcon,
+    href: 'https://linkedin.com/in/manushrimurugakumar',
+    label: 'LinkedIn',
+  },
 ];
 
 export const SocialLinks = ({
-  onThemeChange,
-  onWallpaperChange,
   onReset,
-  onLogout
+  onLogout,
+  onOpenPage,
+  onPowerOff,
 }: {
-  onThemeChange?: (themeId: string) => void;
-  onWallpaperChange?: (wallpaper: string) => void;
   onReset?: () => void;
   onLogout?: () => void;
+  onOpenPage?: (pageKey: BrowserPageKey) => void;
+  onPowerOff?: () => void;
 }) => {
   const [isStartOpen, setIsStartOpen] = useState(false);
+  const startLogoSrc = `${import.meta.env.BASE_URL}assets/icons/start-logo.png`;
+  const profileIconSrc = `${import.meta.env.BASE_URL}assets/icons/profile.png`;
+  const projectsIconSrc = `${import.meta.env.BASE_URL}assets/icons/projects.png`;
+  const experienceIconSrc = `${import.meta.env.BASE_URL}assets/icons/experience.png`;
+  const phoneIconSrc = `${import.meta.env.BASE_URL}assets/icons/phone.png`;
+  const resumeIconSrc = `${import.meta.env.BASE_URL}assets/icons/resume-logo.png`;
+  const logOutIconSrc = `${import.meta.env.BASE_URL}assets/icons/log-out.png`;
+  const powerOffIconSrc = `${import.meta.env.BASE_URL}assets/icons/turn-off.png`;
+  const resumePdfPath = `${import.meta.env.BASE_URL}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`;
 
-  const handleWallpaperUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        onWallpaperChange?.(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const quickLinks: Array<{
+    label: string;
+    pageKey: BrowserPageKey;
+    icon?: typeof UserRound;
+    iconSrc?: string;
+  }> = [
+    {
+      label: 'My Story',
+      pageKey: 'about',
+      iconSrc: profileIconSrc,
+    },
+    {
+      label: 'Projects',
+      pageKey: 'projects',
+      iconSrc: projectsIconSrc,
+    },
+    {
+      label: 'Experience',
+      pageKey: 'experience',
+      iconSrc: experienceIconSrc,
+    },
+  ];
+
+  const systemLinks: Array<{
+    label: string;
+    pageKey?: BrowserPageKey;
+    href?: string;
+    icon?: typeof FolderOpen;
+    iconSrc?: string;
+  }> = [
+    { label: 'About Me', pageKey: 'about', icon: UserRound },
+    { label: 'Projects', pageKey: 'projects', icon: FolderOpen },
+    { label: 'Experience', pageKey: 'experience', icon: BriefcaseBusiness },
+    { label: 'Contact', pageKey: 'contact', icon: Phone },
+    { label: 'Resume', href: resumePdfPath, iconSrc: resumeIconSrc },
+  ];
+
+  const handleOpenPage = (pageKey: BrowserPageKey) => {
+    onOpenPage?.(pageKey);
+    setIsStartOpen(false);
+  };
+
+  const handleAction = (action?: () => void) => {
+    action?.();
+    setIsStartOpen(false);
   };
 
   return (
-    <div className="flex items-center justify-between w-full h-full">
+    <div className="flex items-center h-full">
       {/* Left Side: Start Button & Start Menu */}
-      <div className="flex items-center">
+      <div className="flex items-center h-full">
         <div className="relative">
           <button
             onClick={() => setIsStartOpen(!isStartOpen)}
-            className={`flex items-center justify-center w-[48px] h-[40px] hover:bg-white/10 transition-colors ${isStartOpen ? 'bg-white/20' : ''}`}
+            className={`flex h-full min-w-[84px] items-center gap-1.5 rounded-r-[10px] border border-[#2f7d2d] px-2.5 pr-4 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),inset_0_-1px_0_rgba(0,0,0,0.25)] transition-all ${
+              isStartOpen
+                ? 'bg-[linear-gradient(180deg,#6edb6f_0%,#40a93f_40%,#2e882d_100%)] brightness-95'
+                : 'bg-[linear-gradient(180deg,#72de73_0%,#40a93f_42%,#2f8c30_100%)] hover:brightness-105'
+            }`}
           >
-            <LayoutGrid className="w-5 h-5 text-blue-400 fill-blue-400" />
+            <img src={startLogoSrc} alt="Start" className="h-8 w-8 object-contain" />
+            <span className="text-[17px] font-bold italic leading-none [text-shadow:1px_1px_1px_rgba(0,0,0,0.45)]">
+              Start
+            </span>
           </button>
 
           {/* Start Menu Popup */}
           {isStartOpen && (
-            <div className="absolute bottom-[48px] left-0 w-[300px] bg-[#1c1c1c]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
-              <div className="p-4 border-b border-white/5">
-                <div className="flex items-center gap-3 px-2 py-3 rounded-md hover:bg-white/5 transition-colors cursor-default">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center font-bold text-white">
-                    O
+            <div className="absolute bottom-[32px] left-0 w-[310px] overflow-hidden rounded-t-[8px] border border-[#08319a] bg-[#245ada] shadow-[2px_0_18px_rgba(0,0,0,0.55)] animate-in slide-in-from-bottom-2 duration-200">
+              <div className="border-b border-[#88b5ff] bg-[linear-gradient(180deg,#4f94ff_0%,#245ada_58%,#173b99_100%)] px-2 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[6px] border border-white/60 bg-[linear-gradient(180deg,#fefefe_0%,#dce7ff_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),1px_1px_0_rgba(0,0,0,0.15)]">
+                    <img src={profileIconSrc} alt="Profile" className="h-8 w-8 object-contain" />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-white">Manushri Muruga Kumar</div>
-                    <div className="text-[11px] text-white/50">Software Developer</div>
+                    <div className="text-[18px] font-bold text-white [text-shadow:1px_1px_1px_rgba(0,0,0,0.45)]">
+                      Manushri
+                    </div>
+                    <div className="text-[11px] text-white/90">Desktop</div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-2 space-y-1">
-                <div className="px-3 py-2 text-[11px] font-semibold text-white/30 uppercase tracking-wider">
-                  Pinned
+              <div className="flex min-h-[250px] bg-[#245ada]">
+                <div className="flex w-[50%] flex-col bg-[linear-gradient(180deg,#ffffff_0%,#fffdf5_100%)] px-2 py-2 text-[#204387]">
+                  {quickLinks.map(({ label, pageKey, iconSrc }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => handleOpenPage(pageKey)}
+                      className="flex items-center gap-3 rounded-[4px] px-3 py-[7px] text-left transition-colors hover:bg-[#dce9ff]"
+                    >
+                      <img src={iconSrc} alt="" className="h-7 w-7 flex-shrink-0 object-contain" />
+                      <span className="truncate text-[12px] font-bold text-[#1e4ea8]">{label}</span>
+                    </button>
+                  ))}
+
+                  <div className="mx-3 my-2 h-px bg-[linear-gradient(90deg,#ffffff_0%,#d5def0_20%,#d5def0_80%,#ffffff_100%)]" />
+
+                  {socialLinks.map(({ icon: Icon, href, label }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsStartOpen(false)}
+                      className="flex items-center gap-3 rounded-[4px] px-3 py-[7px] transition-colors hover:bg-[#dce9ff]"
+                    >
+                      <Icon className="h-6 w-6 flex-shrink-0 text-[#245ada]" />
+                      <span className="truncate text-[12px] font-bold text-[#1e4ea8]">{label}</span>
+                    </a>
+                  ))}
                 </div>
-                {links.map(({ icon: Icon, href, label }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-white/10 transition-colors text-white/80 hover:text-white group"
+
+                <div className="flex w-[50%] flex-col border-l border-[#9fbee6] bg-[#d3e5fb] px-2 py-2 text-[#17408b]">
+                  {systemLinks.map(({ label, pageKey, href, icon: Icon, iconSrc }) => (
+                    href ? (
+                      <a
+                        key={label}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setIsStartOpen(false)}
+                        className="flex items-center gap-3 rounded-[4px] px-3 py-[8px] transition-colors hover:bg-white/45"
+                      >
+                        {iconSrc ? (
+                          <img src={iconSrc} alt="" className="h-5 w-5 flex-shrink-0 object-contain" />
+                        ) : (
+                          Icon && <Icon className="h-4 w-4 flex-shrink-0 text-[#245ada]" />
+                        )}
+                        <span className="text-[12px] font-bold">
+                          {label}
+                        </span>
+                      </a>
+                    ) : (
+                      <button
+                        key={label}
+                        type="button"
+                        onClick={() => pageKey && handleOpenPage(pageKey)}
+                        className="flex items-center gap-3 rounded-[4px] px-3 py-[8px] text-left transition-colors hover:bg-white/45"
+                      >
+                        {iconSrc ? (
+                          <img src={iconSrc} alt="" className="h-5 w-5 flex-shrink-0 object-contain" />
+                        ) : (
+                          Icon && <Icon className="h-4 w-4 flex-shrink-0 text-[#245ada]" />
+                        )}
+                        <span className="text-[12px] font-bold">
+                          {label}
+                        </span>
+                      </button>
+                    )
+                  ))}
+
+                  <div className="mx-2 my-2 h-px bg-[#9fbee6]" />
+
+                  <button
+                    type="button"
+                    onClick={() => handleAction(onReset)}
+                    className="flex items-center gap-3 rounded-[4px] px-3 py-[8px] text-left transition-colors hover:bg-white/45"
                   >
-                    <Icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    <span className="text-sm">{label}</span>
-                  </a>
-                ))}
+                    <FileText className="h-4 w-4 flex-shrink-0 text-[#245ada]" />
+                    <span className="text-[12px] font-bold">
+                      Reset Desktop
+                    </span>
+                  </button>
+                </div>
               </div>
 
-              <div className="mt-4 p-4 bg-black/20 flex items-center justify-between text-[11px] text-white/40">
-                <div
-                  onClick={() => {
-                    onLogout?.();
-                    setIsStartOpen(false);
-                  }}
-                  className="flex items-center gap-2 hover:text-white cursor-pointer transition-colors group"
+              <div className="flex items-center justify-end gap-4 border-t border-[#7ea7f5] bg-[linear-gradient(180deg,#3f7fe0_0%,#245ada_100%)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]">
+                <button
+                  type="button"
+                  onClick={() => handleAction(onLogout)}
+                  className="inline-flex items-center gap-2 whitespace-nowrap bg-transparent px-0 py-0 text-[11px] font-bold text-white [text-shadow:1px_1px_1px_rgba(0,0,0,0.35)]"
                 >
-                  <LogOut className="w-3 h-3 group-hover:scale-110 transition-transform" />
-                  <span>Log out</span>
-                </div>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <span className="hover:text-red-400 cursor-pointer transition-colors font-semibold">
-                      Reset
-                    </span>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-[#1c1c1c]/95 backdrop-blur-xl border border-white/10 text-white">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                      <AlertDialogDescription className="text-white/60">
-                        This action will reset your wallpaper, theme, and terminal settings to their default values. The page will reload.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel className="bg-transparent border-white/10 text-white hover:bg-white/5 hover:text-white">Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => {
-                          onReset?.();
-                          setIsStartOpen(false);
-                        }}
-                        className="bg-red-500 hover:bg-red-600 text-white border-none"
-                      >
-                        Reset Everything
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                  <span className="flex h-[22px] w-[22px] items-center justify-center rounded-[3px]]">
+                    <img src={logOutIconSrc} alt="" className="h-4 w-4 object-contain" />
+                  </span>
+                  <span>Log Off</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAction(onPowerOff)}
+                  className="inline-flex items-center gap-2 whitespace-nowrap bg-transparent px-0 py-0 text-[11px] font-bold text-white [text-shadow:1px_1px_1px_rgba(0,0,0,0.35)]"
+                >
+                  <span className="flex h-[22px] w-[22px] items-center justify-center rounded-[3px]]">
+                    <img src={powerOffIconSrc} alt="" className="h-4 w-4 object-contain" />
+                  </span>
+                  <span>Turn Off Computer</span>
+                </button>
               </div>
             </div>
           )}
         </div>
-      </div>
-
-      {/* Right Side: System Tray (Themes, Wallpaper) */}
-      <div className="flex items-center gap-1 h-full px-2">
-        <label className="cursor-pointer">
-          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground h-9 w-9" asChild>
-            <span>
-              <ImageIcon className="w-4 h-4" />
-              <input
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={handleWallpaperUpload}
-              />
-            </span>
-          </Button>
-        </label>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground h-9 w-9">
-              <Palette className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-[#1c1c1c]/95 backdrop-blur-xl border border-white/10 text-white">
-            {themes.map((theme) => (
-              <DropdownMenuItem
-                key={theme.id}
-                onClick={() => onThemeChange?.(theme.id)}
-                className="flex items-center gap-2 cursor-pointer focus:bg-white/10 focus:text-white"
-              >
-                <div
-                  className="w-3 h-3 rounded-full border border-white/20"
-                  style={{ backgroundColor: theme.color }}
-                />
-                <span className="text-xs">{theme.name}</span>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </div>
   );

@@ -6,6 +6,16 @@
 
 @layer base {
   :root {
+    --xp-green: #40a93f;
+    --xp-blue: #245ada;
+    --xp-blue-light: #4c8df6;
+    --xp-blue-dark: #1b47b8;
+    --xp-window: #ece9d8;
+    --xp-window-border: #d8d2bd;
+    --xp-window-shadow: rgba(0, 0, 0, 0.32);
+    --xp-terminal-bg: #000000;
+    --xp-terminal-text: #f5f5f5;
+
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
 
@@ -24,8 +34,8 @@
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 142 70% 45%;
-    --accent-foreground: 0 0% 0%;
+    --accent: 119 46% 45%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -36,11 +46,11 @@
 
     --radius: 0.5rem;
 
-    --terminal-green: 142 70% 45%;
-    --terminal-cyan: 180 70% 50%;
-    --terminal-yellow: 45 90% 55%;
-    --terminal-red: 0 70% 55%;
-    --terminal-purple: 280 70% 60%;
+    --terminal-green: 119 46% 45%;
+    --terminal-cyan: 223 72% 50%;
+    --terminal-yellow: 46 45% 84%;
+    --terminal-red: 4 77% 47%;
+    --terminal-purple: 223 72% 42%;
 
     --sidebar-background: 0 0% 4%;
     --sidebar-foreground: 0 0% 100%;
@@ -65,8 +75,8 @@
     --secondary-foreground: 0 0% 100%;
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 65%;
-    --accent: 142 70% 45%;
-    --accent-foreground: 0 0% 0%;
+    --accent: 119 46% 45%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 20%;

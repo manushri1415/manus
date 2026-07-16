@@ -1,8 +1,9 @@
 .moongle-page {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
+  container-type: inline-size;
   background-color: #ffffff;
   color: #000000;
   font-family: Arial, Verdana, sans-serif;
@@ -20,6 +21,7 @@
 .moongle-header-top {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 20px;
 }
 
@@ -33,6 +35,9 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  flex: 1 1 320px;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .moongle-search-input {
@@ -41,7 +46,8 @@
   border-radius: 2px;
   font-size: 13px;
   font-family: Arial, sans-serif;
-  width: 280px;
+  width: clamp(200px, 34vw, 320px);
+  max-width: 100%;
 }
 
 .moongle-search-input:focus {
@@ -70,15 +76,18 @@
 /* Navigation */
 .moongle-navigation {
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
   align-items: center;
-  padding: 4px 20px 4px 133px;
+  padding: 4px 20px 8px 20px;
   font-size: 12px;
 }
 
 .moongle-navigation-left{
   display: flex;
   gap: 10px;
+  flex: 1 1 420px;
+  flex-wrap: wrap;
   padding-left: 0;
 }
 
@@ -86,6 +95,11 @@
   color: #1a73e8;
   text-decoration: none;
   position: relative;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
 .moongle-nav-link:hover {
@@ -107,6 +121,7 @@
 .moongle-nav-right {
   margin-left: auto;
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
 }
 
@@ -116,6 +131,8 @@
   border-bottom: 1px solid #dadce0;
   padding: 5px 20px;
   display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
@@ -133,8 +150,8 @@
 /* Layout */
 .moongle-layout {
   display: flex;
-  flex: 1;
-  overflow: hidden;
+  flex: 1 0 auto;
+  align-items: flex-start;
   background-color: #ffffff;
 }
 
@@ -142,7 +159,7 @@
 .moongle-results {
   flex: 1;
   padding: 16px 20px;
-  overflow-y: auto;
+  min-width: 0;
   border-right: 1px solid #e8e8e8;
 }
 
@@ -160,6 +177,11 @@
   display: block;
   cursor: pointer;
   word-break: break-word;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  text-align: left;
 }
 
 .moongle-result-title:hover {
@@ -221,9 +243,9 @@
 
 /* Sidebar */
 .moongle-sidebar {
-  width: 240px;
+  width: min(260px, 32%);
   padding: 16px 12px;
-  overflow-y: auto;
+  flex-shrink: 0;
   background-color: #f9f9f9;
   font-size: 12px;
 }
@@ -255,6 +277,12 @@
   font-size: 12px;
   margin-bottom: 2px;
   word-break: break-word;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .moongle-sponsored-title:hover {
@@ -287,14 +315,20 @@
   gap: 4px;
 }
 
-.moongle-popular-search-list a {
+.moongle-popular-search-button {
   color: #1a73e8;
   text-decoration: none;
   font-size: 11px;
   word-break: break-word;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
-.moongle-popular-search-list a:hover {
+.moongle-popular-search-button:hover {
   text-decoration: underline;
 }
 
@@ -308,4 +342,76 @@
   color: #545454;
   padding: 20px;
   text-align: center;
+}
+
+@container (max-width: 920px) {
+  .moongle-header,
+  .moongle-navigation,
+  .moongle-results-bar,
+  .moongle-results {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .moongle-layout {
+    flex-direction: column;
+  }
+
+  .moongle-results {
+    border-right: none;
+    border-bottom: 1px solid #e8e8e8;
+  }
+
+  .moongle-sidebar {
+    width: 100%;
+    padding: 14px;
+  }
+}
+
+@container (max-width: 720px) {
+  .moongle-header-top {
+    align-items: flex-start;
+  }
+
+  .moongle-header-right {
+    width: 100%;
+  }
+
+  .moongle-search-input {
+    flex: 1 1 180px;
+    width: auto;
+  }
+
+  .moongle-nav-right {
+    margin-left: 0;
+  }
+
+  .moongle-results-bar-right {
+    text-align: left;
+  }
+}
+
+@container (max-width: 560px) {
+  .moongle-header,
+  .moongle-navigation,
+  .moongle-results-bar,
+  .moongle-results,
+  .moongle-sidebar {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .moongle-navigation {
+    gap: 10px;
+  }
+
+  .moongle-navigation-left,
+  .moongle-nav-right {
+    gap: 8px;
+  }
+
+  .moongle-result {
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+  }
 }

@@ -1,9 +1,7 @@
-import type { ComponentType } from 'react';
 import { AboutPage } from './AboutPage';
 import { ProjectsPage } from './ProjectsPage';
 import { ExperiencePage } from './ExperiencePage';
 import { ContactPage } from './ContactPage';
-import { ResumePage } from './ResumePage';
 
 type BrowserPageSize = {
   width: number;
@@ -14,19 +12,24 @@ type BrowserPageConfig = {
   title: string;
   label: string;
   url: string;
-  Component: ComponentType<any>;
-  contentBaseSize?: BrowserPageSize;
+  Component: typeof AboutPage | typeof ProjectsPage | typeof ExperiencePage | typeof ContactPage;
+  preferredWindowSize: BrowserPageSize;
+  minWindowSize?: BrowserPageSize;
 };
 
-export const BROWSER_PAGES = {
+export const BROWSER_PAGES: Record<string, BrowserPageConfig> = {
   about: {
     title: '',
-    label: 'About Me',
+    label: 'My story',
     url: 'www.mtube.com/about',
     Component: AboutPage,
-    contentBaseSize: {
+    preferredWindowSize: {
       width: 1080,
-      height: 500,
+      height: 760,
+    },
+    minWindowSize: {
+      width: 760,
+      height: 560,
     },
   },
   projects: {
@@ -34,9 +37,13 @@ export const BROWSER_PAGES = {
     label: 'Projects',
     url: 'http://www.moongle.com/search?q=manushri+muruga+kumar+projects',
     Component: ProjectsPage,
-    contentBaseSize: {
+    preferredWindowSize: {
       width: 1120,
-      height: 640,
+      height: 760,
+    },
+    minWindowSize: {
+      width: 620,
+      height: 520,
     },
   },
   experience: {
@@ -44,9 +51,13 @@ export const BROWSER_PAGES = {
     label: 'Experience',
     url: 'http://www.themanubook.com/manushri',
     Component: ExperiencePage,
-    contentBaseSize: {
+    preferredWindowSize: {
       width: 1100,
       height: 760,
+    },
+    minWindowSize: {
+      width: 700,
+      height: 560,
     },
   },
   contact: {
@@ -54,17 +65,15 @@ export const BROWSER_PAGES = {
     label: 'Contact',
     url: 'http://www.manupress.com/contact',
     Component: ContactPage,
-    contentBaseSize: {
+    preferredWindowSize: {
       width: 1024,
       height: 760,
     },
+    minWindowSize: {
+      width: 620,
+      height: 560,
+    },
   },
-  resume: {
-    title: '',
-    label: 'Resume',
-    url: 'https://www.manushri.dev/resume',
-    Component: ResumePage,
-  },
-} satisfies Record<string, BrowserPageConfig>;
+};
 
 export type BrowserPageKey = keyof typeof BROWSER_PAGES;

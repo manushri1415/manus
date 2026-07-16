@@ -7,6 +7,11 @@ interface TerminalLine {
   content: string | React.ReactNode;
 }
 
+type WindowSize = {
+  width: number;
+  height: number;
+};
+
 const WELCOME_MESSAGE = `Hello, World! I'm Manushri
 Get to know more about me using the Desktop icons to your left!
 Type 'help' to see available commands.`;
@@ -18,7 +23,7 @@ const COMMANDS: Record<string, { description: string; action: () => string | Rea
 Available commands:
   help      - Show this help message
   about     - Learn about me
-  experience - Open my experience page
+  experience- Open my experience page
   skills    - View my technical skills
   projects  - Browse my projects
   contact   - Get my contact information
@@ -139,11 +144,45 @@ type TerminalProps = {
   themeId?: string;
   onOpenExperience?: () => void;
   onOpenResume?: () => void;
+  workspaceSize?: WindowSize;
+  isMinimized?: boolean;
+  onMinimizedChange?: (value: boolean) => void;
+  onFocus?: () => void;
+  zIndex?: number;
 };
 
 const EXTRA_COMMANDS = ['experience', 'resume'];
 
-export const Terminal = forwardRef(({ themeId = 'powershell', onOpenExperience, onOpenResume }: TerminalProps, ref) => {
+const TERMINAL_MIN_WIDTH = 420;
+const TERMINAL_MIN_HEIGHT = 320;
+
+const clampValue = (value: number, min: number, max: number) => {
+  if (max < min) return max;
+  return Math.min(Math.max(value, min), max);
+};
+
+const getFallbackWorkspaceSize = (): WindowSize => {
+  if (typeof window === 'undefined') {
+    return { width: 1200, height: 700 };
+  }
+
+  return {
+    width: Math.max(0, window.innerWidth - 32),
+    height: Math.max(0, window.innerHeight - 72),
+  };
+};
+
+const getResponsiveTerminalSize = (workspace: WindowSize): WindowSize => {
+  const maxWidth = Math.max(TERMINAL_MIN_WIDTH, workspace.width);
+  const maxHeight = Math.max(TERMINAL_MIN_HEIGHT, workspace.height);
+
+  return {
+    width: Math.round(clampValue(workspace.width * 0.58, TERMINAL_MIN_WIDTH, Math.min(760, maxWidth))),
+    height: Math.round(clampValue(workspace.height * 0.58, TERMINAL_MIN_HEIGHT, Math.min(520, maxHeight))),
+  };
+};
+
+export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenResume, workspaceSize, isMinimized: controlledIsMinimized, onMinimizedChange, onFocus, zIndex = 10 }: TerminalProps, ref) => {
   const getThemeConfig = (id: string) => {
     switch (id) {
       case 'matrix':
@@ -175,21 +214,21 @@ export const Terminal = forwardRef(({ themeId = 'powershell', onOpenExperience, 
         };
       case 'cmd':
         return {
-          bg: '#000000',
-          text: '#ffffff',
+          bg: 'var(--xp-terminal-bg)',
+          text: 'var(--xp-terminal-text)',
           prompt: 'C:\\Users\\Manu>',
-          header: 'Command Prompt',
+          header: 'C:\\WINDOWS\\system32\\cmd.exe',
           welcome: WELCOME_MESSAGE,
-          caret: '#ffffff'
+          caret: 'var(--xp-terminal-text)'
         };
       default:
         return {
-          bg: '#012456',
-          text: '#ffffff',
+          bg: 'var(--xp-terminal-bg)',
+          text: 'var(--xp-terminal-text)',
           prompt: 'PS C:\\Users\\Manu>',
           header: 'Windows PowerShell',
           welcome: WELCOME_MESSAGE,
-          caret: '#ffffff'
+          caret: 'var(--xp-terminal-text)'
         };
     }
   };
@@ -205,22 +244,33 @@ export const Terminal = forwardRef(({ themeId = 'powershell', onOpenExperience, 
   const [currentInput, setCurrentInput] = useState('');
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [internalIsMinimized, setInternalIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [size, setSize] = useState({ width: 600, height: 400 });
+  const [size, setSize] = useState(() => getResponsiveTerminalSize(workspaceSize ?? getFallbackWorkspaceSize()));
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [hasManualResize, setHasManualResize] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const resizeStart = useRef({ x: 0, y: 0, w: 0, h: 0 });
+  const effectiveWorkspace = workspaceSize ?? getFallbackWorkspaceSize();
+  const isMinimized = controlledIsMinimized ?? internalIsMinimized;
+
+  const setMinimizedState = useCallback((value: boolean) => {
+    if (controlledIsMinimized === undefined) {
+      setInternalIsMinimized(value);
+    }
+    onMinimizedChange?.(value);
+  }, [controlledIsMinimized, onMinimizedChange]);
 
   useImperativeHandle(ref, () => ({
     executeExternalCommand: (command: string) => {
-      setIsMinimized(false);
+      setMinimizedState(false);
+      onFocus?.();
       executeCommand(command);
       setTimeout(focusInput, 100);
     }
-  }));
+  }), [onFocus, setMinimizedState]);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
@@ -229,6 +279,7 @@ export const Terminal = forwardRef(({ themeId = 'powershell', onOpenExperience, 
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.terminal-header-buttons')) return;
+    onFocus?.();
     setIsDragging(true);
     dragStart.current = {
       x: e.clientX - position.x,
@@ -240,6 +291,7 @@ export const Terminal = forwardRef(({ themeId = 'powershell', onOpenExperience, 
     e.preventDefault();
     e.stopPropagation();
     setIsResizing(true);
+    setHasManualResize(true);
     resizeStart.current = {
       x: e.clientX,
       y: e.clientY,
@@ -260,8 +312,16 @@ export const Terminal = forwardRef(({ themeId = 'powershell', onOpenExperience, 
         const deltaX = e.clientX - resizeStart.current.x;
         const deltaY = e.clientY - resizeStart.current.y;
         setSize({
-          width: Math.max(400, resizeStart.current.w + deltaX),
-          height: Math.max(300, resizeStart.current.h + deltaY)
+          width: clampValue(
+            resizeStart.current.w + deltaX,
+            TERMINAL_MIN_WIDTH,
+            Math.max(TERMINAL_MIN_WIDTH, effectiveWorkspace.width)
+          ),
+          height: clampValue(
+            resizeStart.current.h + deltaY,
+            TERMINAL_MIN_HEIGHT,
+            Math.max(TERMINAL_MIN_HEIGHT, effectiveWorkspace.height)
+          )
         });
       }
     };
@@ -280,7 +340,21 @@ export const Terminal = forwardRef(({ themeId = 'powershell', onOpenExperience, 
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, isMaximized]);
+  }, [effectiveWorkspace.height, effectiveWorkspace.width, isDragging, isResizing, isMaximized]);
+
+  useEffect(() => {
+    const nextAutoSize = getResponsiveTerminalSize(effectiveWorkspace);
+
+    if (!hasManualResize) {
+      setSize(nextAutoSize);
+      return;
+    }
+
+    setSize((prev) => ({
+      width: clampValue(prev.width, TERMINAL_MIN_WIDTH, Math.max(TERMINAL_MIN_WIDTH, effectiveWorkspace.width)),
+      height: clampValue(prev.height, TERMINAL_MIN_HEIGHT, Math.max(TERMINAL_MIN_HEIGHT, effectiveWorkspace.height)),
+    }));
+  }, [effectiveWorkspace, hasManualResize]);
 
   const scrollToBottom = useCallback(() => {
     if (terminalRef.current) {
@@ -443,17 +517,7 @@ export const Terminal = forwardRef(({ themeId = 'powershell', onOpenExperience, 
     }
   };
 
-  if (isMinimized) {
-    return (
-      <div
-        className="fixed bottom-[40px] right-4 bg-secondary border border-border rounded-t-lg px-4 py-2 cursor-pointer shadow-lg animate-fade-in flex items-center gap-2 z-[60]"
-        onClick={() => setIsMinimized(false)}
-      >
-        <div className="w-2 h-2 rounded-full bg-terminal-green animate-pulse" />
-        <span className="text-xs font-mono">Terminal (Guest@Portfolio)</span>
-      </div>
-    );
-  }
+  if (isMinimized) return null;
 
   return (
     <div
@@ -464,10 +528,16 @@ export const Terminal = forwardRef(({ themeId = 'powershell', onOpenExperience, 
         position: isMaximized ? 'fixed' : 'relative',
         top: isMaximized ? 0 : 'auto',
         left: isMaximized ? 0 : 'auto',
-        zIndex: isMaximized ? 50 : 10,
-        willChange: (isDragging || isResizing) ? 'transform, width, height' : 'auto'
+        zIndex: isMaximized ? zIndex + 1 : zIndex,
+        maxWidth: '100%',
+        maxHeight: '100%',
+        willChange: (isDragging || isResizing) ? 'transform, width, height' : 'auto',
+        backgroundColor: 'var(--xp-window)',
+        border: '2px solid var(--xp-window-border)',
+        boxShadow: '0 18px 45px var(--xp-window-shadow)',
       }}
-      className={`bg-card border border-border rounded-lg overflow-hidden shadow-2xl flex flex-col ${isMaximized ? '' : (isDragging || isResizing ? '' : 'transition-all duration-200')} ${isDragging ? 'select-none' : ''}`}
+      className={`relative pointer-events-auto overflow-hidden shadow-2xl flex flex-col ${isMaximized ? '' : (isDragging || isResizing ? '' : 'transition-all duration-200')} ${isDragging ? 'select-none' : ''}`}
+      onMouseDownCapture={onFocus}
       onClick={(e) => {
         // Only focus if the user isn't selecting text
         const selection = window.getSelection();
@@ -476,30 +546,43 @@ export const Terminal = forwardRef(({ themeId = 'powershell', onOpenExperience, 
         // Prevent focusing if we clicked a button or interactive element
         if ((e.target as HTMLElement).closest('button, input, [role="button"]')) return;
 
+        onFocus?.();
         focusInput();
       }}
     >
       {/* Terminal Header */}
       <div
         onMouseDown={handleMouseDown}
-        className="flex items-center justify-between px-4 py-2 bg-secondary border-b border-border cursor-move select-none"
+        className="flex items-center justify-between gap-3 px-4 py-1 cursor-move select-none text-white"
+        style={{
+          background: 'linear-gradient(90deg, var(--xp-blue) 0%, var(--xp-blue-light) 100%)',
+          borderBottom: '2px solid #163d9d',
+        }}
       >
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground font-mono">
+          <span className="text-xs font-mono text-white [text-shadow:1px_1px_0_rgba(0,0,0,0.45)]">
             {theme.header}
           </span>
         </div>
 
-        <div className="flex items-center terminal-header-buttons">
+        <div className="flex items-center gap-0.5 terminal-header-buttons">
           <button
-            onClick={(e) => { e.stopPropagation(); setIsMinimized(true); }}
-            className="p-2 hover:bg-white/10 transition-colors"
+            onClick={(e) => { e.stopPropagation(); setMinimizedState(true); }}
+            className="flex h-6 w-7 items-center justify-center text-black transition-colors"
+            style={{
+              backgroundColor: 'var(--xp-window)',
+              border: '1px solid #8f8b78',
+            }}
           >
             <Minus size={14} />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); setIsMaximized(!isMaximized); }}
-            className="p-2 hover:bg-white/10 transition-colors"
+            className="flex h-6 w-7 items-center justify-center text-black transition-colors"
+            style={{
+              backgroundColor: 'var(--xp-window)',
+              border: '1px solid #8f8b78',
+            }}
           >
             {isMaximized ? <Copy size={14} className="rotate-180" /> : <Square size={14} />}
           </button>
@@ -510,7 +593,7 @@ export const Terminal = forwardRef(({ themeId = 'powershell', onOpenExperience, 
       <div
         ref={terminalRef}
         style={{ backgroundColor: theme.bg, color: theme.text }}
-        className="flex-1 overflow-y-auto p-4 font-mono text-sm leading-relaxed terminal-scrollbar min-h-0"
+        className="flex-1 overflow-y-auto p-3 md:p-4 font-mono text-[13px] md:text-sm leading-relaxed terminal-scrollbar min-h-0"
       >
         <div ref={contentRef}>
           {lines.map((line) => (
@@ -546,20 +629,37 @@ export const Terminal = forwardRef(({ themeId = 'powershell', onOpenExperience, 
       </div>
 
       {/* Terminal Footer */}
-      <div className="px-4 py-2 bg-secondary border-t border-border text-xs text-muted-foreground flex justify-between select-none">
+      <div
+        className="hidden flex-wrap items-center justify-between gap-2 px-3 py-2 md:px-4 text-[11px] md:text-xs select-none"
+        style={{
+          backgroundColor: 'var(--xp-window)',
+          borderTop: '1px solid var(--xp-window-border)',
+          color: '#5b5b5b',
+        }}
+      >
         <span>Type 'help' for commands</span>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <span>↑↓ History • Tab Autocomplete</span>
           {!isMaximized && (
             <div
               onMouseDown={handleResizeDown}
-              className="cursor-nwse-resize p-1 hover:text-foreground transition-colors"
+              className="cursor-nwse-resize p-1 transition-colors"
+              style={{ color: '#6a6a6a' }}
             >
-              <div className="w-3 h-3 border-r-2 border-b-2 border-muted-foreground/50" />
+              <div className="w-3 h-3 border-r-2 border-b-2 border-[#7d7d7d]" />
             </div>
           )}
         </div>
       </div>
+      {!isMaximized && (
+        <div
+          onMouseDown={handleResizeDown}
+          className="absolute bottom-0 right-0 cursor-nwse-resize p-1"
+          style={{ color: '#6a6a6a' }}
+        >
+          <div className="w-3 h-3 border-r-2 border-b-2 border-[#7d7d7d]" />
+        </div>
+      )}
     </div>
   );
 });
