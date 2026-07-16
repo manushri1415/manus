@@ -65,11 +65,15 @@ const DesktopIcon = ({ icon: Icon, label, command, onDoubleClick, initialPos, ic
             onMouseDown={handleMouseDown}
             onClick={handleClick}
         >
-            <div className="w-10 h-10 flex items-center justify-center bg-blue-500/20 rounded-lg border border-blue-400/30 group-hover:bg-blue-500/30 group-hover:border-blue-400/50 backdrop-blur-sm transition-all shadow-lg">
+            <div className="w-14 h-14 flex items-center justify-center">
                 {iconSrc ? (
-                    <img src={iconSrc} alt={label} className="w-6 h-6 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
+                    <img
+                        src={iconSrc}
+                        alt={label}
+                        className="w-12 h-12 object-contain drop-shadow-md"
+                    />
                 ) : (
-                    <Icon className="w-6 h-6 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
+                    <Icon className="w-12 h-12 text-white drop-shadow-md" />
                 )}
             </div>
             <span className="mt-1 text-[10px] font-medium text-white text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] px-1 py-0.5 rounded leading-tight">
@@ -90,7 +94,7 @@ export const DesktopIcons = ({ onIconClick }: { onIconClick: (command: string) =
         { icon: null, label: 'Projects', command: 'projects', pos: { x: 20, y: 110 }, iconSrc: projectsIconSrc },
         { icon: null, label: 'Experience', command: 'experience', pos: { x: 20, y: 210 }, iconSrc: experienceIconSrc },
         { icon: null, label: 'Resume', command: 'resume', pos: { x: 20, y: 310 },iconSrc: resumeIconSrc },
-        { icon: null, label: 'Contact', command: 'contact', pos: { x: 20, y: 400 }, iconSrc: phoneIconSrc },
+        { icon: null, label: 'Contact', command: 'contact', pos: { x: 20, y: 410 }, iconSrc: phoneIconSrc },
     ];
 
     return (

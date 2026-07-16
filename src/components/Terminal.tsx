@@ -13,8 +13,49 @@ type WindowSize = {
 };
 
 const WELCOME_MESSAGE = `Hello, World! I'm Manushri
-Get to know more about me using the Desktop icons to your left!
+ASU CS graduate | full-stack, backend, and AI-integrated apps.
 Type 'help' to see available commands.`;
+
+const ABOUT_MESSAGE = `
++-----------------------------------------------------------+
+| ABOUT                                                     |
+| Chennai, India -> Arizona | ASU CS graduate               |
+| Full-stack, backend, and product-focused engineer         |
+| Building useful, human-centered software with a           |
+| storyteller's eye.                                        |
++-----------------------------------------------------------+
+`;
+
+const SKILLS_MESSAGE = `
++-----------------------------------------------------------+
+| SKILLS                                                    |
+| Languages  TypeScript | JavaScript | Python | Java | SQL |
+| Frameworks React | Flask | Next.js | ASP.NET | Supabase  |
+| Tools      Git | Docker | Vercel | PostgreSQL | MySQL    |
+| Focus      Full-stack | backend | AI-integrated products |
++-----------------------------------------------------------+
+`;
+
+const PROJECTS_MESSAGE = `
++-----------------------------------------------------------+
+| PROJECTS                                                  |
+| Collegiate  AI-powered college/career planning platform   |
+| Evexia      Healthcare data transparency hackathon app    |
+| Censend     AI extension for safer professional emails    |
+| SceneStack  Film production coordination platform         |
+| More details live in the Projects window.                 |
++-----------------------------------------------------------+
+`;
+
+const CONTACT_MESSAGE = `
++-----------------------------------------------------------+
+| CONTACT                                                   |
+| Email     manushrimkumar@gmail.com                        |
+| LinkedIn  linkedin.com/in/manushrimurugakumar             |
+| GitHub    github.com/manushri1415                         |
+| Resume    type 'resume'                                   |
++-----------------------------------------------------------+
+`;
 
 const COMMANDS: Record<string, { description: string; action: () => string | React.ReactNode }> = {
   help: {
@@ -23,7 +64,7 @@ const COMMANDS: Record<string, { description: string; action: () => string | Rea
 Available commands:
   help      - Show this help message
   about     - Learn about me
-  experience- Open my experience page
+  experience - Open my experience page
   skills    - View my technical skills
   projects  - Browse my projects
   contact   - Get my contact information
@@ -35,104 +76,27 @@ Available commands:
   },
   about: {
     description: 'Learn about me',
-    action: () => (
-      <div className="my-4 space-y-4">
-        <div className="border border-border rounded-lg overflow-hidden w-64 bg-secondary/50 shadow-lg">
-          <img
-            alt="Manushri Profile"
-            className="w-full h-auto object-cover"
-          />
-        </div>
-        <div className="font-mono leading-relaxed bg-secondary/30 p-4 border border-border rounded-lg">
-          <div className="text-terminal-cyan font-bold mb-2">┌ ABOUT ME ┐</div>
-          <p className="mb-4 text-foreground/90">
-            I am a Computer Science graduate from Arizona State University interested in full-stack, backend, and product-focused software engineering
-          </p>
-          <p className="text-foreground/90">
-            I am interested in software that helps real people communicate, organize information, and make better decisions
-          </p>
-          <div className="mt-4 text-muted-foreground text-xs italic">
-            Currently working on exciting projects and always looking for new challenges.
-          </div>
-        </div>
-      </div>
-    ),
+    action: () => ABOUT_MESSAGE,
   },
   skills: {
     description: 'View my technical skills',
-    action: () => `
-┌─────────────────────────────────────────────────────────────┐
-│  TECHNICAL SKILLS                                           │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  Languages                                                  │
-│  ─────────────────────────────────────────                  │
-│  • TypeScript                                               │
-│  • JavaScript                                               │
-│  • Python                                                   │
-│                                                             │
-│  Frameworks & Libraries                                     │
-│  ─────────────────────────────────────────                  │
-│  • React                                                    │
-│  • Node.js                                                  │
-│  • Next.js                                                  │
-│  • TailwindCSS                                              │
-│                                                             │
-│  Tools & Platforms                                          │
-│  ─────────────────────────────────────────                  │
-│  • Git, Docker, AWS, Vercel, PostgreSQL                     │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-`,
+    action: () => SKILLS_MESSAGE,
   },
   projects: {
     description: 'Browse my projects',
-    action: () => `
-┌─────────────────────────────────────────────────────────────┐
-│  FEATURED PROJECTS                                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  01. syswaifu                                               │
-│      ──────────────────────────────────                     │
-│      A Cross-Platform Neofetch-style system info with       │
-│      waifu images in terminal.                              │
-│      → github.com/iamovi/syswaifu                           │
-│                                                             │
-│  02. button-will-react                                      │
-│      ──────────────────────────────────                     │
-│      A collection of playful pranks and interactive buttons.│
-│      → github.com/iamovi/button-will-react                  │
-│                                                             │
-│  Visit https://iamovi.github.io/ blog site for              │
-│  more amazing projects!                                     │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-`,
+    action: () => PROJECTS_MESSAGE,
   },
   contact: {
     description: 'Get my contact information',
-    action: () => `
-┌─────────────────────────────────────────────────────────────┐
-│  CONTACT                                                    │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  📧 Email      manushrimkumar@gmail.com                     |    
-│  🐙 GitHub     github.com/manushri1415                      │
-│  🌐 Website    <update later>                               │
-│                                                             
-│  I'm always open to collaborating on interesting            │
-│  projects or just chatting about code or anime!             │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-`,
+    action: () => CONTACT_MESSAGE,
   },
   whoami: {
     description: 'Display current user',
-    action: () => 'Manu@portfolio',
+    action: () => 'manushri@portfolio',
   },
   date: {
     description: 'Show current date and time',
-    action: () => new Date('2005-02-15T09:19:00').toLocaleString(),
+    action: () => new Date().toLocaleString(),
   },
   clear: {
     description: 'Clear the terminal',
@@ -154,7 +118,7 @@ type TerminalProps = {
 const EXTRA_COMMANDS = ['experience', 'resume'];
 
 const TERMINAL_MIN_WIDTH = 420;
-const TERMINAL_MIN_HEIGHT = 320;
+const TERMINAL_MIN_HEIGHT = 380;
 
 const clampValue = (value: number, min: number, max: number) => {
   if (max < min) return max;
@@ -177,10 +141,15 @@ const getResponsiveTerminalSize = (workspace: WindowSize): WindowSize => {
   const maxHeight = Math.max(TERMINAL_MIN_HEIGHT, workspace.height);
 
   return {
-    width: Math.round(clampValue(workspace.width * 0.58, TERMINAL_MIN_WIDTH, Math.min(760, maxWidth))),
-    height: Math.round(clampValue(workspace.height * 0.58, TERMINAL_MIN_HEIGHT, Math.min(520, maxHeight))),
+    width: Math.round(clampValue(workspace.width * 0.5, TERMINAL_MIN_WIDTH, Math.min(680, maxWidth))),
+    height: Math.round(clampValue(workspace.height * 0.72, TERMINAL_MIN_HEIGHT, Math.min(640, maxHeight))),
   };
 };
+
+const getDefaultTerminalOffset = () => ({
+  x: 0,
+  y: 0,
+});
 
 export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenResume, workspaceSize, isMinimized: controlledIsMinimized, onMinimizedChange, onFocus, zIndex = 10 }: TerminalProps, ref) => {
   const getThemeConfig = (id: string) => {
@@ -191,7 +160,7 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
           text: '#00FF41',
           prompt: 'neo@matrix:~$',
           header: 'Matrix Core',
-          welcome: `Wake up, Neo...\n\nHello, World! I'm Manushri Muruga Kumar\n I am a software engineer`,
+          welcome: `Wake up, Neo...\n\nHello, World! I'm Manushri Muruga Kumar\nASU CS graduate building software.`,
           caret: '#00FF41'
         };
       case 'ubuntu':
@@ -207,7 +176,7 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
         return {
           bg: '#282a36',
           text: '#f8f8f2',
-          prompt: 'λ',
+          prompt: 'Î»',
           header: 'Dracula Terminal',
           welcome: WELCOME_MESSAGE,
           caret: '#bd93f9'
@@ -246,10 +215,11 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [internalIsMinimized, setInternalIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState(() => getDefaultTerminalOffset());
   const [size, setSize] = useState(() => getResponsiveTerminalSize(workspaceSize ?? getFallbackWorkspaceSize()));
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [hasManualPosition, setHasManualPosition] = useState(false);
   const [hasManualResize, setHasManualResize] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const resizeStart = useRef({ x: 0, y: 0, w: 0, h: 0 });
@@ -280,6 +250,7 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.terminal-header-buttons')) return;
     onFocus?.();
+    setHasManualPosition(true);
     setIsDragging(true);
     dragStart.current = {
       x: e.clientX - position.x,
@@ -355,6 +326,11 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
       height: clampValue(prev.height, TERMINAL_MIN_HEIGHT, Math.max(TERMINAL_MIN_HEIGHT, effectiveWorkspace.height)),
     }));
   }, [effectiveWorkspace, hasManualResize]);
+
+  useEffect(() => {
+    if (hasManualPosition) return;
+    setPosition(getDefaultTerminalOffset());
+  }, [effectiveWorkspace, hasManualPosition]);
 
   const scrollToBottom = useCallback(() => {
     if (terminalRef.current) {
@@ -533,7 +509,7 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
         maxHeight: '100%',
         willChange: (isDragging || isResizing) ? 'transform, width, height' : 'auto',
         backgroundColor: 'var(--xp-window)',
-        border: '2px solid var(--xp-window-border)',
+        border: '5px solid var(--xp-window-border)',
         boxShadow: '0 18px 45px var(--xp-window-shadow)',
       }}
       className={`relative pointer-events-auto overflow-hidden shadow-2xl flex flex-col ${isMaximized ? '' : (isDragging || isResizing ? '' : 'transition-all duration-200')} ${isDragging ? 'select-none' : ''}`}
@@ -639,7 +615,7 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
       >
         <span>Type 'help' for commands</span>
         <div className="flex items-center gap-3">
-          <span>↑↓ History • Tab Autocomplete</span>
+          <span>â†‘â†“ History â€¢ Tab Autocomplete</span>
           {!isMaximized && (
             <div
               onMouseDown={handleResizeDown}
