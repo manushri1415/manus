@@ -234,45 +234,243 @@
   flex: 1;
 }
 
-.mtube-featured-projects {
-  background-color: #f0f0f0;
-  border: 1px solid #dddddd;
-  padding: 8px;
-  margin-top: 12px;
+/* ========================================
+   Featured Video Section
+   ======================================== */
+.mtube-video-section {
+  padding: 0;
 }
 
-.mtube-featured-title {
+/* ========================================
+   Top Section: Video + About Grid
+   ======================================== */
+.mtube-top-section {
+  padding: 12px;
+}
+
+.mtube-top-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.mtube-top-video-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mtube-top-about-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mtube-top-about-col .mtube-about-heading {
+  font-size: 15px;
+  margin: 0 0 8px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.mtube-top-about-col .mtube-about-content {
   font-size: 12px;
+  line-height: 1.7;
+}
+
+.mtube-video-title-small {
+  font-size: 11px;
   font-weight: bold;
-  margin-bottom: 6px;
+  color: #333333;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.mtube-video-container-small {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  background-color: #000000;
+  border: 1px solid #cccccc;
+}
+
+.mtube-top-secondary {
+  margin-top: 0;
+  padding-top: 12px;
+  border-top: 1px solid #e5e5e5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 11px;
+  color: #666666;
+}
+
+.mtube-video-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333333;
+  margin: 0;
+  padding: 12px 12px 8px 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.mtube-video-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  background-color: #000000;
+}
+
+.mtube-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.mtube-video-actions {
+  padding: 12px;
+  border-bottom: 1px solid #e5e5e5;
+  background-color: #f9f9f9;
+}
+
+.mtube-rating-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.mtube-stars {
+  color: #ff9900;
+  font-size: 13px;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+
+.mtube-rating-text {
+  color: #666666;
+}
+
+.mtube-video-stats {
+  padding: 8px 12px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #e5e5e5;
+  font-size: 11px;
+}
+
+.mtube-stat-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.mtube-stat-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.mtube-stat-label {
+  font-weight: bold;
   color: #333333;
 }
 
-.mtube-featured-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 8px 0;
+.mtube-stat-value {
+  color: #666666;
+  text-align: right;
 }
 
-.mtube-featured-list li {
+.mtube-action-buttons {
+  padding: 8px 12px;
+  background-color: #f9f9f9;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
   font-size: 11px;
-  margin-bottom: 4px;
 }
 
-.mtube-featured-link {
+.mtube-action-link {
   color: #0066cc;
   text-decoration: none;
+  padding-right: 12px;
+  border-right: 1px solid #dddddd;
 }
 
-.mtube-featured-link:hover {
+.mtube-action-link:last-child {
+  border-right: none;
+}
+
+.mtube-action-link:hover {
   text-decoration: underline;
 }
 
-.mtube-featured-footer {
+/* About Video Section */
+.mtube-about-heading {
+  font-size: 13px;
+  font-weight: bold;
+  color: #333333;
+  margin: 0 0 8px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.mtube-about-content {
+  font-size: 11px;
+  color: #333333;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.mtube-about-content p {
+  margin: 0 0 8px 0;
+}
+
+.mtube-about-content p:last-child {
+  margin-bottom: 0;
+}
+
+.mtube-video-metadata {
+  background-color: #f0f0f0;
+  border: 1px solid #dddddd;
+  padding: 8px;
   font-size: 10px;
-  margin: 8px 0 0 0;
-  padding-top: 6px;
-  border-top: 1px solid #dddddd;
+}
+
+.mtube-metadata-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+  align-items: flex-start;
+}
+
+.mtube-metadata-row:last-child {
+  margin-bottom: 0;
+}
+
+.mtube-metadata-label {
+  font-weight: bold;
+  color: #333333;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.mtube-metadata-value {
+  color: #666666;
+  flex: 1;
 }
 
 /* ========================================
@@ -293,8 +491,10 @@
 .mtube-sidebar-title {
   font-size: 12px;
   font-weight: bold;
-  color: #cc0000;
+  color: #333333;
   margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #cccccc;
 }
 
 .mtube-director-videos {
@@ -333,6 +533,53 @@
 
 .mtube-director-label:hover {
   text-decoration: underline;
+}
+
+/* Life Chapters Grid */
+.mtube-life-chapters-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.mtube-life-chapter-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mtube-chapter-button {
+  width: 100%;
+  height: 100px;
+  border: 1px solid #cccccc;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.mtube-chapter-button:hover {
+  opacity: 0.8;
+  background-color: #f0f0f0;
+}
+
+.mtube-chapter-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mtube-chapter-title {
+  font-size: 9px;
+  color: #333333;
+  text-align: center;
+  margin: 0;
+  line-height: 1.2;
+  word-break: break-word;
 }
 
 /* ========================================
@@ -564,6 +811,18 @@
 
   .mtube-left-column {
     order: 1;
+  }
+
+  .mtube-top-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mtube-top-about-col {
+    order: 1;
+  }
+
+  .mtube-top-video-col {
+    order: 2;
   }
 
   .mtube-thumbnail-grid {

@@ -8,7 +8,7 @@ export interface DirectorVideo {
   id: string;
   title: string;
   thumbnail: string;
-  anchor: string;
+  youtubeUrl: string;
 }
 
 export interface FeaturedExperience {
@@ -58,40 +58,40 @@ export const SLIDESHOW_IMAGES: SlideshowImage[] = [
 
 export const DIRECTOR_VIDEOS: DirectorVideo[] = [
   {
-    id: 'my-story',
-    title: 'My Story',
+    id: 'before-the-code',
+    title: 'Before The Code: Childhood in Chennai',
+    thumbnail: 'assets/icons/M-photos/Manu-profile-pic.jpeg',
+    youtubeUrl: '#childhood-in-chennai',
+  },
+  {
+    id: 'early-creativity',
+    title: 'Early Creativity: Classical Dance',
+    thumbnail: 'assets/icons/M-photos/acted-in-show-w-AFA.jpeg',
+    youtubeUrl: '#early-creativity',
+  },
+  {
+    id: 'from-chennai-to-arizona',
+    title: 'From Chennai To Arizona: The Move',
     thumbnail: 'assets/icons/M-photos/gradpic.jpeg',
-    anchor: '#about-creator',
+    youtubeUrl: '#from-chennai-to-arizona',
   },
   {
-    id: 'hackathons-competitions',
-    title: 'Hackathons & Competitions',
-    thumbnail: 'assets/icons/M-photos/zoom2022.jpeg',
-    anchor: '#explore-more',
+    id: 'building-under-pressure',
+    title: 'Building Under Pressure: Hackathons',
+    thumbnail: 'assets/icons/M-photos/evexia.png',
+    youtubeUrl: '#building-under-pressure',
   },
   {
-    id: 'beyond-code',
-    title: 'Beyond Code',
+    id: 'life-on-set',
+    title: 'Life On Set: Arizona Film Association',
     thumbnail: 'assets/icons/M-photos/Production-Assistant-AFA.jpeg',
-    anchor: '#video-responses',
+    youtubeUrl: '#life-on-set',
   },
   {
-    id: 'film-production',
-    title: 'Film & Production',
-    thumbnail: 'assets/icons/M-photos/Production-Assistant-AFA.jpeg',
-    anchor: '#film-production',
-  },
-  {
-    id: 'projects',
-    title: 'Projects',
+    id: 'now-playing',
+    title: 'Now Playing: Post-Graduation',
     thumbnail: 'assets/icons/M-photos/capstone-showcase-collegiate.jpeg',
-    anchor: '#featured-projects',
-  },
-  {
-    id: 'campus-life',
-    title: 'Work & Campus Life',
-    thumbnail: 'assets/icons/M-photos/Camp-counselor.jpeg',
-    anchor: '#campus-life',
+    youtubeUrl: '#now-playing',
   },
 ];
 
@@ -151,9 +151,9 @@ export const FEATURED_EXPERIENCES: FeaturedExperience[] = [
 export const RECENT_COMMENTS: RecentComment[] = [
   {
     id: 'comment-1',
-    username: 'manushri_m',
-    text: 'Don\'t join a sorority as a junior. Lesson learned.',
-    timeAgo: '3 months ago',
+    username: 'manushri_2009',
+    text: 'Dance practice tomorrow. I definitely practiced and did not spend the evening watching television.',
+    timeAgo: '6 years ago',
     commentNumber: 1,
   },
   {
@@ -179,15 +179,15 @@ export const RECENT_COMMENTS: RecentComment[] = [
   },
   {
     id: 'comment-5',
-    username: 'manushri_m',
-    text: 'ASU taught me that ambition and anime breaks can coexist.',
+    username: 'manushri_2022',
+    text: 'Moved across the world to study computer science. This seems reasonable.',
     timeAgo: '1 month ago',
     commentNumber: 5,
   },
   {
     id: 'comment-6',
-    username: 'manushri_m',
-    text: 'The best debugging partner is the friend who asks "have you tried turning it off and on again?"',
+    username: 'manushri_2026',
+    text: 'Graduated. Still deciding whether life is a software project or a film with questionable pacing.',
     timeAgo: '2 weeks ago',
     commentNumber: 6,
   },

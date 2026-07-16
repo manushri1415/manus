@@ -9,6 +9,10 @@ interface BrowserWindowProps {
   initialSize: { width: number; height: number };
   onClose: () => void;
   windowKey?: string;
+  isMinimized?: boolean;
+  onMinimizedChange?: (v: boolean) => void;
+  onFocus?: () => void;
+  zIndex?: number;
 }
 
 const getStorageKey = (key: string) => `window-state-${key}`;
@@ -21,6 +25,10 @@ export const BrowserWindow = ({
   initialSize,
   onClose,
   windowKey,
+  isMinimized = false,
+  onMinimizedChange,
+  onFocus,
+  zIndex = 20,
 }: BrowserWindowProps) => {
   const getInitialState = () => {
     if (!windowKey) return { position: initialPosition, size: initialSize };
@@ -38,7 +46,6 @@ export const BrowserWindow = ({
   const initialState = getInitialState();
   const [position, setPosition] = useState(initialState.position);
   const [size, setSize] = useState(initialState.size);
-  const [isMinimized, setIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -49,6 +56,7 @@ export const BrowserWindow = ({
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.browser-header-buttons')) return;
     setIsDragging(true);
+    onFocus?.();
     dragStart.current = {
       x: e.clientX - position.x,
       y: e.clientY - position.y,
@@ -108,15 +116,7 @@ export const BrowserWindow = ({
   }, [position, size, windowKey]);
 
   if (isMinimized) {
-    return (
-      <div
-        className="fixed bottom-[40px] right-4 bg-secondary border border-border rounded-t-lg px-4 py-2 cursor-pointer shadow-lg animate-fade-in flex items-center gap-2 z-[60]"
-        onClick={() => setIsMinimized(false)}
-      >
-        <div className="w-2 h-2 rounded-full bg-terminal-green animate-pulse" />
-        <span className="text-xs font-mono">{title}</span>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -129,12 +129,13 @@ export const BrowserWindow = ({
         position: isMaximized ? 'fixed' : 'relative',
         top: isMaximized ? 0 : 'auto',
         left: isMaximized ? 0 : 'auto',
-        zIndex: isMaximized ? 40 : 20,
+        zIndex: isMaximized ? zIndex + 1 : zIndex,
         willChange: isDragging || isResizing ? 'transform, width, height' : 'auto',
       }}
       className={`bg-white border border-gray-300 rounded-lg overflow-hidden shadow-2xl flex flex-col ${
         isMaximized ? '' : isDragging || isResizing ? '' : 'transition-all duration-200'
       } ${isDragging ? 'select-none' : ''}`}
+      onMouseDownCapture={onFocus}
     >
       {/* Title Bar */}
       <div
@@ -147,7 +148,7 @@ export const BrowserWindow = ({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setIsMinimized(true);
+              onMinimizedChange?.(true);
             }}
             className="p-0.5 hover:bg-white/20 transition-colors rounded"
           >

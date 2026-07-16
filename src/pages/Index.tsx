@@ -6,6 +6,7 @@ import { LoginScreen } from '@/components/LoginScreen';
 import { DesktopIcons } from '@/components/DesktopIcons';
 import { BrowserWindow } from '@/components/browser/BrowserWindow';
 import { BROWSER_PAGES, type BrowserPageKey } from '@/components/browser/pages/registry';
+import { ExperiencePage } from '@/components/browser/pages/ExperiencePage';
 
 const Index = () => {
   // Resolve the correct path for the default wallpaper based on the base URL
@@ -15,7 +16,8 @@ const Index = () => {
   const [wallpaper, setWallpaper] = useState<string | null>(DEFAULT_WALLPAPER);
   const [time] = useState(new Date('2005-02-15T09:19:00'));
   const [appState, setAppState] = useState<'booting' | 'login' | 'desktop'>('booting');
-  const [activeBrowserPage, setActiveBrowserPage] = useState<BrowserPageKey | null>(null);
+  const [openWindows, setOpenWindows] = useState<BrowserPageKey[]>([]);
+  const [minimizedWindows, setMinimizedWindows] = useState<Set<BrowserPageKey>>(new Set());
   const terminalRef = useRef<any>(null);
 
   useEffect(() => {
@@ -49,13 +51,53 @@ const Index = () => {
     setAppState('login');
   }, []);
 
+  const openOrFocusPage = useCallback((pageKey: BrowserPageKey) => {
+    setOpenWindows((prev) => {
+      const filtered = prev.filter((k) => k !== pageKey);
+      return [...filtered, pageKey];
+    });
+    setMinimizedWindows((prev) => {
+      const next = new Set(prev);
+      next.delete(pageKey);
+      return next;
+    });
+  }, []);
+
+  const handleWindowClose = useCallback((pageKey: BrowserPageKey) => {
+    setOpenWindows((prev) => prev.filter((k) => k !== pageKey));
+    setMinimizedWindows((prev) => {
+      const next = new Set(prev);
+      next.delete(pageKey);
+      return next;
+    });
+  }, []);
+
+  const handleWindowFocus = useCallback((pageKey: BrowserPageKey) => {
+    setOpenWindows((prev) => {
+      const filtered = prev.filter((k) => k !== pageKey);
+      return [...filtered, pageKey];
+    });
+  }, []);
+
+  const handleWindowMinimize = useCallback((pageKey: BrowserPageKey, value: boolean) => {
+    setMinimizedWindows((prev) => {
+      const next = new Set(prev);
+      if (value) {
+        next.add(pageKey);
+      } else {
+        next.delete(pageKey);
+      }
+      return next;
+    });
+  }, []);
+
   const handleIconClick = useCallback((command: string) => {
     if (command in BROWSER_PAGES) {
-      setActiveBrowserPage(command as BrowserPageKey);
+      openOrFocusPage(command as BrowserPageKey);
     } else if (terminalRef.current) {
       terminalRef.current.executeExternalCommand(command);
     }
-  }, []);
+  }, [openOrFocusPage]);
 
   if (appState === 'booting') {
     return <BootSequence onComplete={handleBootComplete} />;
@@ -95,25 +137,36 @@ const Index = () => {
         </div>
 
         {/* Browser Windows */}
-        {activeBrowserPage && (() => {
-          const page = BROWSER_PAGES[activeBrowserPage];
+        {openWindows.map((pageKey, idx) => {
+          const page = BROWSER_PAGES[pageKey];
           if (!page) return null;
           const { Component } = page;
           return (
-            <div className="absolute pointer-events-auto">
+            <div key={pageKey} className="absolute pointer-events-auto">
               <BrowserWindow
                 title={page.title}
                 url={page.url}
-                initialPosition={{ x: 40, y: 40 }}
+                initialPosition={{ x: 40 + idx * 40, y: 40 + idx * 40 }}
                 initialSize={{ width: 1050, height: 580 }}
-                onClose={() => setActiveBrowserPage(null)}
-                windowKey={activeBrowserPage}
+                windowKey={pageKey}
+                zIndex={20 + idx}
+                isMinimized={minimizedWindows.has(pageKey)}
+                onMinimizedChange={(v) => handleWindowMinimize(pageKey, v)}
+                onFocus={() => handleWindowFocus(pageKey)}
+                onClose={() => handleWindowClose(pageKey)}
               >
-                <Component />
+                {pageKey === 'experience' ? (
+                  <ExperiencePage
+                    onClose={() => handleWindowClose('experience')}
+                    onNavigate={openOrFocusPage}
+                  />
+                ) : (
+                  <Component />
+                )}
               </BrowserWindow>
             </div>
           );
-        })()}
+        })}
       </main>
 
       {/* Windows Taskbar */}
@@ -124,6 +177,23 @@ const Index = () => {
           onReset={handleReset}
           onLogout={handleLogout}
         />
+
+        <div className="flex items-center gap-2 flex-1">
+          {openWindows.map((pageKey) => {
+            if (!minimizedWindows.has(pageKey)) return null;
+            const page = BROWSER_PAGES[pageKey];
+            return (
+              <button
+                key={pageKey}
+                onClick={() => handleWindowMinimize(pageKey, false)}
+                className="bg-secondary border border-border rounded-t-lg px-3 py-1 cursor-pointer shadow-lg hover:bg-secondary/80 transition-colors flex items-center gap-2 text-xs font-mono"
+              >
+                <div className="w-2 h-2 rounded-full bg-terminal-green animate-pulse" />
+                <span>{page.label}</span>
+              </button>
+            );
+          })}
+        </div>
 
         <div className="text-[11px] font-mono text-white/70 px-4 select-none text-right font-medium flex-shrink-0">
           {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

@@ -9,6 +9,7 @@ import {
 import { ImageLightbox } from './ImageLightbox';
 
 export const AboutPage = () => {
+  // Restructured layout: video on left, bio on right
   const logoPath = `${import.meta.env.BASE_URL}assets/icons/Heading.png`;
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
 
@@ -63,63 +64,121 @@ export const AboutPage = () => {
         ))}
       </div>
 
-
       {/* Main Content */}
       <div className="mtube-content">
         <div className="mtube-layout">
           {/* Left Column */}
           <div className="mtube-left-column">
-            {/* About This Creator */}
-            <div className="mtube-section" id="about-creator">
-              <h2 className="mtube-section-title">About This Creator</h2>
+            {/* Top Section: Video + About */}
+            <div className="mtube-section mtube-top-section">
+              <div className="mtube-top-grid">
+                <div className="mtube-top-video-col">
+                  <h2 className="mtube-video-title-small">My Childhood Memories: 2005–2022</h2>
+                  <div className="mtube-video-container-small">
+                    <iframe
+                      src="https://www.youtube.com/embed/5-MCFJZabrE?si=N6byMojIk1ex4znn"
+                      title="My Childhood Memories: 2005–2022"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                      className="mtube-iframe"
+                    />
+                  </div>
+                  <div className="mtube-rating-section">
+                    <span className="mtube-stars">★★★★★</span>
+                    <span className="mtube-rating-text">Rate this video</span>
+                  </div>
+                </div>
 
-              <div className="mtube-intro-block">
-                <p className="mtube-intro-text">
-                  I'm a Computer Science graduate from Arizona State University interested in full-stack, backend, and product-focused software engineering. I build systems that help people communicate, organize information, and make better decisions.
-                </p>
-                <p className="mtube-intro-subtext italic">
-                  Beyond code, I'm passionate about filmmaking, visual storytelling, anime, K-dramas, and the unpredictable magic of competition and creation.
-                </p>
+                <div className="mtube-top-about-col">
+                  <h3 className="mtube-about-heading">Who is Manushri Muruga Kumar?</h3>
+                  <div className="mtube-about-content">
+                    <p>
+                      Manushri Muruga Kumar is many things, but aside from being the cosmic twin of YouTube—we share the same birthday—who is she?
+                    </p>
+
+                    <p>
+                      I am a Computer Science graduate from Arizona State University interested in full-stack, backend, and product-focused software engineering.
+                    </p>
+
+                    <p>
+                      I am especially interested in software that helps real people communicate, organize information, and make better decisions.
+                    </p>
+
+                    <p>
+                      This video follows the small moments, milestones, and memories that shaped my life from Chennai to Arizona.
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <div className="mtube-info-fields">
-                <div className="mtube-info-field">
-                  <span className="mtube-field-label">School:</span>
-                  <span className="mtube-field-value">Arizona State University (B.S. Computer Science, 2026)</span>
+              {/* Secondary Details */}
+              <div className="mtube-top-secondary">
+                <div className="mtube-video-stats">
+                  <div className="mtube-stat-item">
+                    <span className="mtube-stat-label">Views:</span>
+                    <span className="mtube-stat-value">21 years of memories</span>
+                  </div>
+                  <div className="mtube-stat-item">
+                    <span className="mtube-stat-label">Comments:</span>
+                    <span className="mtube-stat-value">Character development ongoing</span>
+                  </div>
+                  <div className="mtube-stat-item">
+                    <span className="mtube-stat-label">Favorites:</span>
+                    <span className="mtube-stat-value">Too many to count</span>
+                  </div>
                 </div>
-                <div className="mtube-info-field">
-                  <span className="mtube-field-label">Home Base:</span>
-                  <span className="mtube-field-value">Tempe, Arizona</span>
-                </div>
-                <div className="mtube-info-field">
-                  <span className="mtube-field-label">Interests:</span>
-                  <span className="mtube-field-value">Software Engineering, AI/ML, Product Design, Filmmaking, Visual Storytelling</span>
-                </div>
-                <div className="mtube-info-field">
-                  <span className="mtube-field-label">Categories:</span>
-                  <span className="mtube-field-value">Full-Stack Development, Backend Systems, Product Engineering, Creative Technology</span>
-                </div>
-                <div className="mtube-info-field">
-                  <span className="mtube-field-label">Tags:</span>
-                  <span className="mtube-field-value">TypeScript, React, Python, Problem-Solving, Team Collaboration, Filmmaking, Anime</span>
-                </div>
-              </div>
 
-              <div className="mtube-featured-projects">
-                <h3 className="mtube-featured-title">Featured Projects</h3>
-                <ul className="mtube-featured-list">
-                  <li><a href="#" className="mtube-featured-link">Collegiate — AI-Powered College & Career Planning Platform</a></li>
-                  <li><a href="#" className="mtube-featured-link">Evexia — Healthcare Data Transparency Platform</a></li>
-                  <li><a href="#" className="mtube-featured-link">Censend — AI Professional Communication Extension</a></li>
-                  <li><a href="#" className="mtube-featured-link">SceneStack — Production Coordination for Filmmakers</a></li>
-                </ul>
-                <p className="mtube-featured-footer"><a href="#featured-projects" className="mtube-link">See full list on Moongle →</a></p>
+                <div className="mtube-action-buttons">
+                  <a href="#" className="mtube-action-link">Save to Favorites</a>
+                  <a href="#" className="mtube-action-link">Add to Groups</a>
+                  <a href="#" className="mtube-action-link">Share Video</a>
+                </div>
+
+                <div className="mtube-video-metadata">
+                  <div className="mtube-metadata-row">
+                    <span className="mtube-metadata-label">Added:</span>
+                    <span className="mtube-metadata-value">Upload date of featured video</span>
+                  </div>
+                  <div className="mtube-metadata-row">
+                    <span className="mtube-metadata-label">From:</span>
+                    <span className="mtube-metadata-value">manushri_m</span>
+                  </div>
+                  <div className="mtube-metadata-row">
+                    <span className="mtube-metadata-label">Category:</span>
+                    <span className="mtube-metadata-value">People & Blogs</span>
+                  </div>
+                  <div className="mtube-metadata-row">
+                    <span className="mtube-metadata-label">Tags:</span>
+                    <span className="mtube-metadata-value">childhood, memories, Chennai, Arizona, dance, filmmaking, life</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Explore More Videos */}
-            <div className="mtube-section" id="explore-more">
-              <h2 className="mtube-section-title">Hackathons & Competitions</h2>
+            {/* Film & Production Section */}
+            <div className="mtube-section" id="film-production">
+              <h2 className="mtube-section-title">Life On Set: Film & Production</h2>
+              <div className="mtube-thumbnail-grid">
+                {VIDEO_RESPONSES.filter((v) => v.category === 'film-production').map((item) => (
+                  <div key={item.id} className="mtube-thumbnail-card">
+                    <button
+                      onClick={() => openLightbox(item.thumbnail, item.title)}
+                      className="mtube-thumbnail-button"
+                    >
+                      <img src={`${basePath}${item.thumbnail}`} alt={item.title} className="mtube-thumbnail-image" />
+                    </button>
+                    <h4 className="mtube-card-title">{item.title}</h4>
+                    {item.date && <p className="mtube-card-date">{item.date}</p>}
+                    <p className="mtube-card-description">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Hackathons & Building Under Pressure */}
+            <div className="mtube-section" id="building-under-pressure">
+              <h2 className="mtube-section-title">Building Under Pressure: Hackathons & Competitions</h2>
               <div className="mtube-thumbnail-grid">
                 {FEATURED_EXPERIENCES.map((exp) => (
                   <div key={exp.id} className="mtube-thumbnail-card">
@@ -133,6 +192,26 @@ export const AboutPage = () => {
                     <p className="mtube-card-date">{exp.date}</p>
                     <p className="mtube-card-description">{exp.description}</p>
                     {exp.recognition && <p className="mtube-card-recognition"><strong>{exp.recognition}</strong></p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Campus Life & Work */}
+            <div className="mtube-section" id="campus-life">
+              <h2 className="mtube-section-title">Working Through College: Campus & Community</h2>
+              <div className="mtube-thumbnail-grid">
+                {VIDEO_RESPONSES.filter((v) => v.category === 'campus-life').map((item) => (
+                  <div key={item.id} className="mtube-thumbnail-card">
+                    <button
+                      onClick={() => openLightbox(item.thumbnail, item.title)}
+                      className="mtube-thumbnail-button"
+                    >
+                      <img src={`${basePath}${item.thumbnail}`} alt={item.title} className="mtube-thumbnail-image" />
+                    </button>
+                    <h4 className="mtube-card-title">{item.title}</h4>
+                    {item.date && <p className="mtube-card-date">{item.date}</p>}
+                    <p className="mtube-card-description">{item.description}</p>
                   </div>
                 ))}
               </div>
@@ -157,65 +236,27 @@ export const AboutPage = () => {
                 ))}
               </div>
             </div>
-
-            {/* Video Responses */}
-            <div className="mtube-section" id="video-responses">
-              <h2 className="mtube-section-title">Beyond Code: My Life & Experiences</h2>
-
-              <div id="film-production">
-                <h3 className="mtube-subsection-title">Film & Production</h3>
-                <div className="mtube-thumbnail-grid">
-                  {VIDEO_RESPONSES.filter((v) => v.category === 'film-production').map((item) => (
-                    <div key={item.id} className="mtube-thumbnail-card">
-                      <button
-                        onClick={() => openLightbox(item.thumbnail, item.title)}
-                        className="mtube-thumbnail-button"
-                      >
-                        <img src={`${basePath}${item.thumbnail}`} alt={item.title} className="mtube-thumbnail-image" />
-                      </button>
-                      <h4 className="mtube-card-title">{item.title}</h4>
-                      {item.date && <p className="mtube-card-date">{item.date}</p>}
-                      <p className="mtube-card-description">{item.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div id="campus-life">
-                <h3 className="mtube-subsection-title">Work & Campus Life</h3>
-                <div className="mtube-thumbnail-grid">
-                  {VIDEO_RESPONSES.filter((v) => v.category === 'campus-life').map((item) => (
-                    <div key={item.id} className="mtube-thumbnail-card">
-                      <button
-                        onClick={() => openLightbox(item.thumbnail, item.title)}
-                        className="mtube-thumbnail-button"
-                      >
-                        <img src={`${basePath}${item.thumbnail}`} alt={item.title} className="mtube-thumbnail-image" />
-                      </button>
-                      <h4 className="mtube-card-title">{item.title}</h4>
-                      {item.date && <p className="mtube-card-date">{item.date}</p>}
-                      <p className="mtube-card-description">{item.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Right Column - Director Videos Sidebar */}
+          {/* Right Column - Related Videos Sidebar */}
           <div className="mtube-sidebar">
             <div className="mtube-sidebar-section">
-              <h3 className="mtube-sidebar-title">Director Videos</h3>
-              <div className="mtube-director-videos">
+              <h3 className="mtube-sidebar-title">My Story: Life Chapters</h3>
+              <div className="mtube-life-chapters-grid">
                 {DIRECTOR_VIDEOS.map((video) => (
-                  <a key={video.id} href={video.anchor} className="mtube-director-link">
-                    <img
-                      src={`${basePath}${video.thumbnail}`}
-                      alt={video.title}
-                      className="mtube-director-thumb"
-                    />
-                    <span className="mtube-director-label">{video.title}</span>
-                  </a>
+                  <div key={video.id} className="mtube-life-chapter-card">
+                    <button
+                      onClick={() => openLightbox(video.thumbnail, video.title)}
+                      className="mtube-chapter-button"
+                    >
+                      <img
+                        src={`${basePath}${video.thumbnail}`}
+                        alt={video.title}
+                        className="mtube-chapter-image"
+                      />
+                    </button>
+                    <p className="mtube-chapter-title">{video.title}</p>
+                  </div>
                 ))}
               </div>
             </div>

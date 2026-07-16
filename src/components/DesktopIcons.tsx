@@ -81,11 +81,13 @@ const DesktopIcon = ({ icon: Icon, label, command, onDoubleClick, initialPos, ic
 
 export const DesktopIcons = ({ onIconClick }: { onIconClick: (command: string) => void }) => {
     const projectsIconSrc = `${import.meta.env.BASE_URL}assets/icons/projects.png`;
+    const experienceIconSrc = `${import.meta.env.BASE_URL}assets/icons/experience.png`;
 
     const icons = [
         { icon: User, label: 'About Me', command: 'about', pos: { x: 20, y: 20 } },
         { icon: null, label: 'Projects', command: 'projects', pos: { x: 20, y: 120 }, iconSrc: projectsIconSrc },
-        { icon: File, label: 'Resume', command: 'resume', pos: { x: 20, y: 220 } },
+        { icon: null, label: 'Experience', command: 'experience', pos: { x: 20, y: 220 }, iconSrc: experienceIconSrc },
+        { icon: File, label: 'Resume', command: 'resume', pos: { x: 20, y: 320 } },
         { icon: Trash2, label: 'Recycle Bin', command: 'clear', pos: { x: 20, y: 400 } },
     ];
 
