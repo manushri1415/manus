@@ -1,6 +1,7 @@
 import { AboutPage } from './AboutPage';
 import { ProjectsPage } from './ProjectsPage';
 import { ExperiencePage } from './ExperiencePage';
+import { ContactPage } from './ContactPage';
 
 export const BROWSER_PAGES = {
   about: {
@@ -20,6 +21,12 @@ export const BROWSER_PAGES = {
     label: 'Experience',
     url: 'http://www.themanubook.com/manushri',
     Component: ExperiencePage,
+  },
+  contact: {
+    title: '',
+    label: 'Contact',
+    url: 'http://www.manupress.com/contact',
+    Component: ContactPage,
   },
 };
 

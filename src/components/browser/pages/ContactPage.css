@@ -1,0 +1,508 @@
+/* ========================================
+   Page Layout
+   ======================================== */
+.manupress-page {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #ececec;
+  color: #333333;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 20px 12px;
+  overflow-y: auto;
+}
+
+/* ========================================
+   Masthead
+   ======================================== */
+.manupress-masthead {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.manupress-logo {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* ========================================
+   Main Panel
+   ======================================== */
+.manupress-panel {
+  background-color: #ffffff;
+  max-width: 920px;
+  margin: 0 auto;
+  border: 1px solid #cccccc;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  padding: 24px;
+}
+
+/* ========================================
+   Two-Column Layout
+   ======================================== */
+.manupress-columns {
+  display: grid;
+  grid-template-columns: 2fr 1px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.manupress-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.manupress-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-left: 20px;
+}
+
+.manupress-divider {
+  background-color: #dddddd;
+  height: auto;
+}
+
+/* ========================================
+   Typography & Sections
+   ======================================== */
+.manupress-intro {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #333333;
+  margin: 0;
+  padding: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.manupress-section-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #1a1a1a;
+  margin: 4px 0 8px 0;
+  padding: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 4px;
+}
+
+.manupress-subsection-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: #333333;
+  margin: 8px 0 6px 0;
+  padding: 0;
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 4px;
+}
+
+/* ========================================
+   Bullet Lists & Link Lists
+   ======================================== */
+.manupress-bullet-list {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+  list-style: disc;
+  font-size: 12px;
+  color: #333333;
+  line-height: 1.6;
+}
+
+.manupress-bullet-list li {
+  margin-bottom: 4px;
+}
+
+.manupress-link-list {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+  list-style: decimal;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.manupress-link-list li {
+  margin-bottom: 4px;
+  color: #333333;
+}
+
+.manupress-link {
+  color: #0066cc;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+}
+
+.manupress-link:visited {
+  color: #0066cc;
+}
+
+.manupress-link:hover {
+  color: #0050aa;
+}
+
+.manupress-link:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+.manupress-link-button {
+  color: #0066cc;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 12px;
+  text-align: left;
+}
+
+.manupress-link-button:visited {
+  color: #0066cc;
+}
+
+.manupress-link-button:hover {
+  color: #0050aa;
+}
+
+.manupress-link-button:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+/* ========================================
+   CTA Button
+   ======================================== */
+.manupress-cta-intro {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #333333;
+  margin: 0 0 8px 0;
+  padding: 0;
+}
+
+.manupress-cta-button {
+  background-color: #2b95d6;
+  color: #ffffff;
+  border: 1px solid #1f6fa3;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: bold;
+  font-family: Arial, Verdana, sans-serif;
+  cursor: pointer;
+  text-align: center;
+  display: inline-block;
+  transition: background-color 0.15s ease;
+}
+
+.manupress-cta-button:hover {
+  background-color: #2483ba;
+}
+
+.manupress-cta-button:active {
+  background-color: #1f6fa3;
+}
+
+.manupress-cta-button:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+/* ========================================
+   Form
+   ======================================== */
+.manupress-wip-note {
+  font-size: 11px;
+  color: #666666;
+  margin: 4px 0 8px 0;
+  padding: 0;
+  font-style: italic;
+}
+
+.manupress-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+.manupress-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.manupress-form-label {
+  font-size: 11px;
+  font-weight: bold;
+  color: #333333;
+  cursor: pointer;
+}
+
+.manupress-form-input,
+.manupress-form-textarea {
+  border: 1px solid #999999;
+  background-color: #ffffff;
+  color: #333333;
+  font-size: 11px;
+  font-family: Arial, Verdana, sans-serif;
+  padding: 4px 6px;
+  outline: none;
+}
+
+.manupress-form-input:focus,
+.manupress-form-textarea:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 1px;
+  border-color: #0066cc;
+}
+
+.manupress-form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.manupress-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.manupress-form-checkbox {
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
+}
+
+.manupress-form-checkbox:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 1px;
+}
+
+.manupress-checkbox-label {
+  font-size: 11px;
+  color: #333333;
+  cursor: pointer;
+}
+
+.manupress-form-submit {
+  background-color: #f0f0f0;
+  color: #333333;
+  border: 1px solid #999999;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: bold;
+  font-family: Arial, Verdana, sans-serif;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background-color 0.15s ease;
+  align-self: flex-start;
+}
+
+.manupress-form-submit:hover {
+  background-color: #e0e0e0;
+}
+
+.manupress-form-submit:active {
+  background-color: #d0d0d0;
+}
+
+.manupress-form-submit:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 1px;
+}
+
+.manupress-form-status {
+  font-size: 11px;
+  color: #2b5a00;
+  background-color: #f0f9f0;
+  border: 1px solid #c0e0c0;
+  padding: 6px 8px;
+  margin: 4px 0;
+  border-radius: 2px;
+}
+
+/* ========================================
+   Dividers
+   ======================================== */
+.manupress-divider-thin {
+  border: none;
+  border-top: 1px solid #dddddd;
+  margin: 8px 0;
+  height: 0;
+}
+
+/* ========================================
+   Did You Know / Trivia
+   ======================================== */
+.manupress-trivia-list {
+  margin: 4px 0 0 0;
+  padding-left: 16px;
+  list-style: disc;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #333333;
+}
+
+.manupress-trivia-list li {
+  margin-bottom: 3px;
+}
+
+/* ========================================
+   Footer
+   ======================================== */
+.manupress-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #dddddd;
+  text-align: center;
+  font-size: 11px;
+}
+
+.manupress-footer-cta {
+  margin: 0 0 6px 0;
+  padding: 0;
+  color: #333333;
+  line-height: 1.5;
+}
+
+.manupress-credit {
+  margin: 0 0 8px 0;
+  padding: 0;
+  color: #999999;
+  font-size: 10px;
+}
+
+.manupress-badge {
+  display: block;
+  margin: 8px auto 0;
+  padding: 4px 8px;
+  border: 1px solid #dddddd;
+  background-color: #f5f5f5;
+  color: #333333;
+  font-size: 10px;
+  font-weight: bold;
+  font-family: Arial, Verdana, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: fit-content;
+}
+
+/* ========================================
+   Responsive Styles
+   ======================================== */
+@media (max-width: 750px) {
+  .manupress-page {
+    padding: 16px 8px;
+  }
+
+  .manupress-panel {
+    padding: 16px;
+  }
+
+  .manupress-columns {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .manupress-col-right {
+    padding-left: 0;
+  }
+
+  .manupress-divider {
+    display: none;
+  }
+
+  .manupress-section-title {
+    font-size: 16px;
+  }
+
+  .manupress-subsection-title {
+    font-size: 12px;
+  }
+
+  .manupress-link-list {
+    padding-left: 18px;
+    font-size: 11px;
+  }
+
+  .manupress-trivia-list {
+    padding-left: 14px;
+    font-size: 10px;
+  }
+
+  .manupress-footer {
+    margin-top: 12px;
+    padding-top: 8px;
+    font-size: 10px;
+  }
+
+  .manupress-cta-button {
+    width: 100%;
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .manupress-page {
+    padding: 12px 8px;
+  }
+
+  .manupress-panel {
+    padding: 12px;
+  }
+
+  .manupress-intro {
+    font-size: 12px;
+  }
+
+  .manupress-section-title {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .manupress-link-list,
+  .manupress-bullet-list {
+    font-size: 11px;
+    padding-left: 16px;
+  }
+
+  .manupress-form-label {
+    font-size: 10px;
+  }
+
+  .manupress-form-input,
+  .manupress-form-textarea {
+    font-size: 11px;
+  }
+}
+
+/* ========================================
+   Respect Reduced Motion
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  .manupress-cta-button {
+    transition: none;
+  }
+
+  .manupress-form-input:focus,
+  .manupress-form-textarea:focus,
+  .manupress-form-submit:focus,
+  .manupress-link:focus,
+  .manupress-link-button:focus,
+  .manupress-cta-button:focus {
+    transition: none;
+  }
+}

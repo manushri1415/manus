@@ -60,7 +60,7 @@ export const EXPERIENCE_CATEGORIES: ExperienceCategory[] = [
           'Resolved Supabase RLS issues, configured Brevo SMTP, and deployed frontend updates through Vercel',
           'Collaborated in an Agile team of four to translate client requirements into scoped, production-ready features',
         ],
-        skills: 'TypeScript, React, Python, Flask, Supabase, SQL, REST APIs, Docker, Vercel',
+        skills: ['TypeScript, React, Python, Flask, Supabase, SQL, REST APIs, Docker, Vercel'],
         relatedProject: 'View Collegiate on Moongle',
       },
       {
@@ -74,7 +74,7 @@ export const EXPERIENCE_CATEGORIES: ExperienceCategory[] = [
           'Designed AI-assisted automation workflows using Claude, Shopify, Airtable, and structured prompt libraries',
           'Analyzed traffic, conversion, retention, and competitor data across UK, US, and French markets to identify growth opportunities',
         ],
-        skills: 'AI product strategy, Claude, Shopify, Airtable, SEO optimization, data analysis',
+        skills: ['AI product strategy, Claude, Shopify, Airtable, SEO optimization, data analysis']
       },
     ],
   },

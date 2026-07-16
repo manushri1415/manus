@@ -7,6 +7,7 @@ import { DesktopIcons } from '@/components/DesktopIcons';
 import { BrowserWindow } from '@/components/browser/BrowserWindow';
 import { BROWSER_PAGES, type BrowserPageKey } from '@/components/browser/pages/registry';
 import { ExperiencePage } from '@/components/browser/pages/ExperiencePage';
+import { ContactPage } from '@/components/browser/pages/ContactPage';
 
 const Index = () => {
   // Resolve the correct path for the default wallpaper based on the base URL
@@ -158,6 +159,11 @@ const Index = () => {
                 {pageKey === 'experience' ? (
                   <ExperiencePage
                     onClose={() => handleWindowClose('experience')}
+                    onNavigate={openOrFocusPage}
+                  />
+                ) : pageKey === 'contact' ? (
+                  <ContactPage
+                    onClose={() => handleWindowClose('contact')}
                     onNavigate={openOrFocusPage}
                   />
                 ) : (
