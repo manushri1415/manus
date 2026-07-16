@@ -47,7 +47,7 @@
   flex: 1;
 }
 
-.themanubook-nav-link {
+.themanubook-nav-link, .themanubook-nav-current {
   background: none;
   border: none;
   color: #ffffff;
@@ -55,7 +55,7 @@
   cursor: pointer;
   padding: 0;
   font-family: Arial, sans-serif;
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .themanubook-nav-link:hover {
@@ -75,7 +75,6 @@
 
 .themanubook-nav-current {
   color: #ffffff;
-  font-weight: bold;
 }
 
 /* ========================================
@@ -86,7 +85,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 12px;
+  padding: 4px 40px;
   background-color: var(--themanubook-blue);
   border-bottom: 1px solid #1a3a5c;
   font-size: 11px;
@@ -111,12 +110,12 @@
 .themanubook-content {
   display: flex;
   flex: 1;
-  overflow-y: auto;
   gap: 12px;
   padding: 12px;
   max-width: 1000px;
   margin: 0 auto;
   width: 100%;
+  overflow: hidden;
 }
 
 .themanubook-section-left {
@@ -126,13 +125,15 @@
   position: sticky;
   top: 0;
   height: fit-content;
-  max-height: 100vh;
+  max-height: calc(100vh - 80px);
   overflow-y: auto;
 }
 
 .themanubook-section-right {
   flex: 1;
   min-width: 300px;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 /* ========================================
@@ -202,12 +203,10 @@
    ======================================== */
 
 .themanubook-ad-container {
-  border: 1px solid #999999;
   padding: 8px;
   overflow: hidden;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   text-align: center;
-  background-color: #f9f9f9;
 }
 
 .themanubook-ad-link {
@@ -347,46 +346,6 @@
   margin-top: 4px;
 }
 
-/* ========================================
-   Experience Navigator
-   ======================================== */
-
-.themanubook-experience-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  padding: 6px 0;
-  border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 8px;
-}
-
-.themanubook-nav-button {
-  background: none;
-  border: none;
-  color: #0066cc;
-  text-decoration: underline;
-  cursor: pointer;
-  padding: 0;
-  font-size: 10px;
-  font-family: Arial, sans-serif;
-}
-
-.themanubook-nav-button:hover {
-  color: #0044aa;
-}
-
-.themanubook-nav-button:focus {
-  outline: 1px dotted #0066cc;
-  outline-offset: 2px;
-}
-
-.themanubook-nav-indicator {
-  font-size: 10px;
-  color: #666666;
-  font-weight: bold;
-  white-space: nowrap;
-}
 
 .themanubook-category-label {
   font-size: 11px;
@@ -395,6 +354,11 @@
   padding: 4px 0 2px 0;
   border-bottom: 1px solid #e0e0e0;
   margin-bottom: 8px;
+  margin-top: 16px;
+}
+
+.themanubook-category-label:first-of-type {
+  margin-top: 0;
 }
 
 /* ========================================

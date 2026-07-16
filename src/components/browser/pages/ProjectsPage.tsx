@@ -122,28 +122,30 @@ export const ProjectsPage = () => {
 
         {/* Navigation Links */}
         <div className="moongle-navigation">
-          <a href="#" onClick={handleLinkClick} className="moongle-nav-link moongle-nav-active">
-            Web
-          </a>
-          <a href="#" onClick={handleLinkClick} className="moongle-nav-link">
-            Images
-          </a>
-          <a href="#" onClick={handleLinkClick} className="moongle-nav-link">
-            Groups
-          </a>
-          <a href="#" onClick={handleLinkClick} className="moongle-nav-link">
-            News
-          </a>
-          <a href="#" onClick={handleLinkClick} className="moongle-nav-link">
-            Froogle
-          </a>
-          <a href="#" onClick={handleLinkClick} className="moongle-nav-link">
-            Local
-            <span className="moongle-nav-label-new">New!</span>
-          </a>
-          <a href="#" onClick={handleLinkClick} className="moongle-nav-link">
-            more »
-          </a>
+          <div className="moongle-navigation-left">
+            <a href="#" onClick={handleLinkClick} className="moongle-nav-link moongle-nav-active">
+              Web
+            </a>
+            <a href="#" onClick={handleLinkClick} className="moongle-nav-link">
+              Images
+            </a>
+            <a href="#" onClick={handleLinkClick} className="moongle-nav-link">
+              Groups
+            </a>
+            <a href="#" onClick={handleLinkClick} className="moongle-nav-link">
+              News
+            </a>
+            <a href="#" onClick={handleLinkClick} className="moongle-nav-link">
+              Froogle
+            </a>
+            <a href="#" onClick={handleLinkClick} className="moongle-nav-link">
+              Local
+              <span className="moongle-nav-label-new">New!</span>
+            </a>
+            <a href="#" onClick={handleLinkClick} className="moongle-nav-link">
+              more »
+            </a>
+          </div>
           <div className="moongle-nav-right">
             <a href="#" onClick={handleLinkClick} className="moongle-nav-link">
               Advanced Search

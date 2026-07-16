@@ -71,8 +71,8 @@ export const DIRECTOR_VIDEOS: DirectorVideo[] = [
   },
   {
     id: 'from-chennai-to-arizona',
-    title: 'From Chennai To Arizona: The Move',
-    thumbnail: 'assets/icons/M-photos/gradpic.jpeg',
+    title: 'My first job ever!!!',
+    thumbnail: 'assets/icons/M-photos/my-socialmedia-job-badge.jpeg',
     youtubeUrl: '#from-chennai-to-arizona',
   },
   {
@@ -89,7 +89,7 @@ export const DIRECTOR_VIDEOS: DirectorVideo[] = [
   },
   {
     id: 'now-playing',
-    title: 'Now Playing: Post-Graduation',
+    title: 'Capstone Showcase w/ team',
     thumbnail: 'assets/icons/M-photos/capstone-showcase-collegiate.jpeg',
     youtubeUrl: '#now-playing',
   },
@@ -173,7 +173,7 @@ export const RECENT_COMMENTS: RecentComment[] = [
   {
     id: 'comment-4',
     username: 'manushri_m',
-    text: 'Some of my best ideas started approximately three minutes before a deadline.',
+    text: 'Some of my best ideas started approximately three minutes before a deadline LITERALLY!!',
     timeAgo: '1 month ago',
     commentNumber: 4,
   },
@@ -233,7 +233,7 @@ export const VIDEO_RESPONSES: VideoResponse[] = [
   },
   {
     id: 'live-well-asu',
-    title: 'Live Well @ASU Social Media Staff',
+    title: 'Social media/Outreach specialist @ASU SDFC West',
     description: 'Created content and managed social media for the "Live Well @ASU" program, promoting campus wellness.',
     thumbnail: 'assets/icons/M-photos/my-socialmedia-job-badge.jpeg',
     category: 'campus-life',

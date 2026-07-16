@@ -156,7 +156,7 @@
    ======================================== */
 .mtube-layout {
   display: grid;
-  grid-template-columns: 1fr 260px;
+  grid-template-columns: 1fr 330px;
   gap: 16px;
 }
 
@@ -250,7 +250,7 @@
 
 .mtube-top-grid {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 380px minmax(0, 1fr);
   gap: 16px;
   align-items: start;
   margin-bottom: 12px;
@@ -267,7 +267,6 @@
 .mtube-top-about-col {
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .mtube-top-about-col .mtube-about-heading {
@@ -303,13 +302,54 @@
 
 .mtube-top-secondary {
   margin-top: 0;
-  padding-top: 12px;
-  border-top: 1px solid #e5e5e5;
   display: flex;
   flex-direction: column;
   gap: 8px;
   font-size: 11px;
   color: #666666;
+}
+
+.mtube-related-videos {
+  margin-top: 8px;
+  padding-top: 4px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.mtube-related-heading {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.mtube-related-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mtube-related-video {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  background: #000000;
+  border: 1px solid #cccccc;
+}
+
+.mtube-related-video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.mtube-related-title {
+  margin: 5px 0 0;
+  font-size: 10px;
+  font-weight: bold;
+  color: #333333;
 }
 
 .mtube-video-title {
@@ -364,7 +404,7 @@
 }
 
 .mtube-video-stats {
-  padding: 8px 12px;
+  padding: 3px 12px;
   background-color: #f9f9f9;
   border-bottom: 1px solid #e5e5e5;
   font-size: 11px;
@@ -429,7 +469,7 @@
 }
 
 .mtube-about-content {
-  font-size: 11px;
+  font-size: 14px;
   color: #333333;
   line-height: 1.6;
   margin-bottom: 12px;
@@ -814,7 +854,7 @@
   }
 
   .mtube-top-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 260px minmax(0, 1fr);
   }
 
   .mtube-top-about-col {

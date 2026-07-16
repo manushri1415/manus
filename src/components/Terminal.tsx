@@ -8,7 +8,7 @@ interface TerminalLine {
 }
 
 const WELCOME_MESSAGE = `Hello, World! I'm Manushri
-
+Get to know more about me using the Desktop icons to your left!
 Type 'help' to see available commands.`;
 
 const COMMANDS: Record<string, { description: string; action: () => string | React.ReactNode }> = {

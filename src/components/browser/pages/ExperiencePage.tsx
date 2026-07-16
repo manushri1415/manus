@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import './ExperiencePage.css';
 import { EXPERIENCE_CATEGORIES, EXPERIENCE_PHOTOS } from './experienceData';
 
@@ -8,19 +8,8 @@ interface ExperiencePageProps {
 }
 
 export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => {
-  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const photoGridRef = useRef<HTMLDivElement>(null);
   const basePath = import.meta.env.BASE_URL;
-
-  const currentCategory = EXPERIENCE_CATEGORIES[currentCategoryIndex];
-
-  const handleNext = () => {
-    setCurrentCategoryIndex((prev) => (prev + 1) % EXPERIENCE_CATEGORIES.length);
-  };
-
-  const handlePrev = () => {
-    setCurrentCategoryIndex((prev) => (prev - 1 + EXPERIENCE_CATEGORIES.length) % EXPERIENCE_CATEGORIES.length);
-  };
 
   const resumePdfPath = `${basePath}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`;
   const logoPath = `${basePath}assets/icons/M-photos/themanubook-logo.png`;
@@ -139,27 +128,15 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
               </div>
               <div className="themanubook-info-row">
                 <span className="themanubook-info-label">Current Title:</span>
-                <span className="themanubook-info-value">Software Engineer / Computer Science Graduate</span>
+                <span className="themanubook-info-value">Software Engineer /Computer Science Graduate</span>
               </div>
               <div className="themanubook-info-row">
                 <span className="themanubook-info-label">Member Since:</span>
-                <span className="themanubook-info-value">2005</span>
+                <span className="themanubook-info-value">Feb 15 2005</span>
               </div>
               <div className="themanubook-info-row">
                 <span className="themanubook-info-label">Last Update:</span>
                 <span className="themanubook-info-value">Recently</span>
-              </div>
-              <div className="themanubook-info-row">
-                <span className="themanubook-info-label">School:</span>
-                <span className="themanubook-info-value">Arizona State University</span>
-              </div>
-              <div className="themanubook-info-row">
-                <span className="themanubook-info-label">Degree:</span>
-                <span className="themanubook-info-value">B.S. Computer Science</span>
-              </div>
-              <div className="themanubook-info-row">
-                <span className="themanubook-info-label">Status:</span>
-                <span className="themanubook-info-value">New graduate</span>
               </div>
               <div className="themanubook-info-row">
                 <span className="themanubook-info-label">Hometown:</span>
@@ -174,9 +151,9 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
                 <span className="themanubook-info-value">New-grad software engineering opportunities</span>
               </div>
               <div className="themanubook-info-row">
-                <span className="themanubook-info-label">Professional Interests:</span>
+                <span className="themanubook-info-label">Interests:</span>
                 <span className="themanubook-info-value">
-                  Full-stack engineering, backend development, product engineering, applied AI, databases, testing, cloud, creative technology
+                  Full-stack engineering, backend development, product engineering, applied AI, testing, cloud (AWS)
                 </span>
               </div>
               <div className="themanubook-info-row">
@@ -188,7 +165,7 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
             <div className="themanubook-info-section">
               <h3 className="themanubook-info-section-label">Education:</h3>
               <div className="themanubook-info-row">
-                <span className="themanubook-info-label">School:</span>
+                <span className="themanubook-info-label">University:</span>
                 <span className="themanubook-info-value">Arizona State University</span>
               </div>
               <div className="themanubook-info-row">
@@ -207,71 +184,55 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
                   AWS Cloud Practitioner Essentials (AWS, July 2026)
                 </span>
               </div>
-              <div className="themanubook-info-row themanubook-previous-school">
-                <span className="themanubook-info-label">Previously:</span>
-                <span className="themanubook-info-value">Sunshine Chennai Senior Secondary School</span>
+              <div className="themanubook-info-row">
+                <span className="themanubook-info-label">School:</span>
+                <span className="themanubook-info-value">Sunshine Chennai Senior Secondary School(2010-2022)</span>
               </div>
             </div>
           </div>
 
-          {/* Experience Navigator */}
-          <div className="themanubook-experience-nav">
-            <button
-              className="themanubook-nav-button"
-              onClick={handlePrev}
-              aria-label="Previous experience category"
-            >
-              ‹ Previous
-            </button>
-            <div className="themanubook-nav-indicator">
-              {currentCategoryIndex + 1} of {EXPERIENCE_CATEGORIES.length}
-            </div>
-            <button
-              className="themanubook-nav-button"
-              onClick={handleNext}
-              aria-label="Next experience category"
-            >
-              Next ›
-            </button>
-          </div>
+          {/* All Experience Categories */}
+          {EXPERIENCE_CATEGORIES.map((category) => (
+            <div key={category.id}>
+              <div className="themanubook-category-label">{category.label}</div>
 
-          <div className="themanubook-category-label">{currentCategory.label}</div>
-
-          {/* Experience Entries */}
-          <div className="themanubook-experience-entries">
-            {currentCategory.entries.map((entry) => (
-              <div key={entry.id} className="themanubook-entry">
-                <div className="themanubook-entry-title">{entry.title}</div>
-                <div className="themanubook-entry-org">
-                  {entry.organization}
-                  {entry.dates && <span className="themanubook-entry-dates"> — {entry.dates}</span>}
-                </div>
-                {entry.location && (
-                  <div className="themanubook-entry-location">{entry.location}</div>
-                )}
-                {entry.highlights.length > 0 && (
-                  <ul className="themanubook-entry-highlights">
-                    {entry.highlights.map((highlight, idx) => (
-                      <li key={idx}>{highlight}</li>
-                    ))}
-                  </ul>
-                )}
-                {entry.skills && (
-                  <div className="themanubook-entry-skills">
-                    <strong>Technologies:</strong> {entry.skills}
+              {/* Experience Entries */}
+              <div className="themanubook-experience-entries">
+                {category.entries.map((entry) => (
+                  <div key={entry.id} className="themanubook-entry">
+                    <div className="themanubook-entry-title">{entry.title}</div>
+                    <div className="themanubook-entry-org">
+                      {entry.organization}
+                      {entry.dates && <span className="themanubook-entry-dates"> — {entry.dates}</span>}
+                    </div>
+                    {entry.location && (
+                      <div className="themanubook-entry-location">{entry.location}</div>
+                    )}
+                    {entry.highlights.length > 0 && (
+                      <ul className="themanubook-entry-highlights">
+                        {entry.highlights.map((highlight, idx) => (
+                          <li key={idx}>{highlight}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {entry.skills && (
+                      <div className="themanubook-entry-skills">
+                        <strong>Technologies:</strong> {entry.skills}
+                      </div>
+                    )}
+                    {entry.relatedProject && (
+                      <div className="themanubook-entry-related">
+                        <button onClick={() => onNavigate?.('projects')} className="themanubook-related-link">
+                          {entry.relatedProject}
+                        </button>
+                      </div>
+                    )}
+                    <div className="themanubook-entry-divider" />
                   </div>
-                )}
-                {entry.relatedProject && (
-                  <div className="themanubook-entry-related">
-                    <button onClick={() => onNavigate?.('projects')} className="themanubook-related-link">
-                      {entry.relatedProject}
-                    </button>
-                  </div>
-                )}
-                <div className="themanubook-entry-divider" />
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

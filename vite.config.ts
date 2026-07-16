@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [react()],
-  base: "/tfish/",
+  base: "/manus/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

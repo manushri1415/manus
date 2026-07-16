@@ -14,14 +14,13 @@
 .moongle-header {
   background-color: #ffffff;
   border-bottom: 1px solid #cccccc;
-  padding: 12px 20px;
+  padding: 12px 20px 0px 20px;
 }
 
 .moongle-header-top {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 12px;
 }
 
 .moongle-logo {
@@ -71,11 +70,16 @@
 /* Navigation */
 .moongle-navigation {
   display: flex;
-  gap: 24px;
+  gap: 20px;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #e8e8e8;
+  padding: 4px 20px 4px 133px;
   font-size: 12px;
+}
+
+.moongle-navigation-left{
+  display: flex;
+  gap: 10px;
+  padding-left: 0;
 }
 
 .moongle-nav-link {
@@ -110,7 +114,7 @@
 .moongle-results-bar {
   background-color: #e8f0fe;
   border-bottom: 1px solid #dadce0;
-  padding: 8px 20px;
+  padding: 5px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -217,7 +221,7 @@
 
 /* Sidebar */
 .moongle-sidebar {
-  width: 200px;
+  width: 240px;
   padding: 16px 12px;
   overflow-y: auto;
   background-color: #f9f9f9;

@@ -61,7 +61,6 @@ export const EXPERIENCE_CATEGORIES: ExperienceCategory[] = [
           'Collaborated in an Agile team of four to translate client requirements into scoped, production-ready features',
         ],
         skills: ['TypeScript, React, Python, Flask, Supabase, SQL, REST APIs, Docker, Vercel'],
-        relatedProject: 'View Collegiate on Moongle',
       },
       {
         id: 'adjoaa',
@@ -146,31 +145,6 @@ export const EXPERIENCE_CATEGORIES: ExperienceCategory[] = [
           'Helped organize classrooms and educational spaces for maximum impact',
           'Supported gardening and school-improvement projects with other ASU students',
         ],
-      },
-    ],
-  },
-  {
-    id: 'education',
-    label: 'Education',
-    entries: [
-      {
-        id: 'asu',
-        title: 'B.S. Computer Science',
-        organization: 'Arizona State University',
-        dates: 'August 2022 – July 2026',
-        location: 'Tempe, Arizona',
-        highlights: [
-          'Full-stack development, backend systems, databases, and product engineering focus',
-          'Certifications: AI Fluency: Framework & Foundations (Anthropic, July 2026), AWS Cloud Practitioner Essentials (AWS, July 2026)',
-        ],
-      },
-      {
-        id: 'sunshine-chennai',
-        title: 'Previously studied at Sunshine Chennai Senior Secondary School',
-        organization: 'Sunshine Chennai Senior Secondary School',
-        dates: '',
-        location: 'Chennai, India',
-        highlights: [],
       },
     ],
   },

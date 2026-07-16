@@ -83,14 +83,14 @@ export const DesktopIcons = ({ onIconClick }: { onIconClick: (command: string) =
     const projectsIconSrc = `${import.meta.env.BASE_URL}assets/icons/projects.png`;
     const experienceIconSrc = `${import.meta.env.BASE_URL}assets/icons/experience.png`;
     const phoneIconSrc = `${import.meta.env.BASE_URL}assets/icons/phone.png`;
-
+    const profileIconSrc = `${import.meta.env.BASE_URL}assets/icons/profile.png`;
+    const resumeIconSrc = `${import.meta.env.BASE_URL}assets/icons/resume-logo.png`;
     const icons = [
-        { icon: User, label: 'About Me', command: 'about', pos: { x: 20, y: 20 } },
-        { icon: null, label: 'Projects', command: 'projects', pos: { x: 20, y: 120 }, iconSrc: projectsIconSrc },
-        { icon: null, label: 'Experience', command: 'experience', pos: { x: 20, y: 220 }, iconSrc: experienceIconSrc },
-        { icon: File, label: 'Resume', command: 'resume', pos: { x: 20, y: 320 } },
-        { icon: null, label: 'Contact', command: 'contact', pos: { x: 20, y: 420 }, iconSrc: phoneIconSrc },
-        { icon: Trash2, label: 'Recycle Bin', command: 'clear', pos: { x: 20, y: 520 } },
+        { icon: null, label: 'My Story', command: 'about', pos: { x: 20, y: 10 ,},iconSrc: profileIconSrc },
+        { icon: null, label: 'Projects', command: 'projects', pos: { x: 20, y: 110 }, iconSrc: projectsIconSrc },
+        { icon: null, label: 'Experience', command: 'experience', pos: { x: 20, y: 210 }, iconSrc: experienceIconSrc },
+        { icon: null, label: 'Resume', command: 'resume', pos: { x: 20, y: 310 },iconSrc: resumeIconSrc },
+        { icon: null, label: 'Contact', command: 'contact', pos: { x: 20, y: 410 }, iconSrc: phoneIconSrc },
     ];
 
     return (

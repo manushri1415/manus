@@ -8,7 +8,12 @@ import {
 } from './aboutPageData';
 import { ImageLightbox } from './ImageLightbox';
 
-export const AboutPage = () => {
+interface AboutPageProps {
+  onClose?: () => void;
+  onNavigate?: (page: 'projects' | 'experience' | 'contact') => void;
+}
+
+export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
   // Restructured layout: video on left, bio on right
   const logoPath = `${import.meta.env.BASE_URL}assets/icons/Heading.png`;
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
@@ -30,7 +35,7 @@ export const AboutPage = () => {
         <div className="mtube-masthead-left">
           <img src={logoPath} alt="MTube Logo" className="mtube-logo" />
           <div className="mtube-search-section">
-            <input type="text" placeholder="" className="mtube-search-input" />
+            <input type="text" placeholder="Manushri Muruga Kumar" className="mtube-search-input" />
             <select className="mtube-search-dropdown">
               <option>Videos</option>
               <option>Channels</option>
@@ -54,14 +59,11 @@ export const AboutPage = () => {
 
       {/* Primary Navigation */}
       <div className="mtube-nav-primary">
-        {['Home', 'About', 'Projects', 'Skills', 'Contact'].map((tab, idx) => (
-          <button
-            key={tab}
-            className={`mtube-nav-tab ${idx === 1 ? 'mtube-nav-tab-active' : ''}`}
-          >
-            {tab}
-          </button>
-        ))}
+        <button className="mtube-nav-tab" onClick={onClose}>Home</button>
+        <button className="mtube-nav-tab mtube-nav-tab-active">About</button>
+        <button className="mtube-nav-tab" onClick={() => onNavigate?.('projects')}>Projects</button>
+        <button className="mtube-nav-tab" onClick={() => onNavigate?.('experience')}>Experience</button>
+        <button className="mtube-nav-tab" onClick={() => onNavigate?.('contact')}>Contact</button>
       </div>
 
       {/* Main Content */}
@@ -73,7 +75,6 @@ export const AboutPage = () => {
             <div className="mtube-section mtube-top-section">
               <div className="mtube-top-grid">
                 <div className="mtube-top-video-col">
-                  <h2 className="mtube-video-title-small">My Childhood Memories: 2005–2022</h2>
                   <div className="mtube-video-container-small">
                     <iframe
                       src="https://www.youtube.com/embed/5-MCFJZabrE?si=N6byMojIk1ex4znn"
@@ -84,10 +85,55 @@ export const AboutPage = () => {
                       className="mtube-iframe"
                     />
                   </div>
-                  <div className="mtube-rating-section">
-                    <span className="mtube-stars">★★★★★</span>
-                    <span className="mtube-rating-text">Rate this video</span>
-                  </div>
+                    <div className= "video-title-info"> 
+                      <h2 className="mtube-video-title-small">My Childhood Memories: 2005 – 2022</h2>
+                      <div className="mtube-rating-section">
+                        <span className="mtube-stars">★★★★★</span>
+                        <span className="mtube-rating-text">Rate this video</span>
+                      </div>
+                    </div>
+                    {/* Secondary Details */}
+                    <div className="mtube-top-secondary">
+                      <div className="mtube-video-stats">
+                        <div className="mtube-stat-item">
+                          <span className="mtube-stat-label">Views:</span>
+                          <span className="mtube-stat-value">21 years of memories</span>
+                        </div>
+                        <div className="mtube-stat-item">
+                          <span className="mtube-stat-label">Comments:</span>
+                          <span className="mtube-stat-value">Character development ongoing</span>
+                        </div>
+                        <div className="mtube-stat-item">
+                          <span className="mtube-stat-label">Favorites:</span>
+                          <span className="mtube-stat-value">Too many to count</span>
+                        </div>
+                      </div>
+
+                      <div className="mtube-action-buttons">
+                        <a href="#" className="mtube-action-link">Save to Favorites</a>
+                        <a href="#" className="mtube-action-link">Add to Groups</a>
+                        <a href="#" className="mtube-action-link">Share Video</a>
+                      </div>
+
+                      <div className="mtube-video-metadata">
+                        <div className="mtube-metadata-row">
+                          <span className="mtube-metadata-label">Added:</span>
+                          <span className="mtube-metadata-value">6 Jun 2021</span>
+                        </div>
+                        <div className="mtube-metadata-row">
+                          <span className="mtube-metadata-label">From:</span>
+                          <span className="mtube-metadata-value">@ManushriMurugaKumar</span>
+                        </div>
+                        <div className="mtube-metadata-row">
+                          <span className="mtube-metadata-label">Category:</span>
+                          <span className="mtube-metadata-value">People & Blogs</span>
+                        </div>
+                        <div className="mtube-metadata-row">
+                          <span className="mtube-metadata-label">Tags:</span>
+                          <span className="mtube-metadata-value">childhood, memories, short film</span>
+                        </div>
+                      </div>
+                    </div>
                 </div>
 
                 <div className="mtube-top-about-col">
@@ -96,61 +142,49 @@ export const AboutPage = () => {
                     <p>
                       Manushri Muruga Kumar is many things, but aside from being the cosmic twin of YouTube—we share the same birthday—who is she?
                     </p>
-
                     <p>
-                      I am a Computer Science graduate from Arizona State University interested in full-stack, backend, and product-focused software engineering.
+                      I grew up in Chennai, India, and later moved to Arizona to study Computer Science at Arizona State University. 
+                      Living between different places, cultures, and interests has shaped how I communicate, adapt, and approach unfamiliar problems.
                     </p>
-
                     <p>
-                      I am especially interested in software that helps real people communicate, organize information, and make better decisions.
+                      I made this video a year before I moved to Arizona, back then I didn't realise I was going to embrack on this journey away from home by myself.
                     </p>
-
                     <p>
-                      This video follows the small moments, milestones, and memories that shaped my life from Chennai to Arizona.
+                      This page is less of a traditional resume and more of a collection of the places, people, projects, and memories that shaped me
                     </p>
                   </div>
-                </div>
-              </div>
+                  <div className="mtube-related-videos">
+                    <h4 className="mtube-related-heading">Related Videos</h4>
 
-              {/* Secondary Details */}
-              <div className="mtube-top-secondary">
-                <div className="mtube-video-stats">
-                  <div className="mtube-stat-item">
-                    <span className="mtube-stat-label">Views:</span>
-                    <span className="mtube-stat-value">21 years of memories</span>
-                  </div>
-                  <div className="mtube-stat-item">
-                    <span className="mtube-stat-label">Comments:</span>
-                    <span className="mtube-stat-value">Character development ongoing</span>
-                  </div>
-                  <div className="mtube-stat-item">
-                    <span className="mtube-stat-label">Favorites:</span>
-                    <span className="mtube-stat-value">Too many to count</span>
-                  </div>
-                </div>
+                    <div className="mtube-related-grid">
+                      <div className="mtube-related-card">
+                        <div className="mtube-related-video">
+                          <iframe
+                            src="https://www.youtube.com/embed/hsx0wmsrPAM"
+                            title="Related video one"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            loading="lazy"
+                          />
+                        </div>
 
-                <div className="mtube-action-buttons">
-                  <a href="#" className="mtube-action-link">Save to Favorites</a>
-                  <a href="#" className="mtube-action-link">Add to Groups</a>
-                  <a href="#" className="mtube-action-link">Share Video</a>
-                </div>
+                        <p className="mtube-related-title">Meet Sodalis: A Better Way for Students to Connect</p>
+                      </div>
 
-                <div className="mtube-video-metadata">
-                  <div className="mtube-metadata-row">
-                    <span className="mtube-metadata-label">Added:</span>
-                    <span className="mtube-metadata-value">Upload date of featured video</span>
-                  </div>
-                  <div className="mtube-metadata-row">
-                    <span className="mtube-metadata-label">From:</span>
-                    <span className="mtube-metadata-value">manushri_m</span>
-                  </div>
-                  <div className="mtube-metadata-row">
-                    <span className="mtube-metadata-label">Category:</span>
-                    <span className="mtube-metadata-value">People & Blogs</span>
-                  </div>
-                  <div className="mtube-metadata-row">
-                    <span className="mtube-metadata-label">Tags:</span>
-                    <span className="mtube-metadata-value">childhood, memories, Chennai, Arizona, dance, filmmaking, life</span>
+                      <div className="mtube-related-card">
+                        <div className="mtube-related-video">
+                          <iframe
+                            src="https://www.youtube.com/embed/j2wNxcnJy-Q"
+                            title="Related video two"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            loading="lazy"
+                          />
+                        </div>
+
+                        <p className="mtube-related-title">THERE IS HOPE ! SHORT FILM | DEPRESSION</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -178,7 +212,7 @@ export const AboutPage = () => {
 
             {/* Hackathons & Building Under Pressure */}
             <div className="mtube-section" id="building-under-pressure">
-              <h2 className="mtube-section-title">Building Under Pressure: Hackathons & Competitions</h2>
+              <h2 className="mtube-section-title">Hackathons & Competitions</h2>
               <div className="mtube-thumbnail-grid">
                 {FEATURED_EXPERIENCES.map((exp) => (
                   <div key={exp.id} className="mtube-thumbnail-card">
@@ -219,7 +253,7 @@ export const AboutPage = () => {
 
             {/* Recent Comments */}
             <div className="mtube-section">
-              <h2 className="mtube-section-title">Recent Comments</h2>
+              <h2 className="mtube-section-title">Recent Comments (6)</h2>
               <div className="mtube-comments">
                 {RECENT_COMMENTS.map((comment) => (
                   <div key={comment.id} className="mtube-comment">
@@ -241,7 +275,7 @@ export const AboutPage = () => {
           {/* Right Column - Related Videos Sidebar */}
           <div className="mtube-sidebar">
             <div className="mtube-sidebar-section">
-              <h3 className="mtube-sidebar-title">My Story: Life Chapters</h3>
+              <h3 className="mtube-sidebar-title">My Story: In pictures</h3>
               <div className="mtube-life-chapters-grid">
                 {DIRECTOR_VIDEOS.map((video) => (
                   <div key={video.id} className="mtube-life-chapter-card">

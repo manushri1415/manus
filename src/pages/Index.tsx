@@ -6,6 +6,7 @@ import { LoginScreen } from '@/components/LoginScreen';
 import { DesktopIcons } from '@/components/DesktopIcons';
 import { BrowserWindow } from '@/components/browser/BrowserWindow';
 import { BROWSER_PAGES, type BrowserPageKey } from '@/components/browser/pages/registry';
+import { AboutPage } from '@/components/browser/pages/AboutPage';
 import { ExperiencePage } from '@/components/browser/pages/ExperiencePage';
 import { ContactPage } from '@/components/browser/pages/ContactPage';
 
@@ -164,6 +165,11 @@ const Index = () => {
                 ) : pageKey === 'contact' ? (
                   <ContactPage
                     onClose={() => handleWindowClose('contact')}
+                    onNavigate={openOrFocusPage}
+                  />
+                ) : pageKey === 'about' ? (
+                  <AboutPage
+                    onClose={() => handleWindowClose('about')}
                     onNavigate={openOrFocusPage}
                   />
                 ) : (

@@ -82,19 +82,13 @@
 
   body {
     @apply bg-background text-foreground font-mono antialiased;
-    cursor: url('../assets/CursorsXP.cur'), auto;
   }
 
-    a,
-  button,
-  [role="button"] {
-    cursor: url('../assets/CursorsXP.cur'), pointer;
   }
 
   ::selection {
     @apply bg-primary text-primary-foreground;
   }
-}
 
 @layer utilities {
   .terminal-glow {
