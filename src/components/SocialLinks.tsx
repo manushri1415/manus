@@ -31,12 +31,10 @@ const socialLinks = [
 
 export const SocialLinks = ({
   onReset,
-  onLogout,
   onOpenPage,
   onPowerOff,
 }: {
   onReset?: () => void;
-  onLogout?: () => void;
   onOpenPage?: (pageKey: BrowserPageKey) => void;
   onPowerOff?: () => void;
 }) => {
@@ -45,9 +43,7 @@ export const SocialLinks = ({
   const profileIconSrc = `${import.meta.env.BASE_URL}assets/icons/profile.png`;
   const projectsIconSrc = `${import.meta.env.BASE_URL}assets/icons/projects.png`;
   const experienceIconSrc = `${import.meta.env.BASE_URL}assets/icons/experience.png`;
-  const phoneIconSrc = `${import.meta.env.BASE_URL}assets/icons/phone.png`;
   const resumeIconSrc = `${import.meta.env.BASE_URL}assets/icons/resume-logo.png`;
-  const logOutIconSrc = `${import.meta.env.BASE_URL}assets/icons/log-out.png`;
   const powerOffIconSrc = `${import.meta.env.BASE_URL}assets/icons/turn-off.png`;
   const resumePdfPath = `${import.meta.env.BASE_URL}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`;
 
@@ -220,16 +216,6 @@ export const SocialLinks = ({
               </div>
 
               <div className="flex items-center justify-end gap-4 border-t border-[#7ea7f5] bg-[linear-gradient(180deg,#3f7fe0_0%,#245ada_100%)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]">
-                <button
-                  type="button"
-                  onClick={() => handleAction(onLogout)}
-                  className="inline-flex items-center gap-2 whitespace-nowrap bg-transparent px-0 py-0 text-[11px] font-bold text-white [text-shadow:1px_1px_1px_rgba(0,0,0,0.35)]"
-                >
-                  <span className="flex h-[22px] w-[22px] items-center justify-center rounded-[3px]]">
-                    <img src={logOutIconSrc} alt="" className="h-4 w-4 object-contain" />
-                  </span>
-                  <span>Log Off</span>
-                </button>
                 <button
                   type="button"
                   onClick={() => handleAction(onPowerOff)}

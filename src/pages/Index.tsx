@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef, type ChangeEvent } from 'reac
 import { Terminal } from '@/components/Terminal';
 import { SocialLinks } from '@/components/SocialLinks';
 import { BootSequence } from '@/components/BootSequence';
-import { LoginScreen } from '@/components/LoginScreen';
 import { DesktopIcons } from '@/components/DesktopIcons';
 import { BrowserWindow } from '@/components/browser/BrowserWindow';
 import { BROWSER_PAGES, type BrowserPageKey } from '@/components/browser/pages/registry';
@@ -44,7 +43,7 @@ const Index = () => {
   const [currentTheme, setCurrentTheme] = useState('cmd');
   const [wallpaper, setWallpaper] = useState<string | null>(DEFAULT_WALLPAPER);
   const [time] = useState(new Date('2005-02-15T09:19:00'));
-  const [appState, setAppState] = useState<'booting' | 'login' | 'desktop'>('booting');
+  const [appState, setAppState] = useState<'booting' | 'desktop'>('booting');
   const [openWindows, setOpenWindows] = useState<BrowserPageKey[]>([]);
   const [minimizedWindows, setMinimizedWindows] = useState<Set<BrowserPageKey>>(new Set());
   const [isTerminalMinimized, setIsTerminalMinimized] = useState(false);
@@ -107,15 +106,7 @@ const Index = () => {
   }, [DEFAULT_WALLPAPER]);
 
   const handleBootComplete = useCallback(() => {
-    setAppState('login');
-  }, []);
-
-  const handleLogin = useCallback(() => {
     setAppState('desktop');
-  }, []);
-
-  const handleLogout = useCallback(() => {
-    setAppState('login');
   }, []);
 
   const handlePowerOff = useCallback(() => {
@@ -268,15 +259,6 @@ const Index = () => {
     return <BootSequence onComplete={handleBootComplete} />;
   }
 
-  if (appState === 'login') {
-    return (
-      <LoginScreen
-        wallpaper={wallpaper}
-        onLogin={handleLogin}
-      />
-    );
-  }
-
   return (
     <div
       className="h-screen bg-background text-foreground relative overflow-hidden animate-in fade-in duration-1000"
@@ -373,7 +355,6 @@ const Index = () => {
       <footer className="fixed bottom-0 left-0 right-0 z-50 flex h-[32px] items-stretch border-t border-[#7abaf8] bg-[linear-gradient(180deg,var(--xp-blue-light)_0%,var(--xp-blue)_45%,var(--xp-blue-dark)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
         <SocialLinks
           onReset={handleReset}
-          onLogout={handleLogout}
           onOpenPage={openOrFocusPage}
           onPowerOff={handlePowerOff}
         />

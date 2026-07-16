@@ -175,7 +175,7 @@
    ======================================== */
 .mtube-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 30%);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
   gap: 16px;
   align-items: start;
 }
@@ -271,7 +271,7 @@
 
 .mtube-top-grid {
   display: grid;
-  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+  grid-template-columns: minmax(280px, 300px) minmax(0, 1fr);
   gap: 16px;
   align-items: start;
   margin-bottom: 12px;
@@ -332,22 +332,15 @@
   color: #666666;
 }
 
-.mtube-related-videos {
-  margin-top: 8px;
-  padding-top: 4px;
-  border-top: 1px solid #e5e5e5;
-}
-
-.mtube-related-heading {
-  margin: 0 0 10px;
-  font-size: 12px;
-  font-weight: bold;
-}
-
 .mtube-related-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+
+.mtube-related-grid-sidebar {
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
 
 .mtube-related-video {
@@ -369,10 +362,11 @@
 }
 
 .mtube-related-title {
-  margin: 5px 0 0;
+  margin: 4px 0 0;
   font-size: 10px;
   font-weight: bold;
   color: #333333;
+  line-height: 1.35;
 }
 
 .mtube-video-title {
@@ -549,7 +543,7 @@
 .mtube-sidebar-section {
   border: 1px solid #cccccc;
   background-color: #e8f0ff;
-  padding: 12px;
+  padding: 10px;
 }
 
 .mtube-sidebar-title {

@@ -12,7 +12,7 @@ type WindowSize = {
   height: number;
 };
 
-const WELCOME_MESSAGE = `Hello, World! I'm Manushri
+const WELCOME_MESSAGE = `Hello, World! I'm Manushri Muruga Kumar
 ASU CS graduate | full-stack, backend, and AI-integrated apps.
 Type 'help' to see available commands.`;
 
@@ -57,22 +57,22 @@ const CONTACT_MESSAGE = `
 +-----------------------------------------------------------+
 `;
 
+const HELP_MESSAGE = `Available commands:
+  help       - Show this help message
+  about      - Learn about me
+  experience - Open my experience page
+  skills     - View my technical skills
+  projects   - Browse my projects
+  contact    - Get my contact information
+  resume     - Open my resume
+  whoami     - Display current user
+  date       - Show current date and time
+  clear      - Clear the terminal`;
+
 const COMMANDS: Record<string, { description: string; action: () => string | React.ReactNode }> = {
   help: {
     description: 'Show available commands',
-    action: () => `
-Available commands:
-  help      - Show this help message
-  about     - Learn about me
-  experience - Open my experience page
-  skills    - View my technical skills
-  projects  - Browse my projects
-  contact   - Get my contact information
-  resume    - Open my resume
-  whoami    - Display current user
-  date      - Show current date and time
-  clear     - Clear the terminal
-`,
+    action: () => HELP_MESSAGE,
   },
   about: {
     description: 'Learn about me',
@@ -208,7 +208,11 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
   const [lines, setLines] = useState<TerminalLine[]>([]);
 
   useEffect(() => {
-    setLines([{ id: 0, type: 'output', content: theme.welcome }]);
+    setLines([
+      { id: 0, type: 'output', content: theme.welcome },
+      { id: 1, type: 'info', content: HELP_MESSAGE },
+    ]);
+    lineIdRef.current = 2;
   }, [themeId]);
   const [currentInput, setCurrentInput] = useState('');
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
@@ -245,7 +249,7 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const lineIdRef = useRef(1);
+  const lineIdRef = useRef(2);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.terminal-header-buttons')) return;
@@ -557,7 +561,7 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
             className="flex h-6 w-7 items-center justify-center text-black transition-colors"
             style={{
               backgroundColor: 'var(--xp-window)',
-              border: '1px solid #8f8b78',
+              border: '1px solid #ffffff',
             }}
           >
             {isMaximized ? <Copy size={14} className="rotate-180" /> : <Square size={14} />}
