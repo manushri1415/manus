@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, type ChangeEvent } from 'react';
-import { Terminal } from '@/components/Terminal';
+import { Terminal, type TerminalHandle } from '@/components/Terminal';
 import { SocialLinks } from '@/components/SocialLinks';
 import { BootSequence } from '@/components/BootSequence';
 import { DesktopIcons } from '@/components/DesktopIcons';
@@ -10,9 +10,13 @@ import { ProjectsPage } from '@/components/browser/pages/ProjectsPage';
 import { ExperiencePage } from '@/components/browser/pages/ExperiencePage';
 import { ContactPage } from '@/components/browser/pages/ContactPage';
 import { Image as ImageIcon } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const TASKBAR_HEIGHT = 38;
 const WORKSPACE_PADDING = 16;
+const MOBILE_WORKSPACE_PADDING = 8;
+const MOBILE_TERMINAL_TOP_GAP = 12;
+const MOBILE_TERMINAL_BOTTOM_CLEARANCE = 52;
 const DEFAULT_BROWSER_WIDTH = 980;
 const DEFAULT_BROWSER_HEIGHT = 700;
 const DEFAULT_MIN_BROWSER_WIDTH = 560;
@@ -63,7 +67,7 @@ const getInitialWorkspaceSize = (): WorkspaceSize => {
 };
 
 const Index = () => {
-  // Resolve the correct path for the default wallpaper based on the base URL
+  const isMobile = useIsMobile();
   const DEFAULT_WALLPAPER = `${import.meta.env.BASE_URL}frieren.jpg`;
 
   const [currentTheme, setCurrentTheme] = useState('cmd');
@@ -73,9 +77,32 @@ const Index = () => {
   const [browserWindow, setBrowserWindow] = useState<BrowserWindowState>(createDefaultBrowserWindowState);
   const [isTerminalMinimized, setIsTerminalMinimized] = useState(false);
   const [windowStack, setWindowStack] = useState<DesktopWindowKey[]>(['terminal']);
-  const terminalRef = useRef<any>(null);
+  const terminalRef = useRef<TerminalHandle | null>(null);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [workspaceSize, setWorkspaceSize] = useState<WorkspaceSize>(getInitialWorkspaceSize);
+  const mobileIconCount = 6;
+  const mobileIconColumns = !isMobile
+    ? 6
+    : workspaceSize.width >= 480
+      ? 6
+      : workspaceSize.width >= 260
+        ? 3
+        : 2;
+  const mobileIconRows = Math.ceil(mobileIconCount / mobileIconColumns);
+  const mobileIconAreaHeight = 28 + mobileIconRows * 78;
+  const mobileTerminalTopInset = mobileIconAreaHeight + MOBILE_TERMINAL_TOP_GAP;
+  const mobileTerminalAvailableHeight = isMobile
+    ? Math.max(
+      0,
+      workspaceSize.height - mobileIconAreaHeight - MOBILE_TERMINAL_TOP_GAP - MOBILE_TERMINAL_BOTTOM_CLEARANCE,
+    )
+    : workspaceSize.height;
+  const terminalWorkspaceSize = isMobile
+    ? {
+      width: workspaceSize.width,
+      height: mobileTerminalAvailableHeight,
+    }
+    : workspaceSize;
 
   useEffect(() => {
     const savedWallpaper = localStorage.getItem('terminal-wallpaper');
@@ -162,15 +189,25 @@ const Index = () => {
       return { size: fallbackSize, position: fallbackPosition };
     }
 
+    if (isMobile) {
+      return {
+        size: {
+          width: workspaceSize.width,
+          height: workspaceSize.height,
+        },
+        position: { x: 0, y: 0 },
+      };
+    }
+
     const targetWidth = Math.round(Math.min(preferredSize.width, workspaceSize.width * 0.84));
     const targetHeight = Math.round(Math.min(preferredSize.height, workspaceSize.height * 0.9));
     const width = Math.min(
       workspaceSize.width,
-      Math.max(Math.min(minSize.width, workspaceSize.width), targetWidth)
+      Math.max(Math.min(minSize.width, workspaceSize.width), targetWidth),
     );
     const height = Math.min(
       workspaceSize.height,
-      Math.max(Math.min(minSize.height, workspaceSize.height), targetHeight)
+      Math.max(Math.min(minSize.height, workspaceSize.height), targetHeight),
     );
 
     const maxX = Math.max(0, workspaceSize.width - width);
@@ -183,7 +220,7 @@ const Index = () => {
         y: Math.round(maxY / 2),
       },
     };
-  }, [workspaceSize]);
+  }, [isMobile, workspaceSize]);
 
   const openBrowserPage = useCallback((pageKey: BrowserPageKey) => {
     const initialWindowState = getInitialWindowState(pageKey);
@@ -218,6 +255,8 @@ const Index = () => {
         isMinimized: false,
         history: nextHistory,
         historyIndex: nextHistory.length - 1,
+        initialPosition: initialWindowState.position,
+        initialSize: initialWindowState.size,
       };
     });
 
@@ -239,6 +278,8 @@ const Index = () => {
   }, [bringWindowToFront]);
 
   const handleBrowserMinimize = useCallback((value: boolean) => {
+    if (isMobile) return;
+
     setBrowserWindow((prev) => (
       prev.isOpen
         ? { ...prev, isMinimized: value }
@@ -248,7 +289,7 @@ const Index = () => {
     if (!value) {
       bringWindowToFront('browser');
     }
-  }, [bringWindowToFront]);
+  }, [bringWindowToFront, isMobile]);
 
   const handleBrowserBack = useCallback(() => {
     setBrowserWindow((prev) => {
@@ -288,12 +329,15 @@ const Index = () => {
   }, [bringWindowToFront]);
 
   const handleIconClick = useCallback((command: string) => {
-    if (command in BROWSER_PAGES) {
+    if (command === 'terminal') {
+      setIsTerminalMinimized(false);
+      bringWindowToFront('terminal');
+    } else if (command in BROWSER_PAGES) {
       openBrowserPage(command as BrowserPageKey);
     } else if (terminalRef.current) {
       terminalRef.current.executeExternalCommand(command);
     }
-  }, [openBrowserPage]);
+  }, [bringWindowToFront, openBrowserPage]);
 
   const currentBrowserPageKey =
     browserWindow.historyIndex >= 0 ? browserWindow.history[browserWindow.historyIndex] ?? null : null;
@@ -316,7 +360,7 @@ const Index = () => {
   }, [windowStack]);
 
   const handleTaskbarBrowserClick = useCallback(() => {
-    if (!browserWindow.isOpen) {
+    if (!browserWindow.isOpen || isMobile) {
       return;
     }
 
@@ -333,13 +377,19 @@ const Index = () => {
 
     setBrowserWindow((prev) => ({ ...prev, isMinimized: false }));
     bringWindowToFront('browser');
-  }, [activeWindow, browserWindow.isMinimized, browserWindow.isOpen, bringWindowToFront]);
+  }, [activeWindow, browserWindow.isMinimized, browserWindow.isOpen, bringWindowToFront, isMobile]);
 
   const handleTerminalFocus = useCallback(() => {
     bringWindowToFront('terminal');
   }, [bringWindowToFront]);
 
   const handleTaskbarTerminalClick = useCallback(() => {
+    if (isMobile) {
+      setIsTerminalMinimized(false);
+      bringWindowToFront('terminal');
+      return;
+    }
+
     if (isTerminalMinimized) {
       setIsTerminalMinimized(false);
       bringWindowToFront('terminal');
@@ -352,7 +402,7 @@ const Index = () => {
     }
 
     bringWindowToFront('terminal');
-  }, [activeWindow, bringWindowToFront, isTerminalMinimized]);
+  }, [activeWindow, bringWindowToFront, isMobile, isTerminalMinimized]);
 
   const renderBrowserPage = () => {
     switch (currentBrowserPageKey) {
@@ -390,40 +440,48 @@ const Index = () => {
 
   return (
     <div
-      className="h-screen bg-background text-foreground relative overflow-hidden animate-in fade-in duration-1000"
+      className="relative h-screen overflow-hidden bg-background text-foreground animate-in fade-in duration-1000"
       style={{
         backgroundImage: wallpaper ? `url(${wallpaper})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
+        backgroundRepeat: 'no-repeat',
       }}
     >
-      {/* Background Overlay */}
       {wallpaper && (
-        <div className="absolute inset-0 bg-black/40 z-0" />
+        <div className="absolute inset-0 z-0 bg-black/40" />
       )}
 
-      {/* Desktop Icons Layer */}
-      <DesktopIcons onIconClick={handleIconClick} />
+      <DesktopIcons
+        onIconClick={handleIconClick}
+        isMobile={isMobile}
+        mobileColumns={mobileIconColumns}
+      />
 
-      {/* Main Content (Terminal & Browser Windows) */}
       <main
-        className="relative overflow-hidden z-10 pointer-events-none"
+        className="relative z-10 overflow-hidden pointer-events-none"
         style={{ height: `calc(100vh - ${TASKBAR_HEIGHT}px)` }}
       >
         <div
-          className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none"
-          style={{ zIndex: getWindowZIndex('terminal') }}
+          className={`absolute inset-0 pointer-events-none ${isMobile ? 'flex items-center justify-center px-3' : 'flex items-center justify-center p-4'}`}
+          style={{
+            zIndex: getWindowZIndex('terminal'),
+            paddingTop: isMobile ? `${mobileTerminalTopInset}px` : undefined,
+            paddingBottom: isMobile ? `${MOBILE_TERMINAL_BOTTOM_CLEARANCE}px` : undefined,
+          }}
         >
-          <div className="flex h-full w-full items-center justify-center">
+          <div className={`flex h-full w-full ${isMobile ? 'items-center justify-center' : 'items-center justify-center'}`}>
             <Terminal
               ref={terminalRef}
               themeId={currentTheme}
-              workspaceSize={workspaceSize}
+              workspaceSize={terminalWorkspaceSize}
               isMinimized={isTerminalMinimized}
               onMinimizedChange={setIsTerminalMinimized}
               onFocus={handleTerminalFocus}
               zIndex={getWindowZIndex('terminal')}
+              isCompactMobile={isMobile}
+              showInitialHelp={!isMobile}
+              showCompactCloseButton={isMobile}
             />
           </div>
         </div>
@@ -432,13 +490,13 @@ const Index = () => {
           ref={workspaceRef}
           className="absolute pointer-events-none"
           style={{
-            inset: `${WORKSPACE_PADDING}px`,
+            inset: `${isMobile ? MOBILE_WORKSPACE_PADDING : WORKSPACE_PADDING}px`,
             zIndex: getWindowZIndex('browser'),
           }}
         >
           {browserWindow.isOpen && currentBrowserPage && (
             <BrowserWindow
-              title={currentBrowserPage.title}
+              title={currentBrowserPage.title || `${currentBrowserPage.label} - Microsoft Internet Explorer`}
               url={currentBrowserPage.url}
               initialPosition={browserWindow.initialPosition}
               initialSize={browserWindow.initialSize}
@@ -454,6 +512,7 @@ const Index = () => {
               onBack={handleBrowserBack}
               onForward={handleBrowserForward}
               onRefresh={handleBrowserRefresh}
+              mobileFullScreen={isMobile}
             >
               <div key={`${currentBrowserPageKey}:${browserWindow.refreshKey}`} className="h-full">
                 {renderBrowserPage()}
@@ -463,50 +522,52 @@ const Index = () => {
         </div>
       </main>
 
-      {/* Windows Taskbar */}
       <footer className="fixed bottom-0 left-0 right-0 z-50 flex h-[32px] items-stretch border-t border-[#7abaf8] bg-[linear-gradient(180deg,var(--xp-blue-light)_0%,var(--xp-blue)_45%,var(--xp-blue-dark)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
         <SocialLinks
           onReset={handleReset}
           onOpenPage={openBrowserPage}
           onPowerOff={handlePowerOff}
+          isMobile={isMobile}
         />
 
         <div className="min-w-0 flex-1 border-l border-[#3e74df] bg-[linear-gradient(180deg,var(--xp-blue-light)_0%,var(--xp-blue)_50%,var(--xp-blue-dark)_100%)]">
-          <div className="flex h-full items-center gap-1 overflow-x-auto px-1">
-            <button
-              onClick={handleTaskbarTerminalClick}
-              className="flex h-[24px] min-w-0 max-w-[220px] flex-shrink-0 items-center rounded-sm border px-2 text-[11px] font-semibold text-white shadow-[inset_1px_1px_0_rgba(255,255,255,0.35)]"
-              style={{
-                background: activeWindow === 'terminal'
-                  ? 'linear-gradient(180deg, #3d89ff 0%, #2f6be6 48%, #1f49b9 100%)'
-                  : 'linear-gradient(180deg, #4e8df2 0%, #336ed7 50%, #2451be 100%)',
-                borderColor: activeWindow === 'terminal' ? '#173b94' : '#2b58bc',
-                opacity: isTerminalMinimized ? 0.82 : 1,
-              }}
-            >
-              <span className="truncate">Terminal (Guest@Portfolio)</span>
-            </button>
-
-            {browserWindow.isOpen && (
+          {!isMobile && (
+            <div className="flex h-full items-center gap-1 overflow-x-auto px-1">
               <button
-                onClick={handleTaskbarBrowserClick}
+                onClick={handleTaskbarTerminalClick}
                 className="flex h-[24px] min-w-0 max-w-[220px] flex-shrink-0 items-center rounded-sm border px-2 text-[11px] font-semibold text-white shadow-[inset_1px_1px_0_rgba(255,255,255,0.35)]"
                 style={{
-                  background: activeWindow === 'browser'
+                  background: activeWindow === 'terminal'
                     ? 'linear-gradient(180deg, #3d89ff 0%, #2f6be6 48%, #1f49b9 100%)'
                     : 'linear-gradient(180deg, #4e8df2 0%, #336ed7 50%, #2451be 100%)',
-                  borderColor: activeWindow === 'browser' ? '#173b94' : '#2b58bc',
-                  opacity: browserWindow.isMinimized ? 0.82 : 1,
+                  borderColor: activeWindow === 'terminal' ? '#173b94' : '#2b58bc',
+                  opacity: isTerminalMinimized ? 0.82 : 1,
                 }}
               >
-                <span className="truncate">Internet Explorer</span>
+                <span className="truncate">Terminal (Guest@Portfolio)</span>
               </button>
-            )}
-          </div>
+
+              {browserWindow.isOpen && (
+                <button
+                  onClick={handleTaskbarBrowserClick}
+                  className="flex h-[24px] min-w-0 max-w-[220px] flex-shrink-0 items-center rounded-sm border px-2 text-[11px] font-semibold text-white shadow-[inset_1px_1px_0_rgba(255,255,255,0.35)]"
+                  style={{
+                    background: activeWindow === 'browser'
+                      ? 'linear-gradient(180deg, #3d89ff 0%, #2f6be6 48%, #1f49b9 100%)'
+                      : 'linear-gradient(180deg, #4e8df2 0%, #336ed7 50%, #2451be 100%)',
+                    borderColor: activeWindow === 'browser' ? '#173b94' : '#2b58bc',
+                    opacity: browserWindow.isMinimized ? 0.82 : 1,
+                  }}
+                >
+                  <span className="truncate">Internet Explorer</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex items-stretch border-l border-[#6bc6fb] bg-[linear-gradient(180deg,var(--xp-blue-light)_0%,var(--xp-blue)_45%,var(--xp-blue-dark)_100%)] shadow-[inset_1px_0_0_rgba(255,255,255,0.35)]">
-          <label className="flex cursor-pointer items-center border-r border-[#51b8f2] px-3 text-white/90 transition-colors hover:bg-white/10">
+          <label className={`flex cursor-pointer items-center border-r border-[#51b8f2] ${isMobile ? 'px-2.5' : 'px-3'} text-white/90 transition-colors hover:bg-white/10`}>
             <ImageIcon className="h-4 w-4" />
             <input
               type="file"
@@ -516,7 +577,7 @@ const Index = () => {
             />
           </label>
 
-          <div className="select-none px-4 py-[3px] text-right font-sans text-[11px] font-medium leading-tight text-white [text-shadow:1px_1px_1px_rgba(0,0,0,0.45)]">
+          <div className={`select-none ${isMobile ? 'px-2.5 text-[10px]' : 'px-4 text-[11px]'} py-[3px] text-right font-sans font-medium leading-tight text-white [text-shadow:1px_1px_1px_rgba(0,0,0,0.45)]`}>
             {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             <br />
             {time.toLocaleDateString()}

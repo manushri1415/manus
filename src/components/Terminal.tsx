@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
-import { Minus, Square, Copy } from 'lucide-react';
+import { Minus, Square, Copy, X } from 'lucide-react';
 
 interface TerminalLine {
   id: number;
@@ -12,9 +12,14 @@ type WindowSize = {
   height: number;
 };
 
-const WELCOME_MESSAGE = `Hello, World! I'm Manushri Muruga Kumar
-ASU CS graduate | full-stack, backend, and AI-integrated apps.
-Type 'help' to see available commands.`;
+export type TerminalHandle = {
+  executeExternalCommand: (command: string) => void;
+};
+
+const WELCOME_MESSAGE = `Welcome to Manu OS.
+Use the desktop icons or the Start menu to explore my story, projects, experience, and contact info.
+
+Type 'help' for basic terminal commands.`;
 
 const ABOUT_MESSAGE = `
 +-----------------------------------------------------------+
@@ -59,36 +64,18 @@ const CONTACT_MESSAGE = `
 
 const HELP_MESSAGE = `Available commands:
   help       - Show this help message
-  about      - Learn about me
-  experience - Open my experience page
-  skills     - View my technical skills
-  projects   - Browse my projects
-  contact    - Get my contact information
-  resume     - Open my resume
   whoami     - Display current user
   date       - Show current date and time
-  clear      - Clear the terminal`;
+  resume     - Open my resume
+  clear      - Clear the terminal
+
+Navigation tip:
+  Use the desktop icons or Start menu for the full portfolio.`;
 
 const COMMANDS: Record<string, { description: string; action: () => string | React.ReactNode }> = {
   help: {
     description: 'Show available commands',
     action: () => HELP_MESSAGE,
-  },
-  about: {
-    description: 'Learn about me',
-    action: () => ABOUT_MESSAGE,
-  },
-  skills: {
-    description: 'View my technical skills',
-    action: () => SKILLS_MESSAGE,
-  },
-  projects: {
-    description: 'Browse my projects',
-    action: () => PROJECTS_MESSAGE,
-  },
-  contact: {
-    description: 'Get my contact information',
-    action: () => CONTACT_MESSAGE,
   },
   whoami: {
     description: 'Display current user',
@@ -104,6 +91,13 @@ const COMMANDS: Record<string, { description: string; action: () => string | Rea
   },
 };
 
+const HIDDEN_COMMANDS: Record<string, () => string | React.ReactNode> = {
+  about: () => ABOUT_MESSAGE,
+  skills: () => SKILLS_MESSAGE,
+  projects: () => PROJECTS_MESSAGE,
+  contact: () => CONTACT_MESSAGE,
+};
+
 type TerminalProps = {
   themeId?: string;
   onOpenExperience?: () => void;
@@ -113,6 +107,9 @@ type TerminalProps = {
   onMinimizedChange?: (value: boolean) => void;
   onFocus?: () => void;
   zIndex?: number;
+  isCompactMobile?: boolean;
+  showInitialHelp?: boolean;
+  showCompactCloseButton?: boolean;
 };
 
 const EXTRA_COMMANDS = ['experience', 'resume'];
@@ -136,7 +133,14 @@ const getFallbackWorkspaceSize = (): WindowSize => {
   };
 };
 
-const getResponsiveTerminalSize = (workspace: WindowSize): WindowSize => {
+const getResponsiveTerminalSize = (workspace: WindowSize, isCompactMobile: boolean): WindowSize => {
+  if (isCompactMobile) {
+    return {
+      width: Math.max(0, workspace.width),
+      height: Math.round(clampValue(workspace.height * 0.84, 260, Math.min(440, workspace.height))),
+    };
+  }
+
   const maxWidth = Math.max(TERMINAL_MIN_WIDTH, workspace.width);
   const maxHeight = Math.max(TERMINAL_MIN_HEIGHT, workspace.height);
 
@@ -151,7 +155,19 @@ const getDefaultTerminalOffset = () => ({
   y: 0,
 });
 
-export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenResume, workspaceSize, isMinimized: controlledIsMinimized, onMinimizedChange, onFocus, zIndex = 10 }: TerminalProps, ref) => {
+export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
+  themeId = 'cmd',
+  onOpenExperience,
+  onOpenResume,
+  workspaceSize,
+  isMinimized: controlledIsMinimized,
+  onMinimizedChange,
+  onFocus,
+  zIndex = 10,
+  isCompactMobile = false,
+  showInitialHelp = true,
+  showCompactCloseButton = false,
+}, ref) => {
   const getThemeConfig = (id: string) => {
     switch (id) {
       case 'matrix':
@@ -161,7 +177,7 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
           prompt: 'neo@matrix:~$',
           header: 'Matrix Core',
           welcome: `Wake up, Neo...\n\nHello, World! I'm Manushri Muruga Kumar\nASU CS graduate building software.`,
-          caret: '#00FF41'
+          caret: '#00FF41',
         };
       case 'ubuntu':
         return {
@@ -170,16 +186,16 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
           prompt: 'Manu@ubuntu:~$',
           header: 'Terminal (Ubuntu)',
           welcome: WELCOME_MESSAGE,
-          caret: '#ffffff'
+          caret: '#ffffff',
         };
       case 'dracula':
         return {
           bg: '#282a36',
           text: '#f8f8f2',
-          prompt: 'Î»',
+          prompt: 'ÃŽÂ»',
           header: 'Dracula Terminal',
           welcome: WELCOME_MESSAGE,
-          caret: '#bd93f9'
+          caret: '#bd93f9',
         };
       case 'cmd':
         return {
@@ -188,7 +204,7 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
           prompt: 'C:\\Users\\Manu>',
           header: 'C:\\WINDOWS\\system32\\cmd.exe',
           welcome: WELCOME_MESSAGE,
-          caret: 'var(--xp-terminal-text)'
+          caret: 'var(--xp-terminal-text)',
         };
       default:
         return {
@@ -197,38 +213,47 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
           prompt: 'PS C:\\Users\\Manu>',
           header: 'Windows PowerShell',
           welcome: WELCOME_MESSAGE,
-          caret: 'var(--xp-terminal-text)'
+          caret: 'var(--xp-terminal-text)',
         };
     }
   };
 
   const theme = getThemeConfig(themeId);
   const resumePdfPath = `${import.meta.env.BASE_URL}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`;
+  const effectiveWorkspace = workspaceSize ?? getFallbackWorkspaceSize();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const terminalRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const lineIdRef = useRef(2);
+  const dragStart = useRef({ x: 0, y: 0 });
+  const resizeStart = useRef({ x: 0, y: 0, w: 0, h: 0 });
 
   const [lines, setLines] = useState<TerminalLine[]>([]);
-
-  useEffect(() => {
-    setLines([
-      { id: 0, type: 'output', content: theme.welcome },
-      { id: 1, type: 'info', content: HELP_MESSAGE },
-    ]);
-    lineIdRef.current = 2;
-  }, [themeId]);
   const [currentInput, setCurrentInput] = useState('');
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [internalIsMinimized, setInternalIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [position, setPosition] = useState(() => getDefaultTerminalOffset());
-  const [size, setSize] = useState(() => getResponsiveTerminalSize(workspaceSize ?? getFallbackWorkspaceSize()));
+  const [size, setSize] = useState(() => getResponsiveTerminalSize(effectiveWorkspace, isCompactMobile));
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [hasManualPosition, setHasManualPosition] = useState(false);
   const [hasManualResize, setHasManualResize] = useState(false);
-  const dragStart = useRef({ x: 0, y: 0 });
-  const resizeStart = useRef({ x: 0, y: 0, w: 0, h: 0 });
-  const effectiveWorkspace = workspaceSize ?? getFallbackWorkspaceSize();
   const isMinimized = controlledIsMinimized ?? internalIsMinimized;
+
+  useEffect(() => {
+    const nextLines: TerminalLine[] = [
+      { id: 0, type: 'output', content: theme.welcome },
+    ];
+
+    if (showInitialHelp) {
+      nextLines.push({ id: 1, type: 'info', content: HELP_MESSAGE });
+    }
+
+    setLines(nextLines);
+    lineIdRef.current = nextLines.length;
+  }, [showInitialHelp, theme.welcome]);
 
   const setMinimizedState = useCallback((value: boolean) => {
     if (controlledIsMinimized === undefined) {
@@ -237,104 +262,9 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
     onMinimizedChange?.(value);
   }, [controlledIsMinimized, onMinimizedChange]);
 
-  useImperativeHandle(ref, () => ({
-    executeExternalCommand: (command: string) => {
-      setMinimizedState(false);
-      onFocus?.();
-      executeCommand(command);
-      setTimeout(focusInput, 100);
-    }
-  }), [onFocus, setMinimizedState]);
-
-  const inputRef = useRef<HTMLInputElement>(null);
-  const terminalRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const lineIdRef = useRef(2);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('.terminal-header-buttons')) return;
-    onFocus?.();
-    setHasManualPosition(true);
-    setIsDragging(true);
-    dragStart.current = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y
-    };
-  };
-
-  const handleResizeDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsResizing(true);
-    setHasManualResize(true);
-    resizeStart.current = {
-      x: e.clientX,
-      y: e.clientY,
-      w: size.width,
-      h: size.height
-    };
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging && !isMaximized) {
-        setPosition({
-          x: e.clientX - dragStart.current.x,
-          y: e.clientY - dragStart.current.y
-        });
-      }
-      if (isResizing && !isMaximized) {
-        const deltaX = e.clientX - resizeStart.current.x;
-        const deltaY = e.clientY - resizeStart.current.y;
-        setSize({
-          width: clampValue(
-            resizeStart.current.w + deltaX,
-            TERMINAL_MIN_WIDTH,
-            Math.max(TERMINAL_MIN_WIDTH, effectiveWorkspace.width)
-          ),
-          height: clampValue(
-            resizeStart.current.h + deltaY,
-            TERMINAL_MIN_HEIGHT,
-            Math.max(TERMINAL_MIN_HEIGHT, effectiveWorkspace.height)
-          )
-        });
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      setIsResizing(false);
-    };
-
-    if (isDragging || isResizing) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-    }
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [effectiveWorkspace.height, effectiveWorkspace.width, isDragging, isResizing, isMaximized]);
-
-  useEffect(() => {
-    const nextAutoSize = getResponsiveTerminalSize(effectiveWorkspace);
-
-    if (!hasManualResize) {
-      setSize(nextAutoSize);
-      return;
-    }
-
-    setSize((prev) => ({
-      width: clampValue(prev.width, TERMINAL_MIN_WIDTH, Math.max(TERMINAL_MIN_WIDTH, effectiveWorkspace.width)),
-      height: clampValue(prev.height, TERMINAL_MIN_HEIGHT, Math.max(TERMINAL_MIN_HEIGHT, effectiveWorkspace.height)),
-    }));
-  }, [effectiveWorkspace, hasManualResize]);
-
-  useEffect(() => {
-    if (hasManualPosition) return;
-    setPosition(getDefaultTerminalOffset());
-  }, [effectiveWorkspace, hasManualPosition]);
+  const focusInput = useCallback(() => {
+    inputRef.current?.focus();
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     if (terminalRef.current) {
@@ -346,7 +276,6 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
     scrollToBottom();
   }, [lines, scrollToBottom]);
 
-  // Handle auto-scroll when content size changes (like images loading)
   useEffect(() => {
     if (!terminalRef.current) return;
 
@@ -361,15 +290,10 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
     return () => resizeObserver.disconnect();
   }, [scrollToBottom]);
 
-  const focusInput = useCallback(() => {
-    inputRef.current?.focus();
-  }, []);
-
   const executeCommand = useCallback((input: string) => {
     const trimmedInput = input.trim().toLowerCase();
     const newLines: TerminalLine[] = [];
 
-    // Add the input line
     newLines.push({
       id: lineIdRef.current++,
       type: 'input',
@@ -381,11 +305,9 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
       return;
     }
 
-    // Add to command history
     setCommandHistory((prev) => [...prev, input]);
     setHistoryIndex(-1);
 
-    // Handle clear command specially
     if (trimmedInput === 'cls' || trimmedInput === 'clear') {
       setLines([]);
       return;
@@ -425,10 +347,16 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
       return;
     }
 
-    // Execute command
     const command = COMMANDS[trimmedInput];
     if (command) {
       const result = command.action();
+      newLines.push({
+        id: lineIdRef.current++,
+        type: 'output',
+        content: result,
+      });
+    } else if (trimmedInput in HIDDEN_COMMANDS) {
+      const result = HIDDEN_COMMANDS[trimmedInput]?.();
       newLines.push({
         id: lineIdRef.current++,
         type: 'output',
@@ -443,46 +371,139 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
     }
 
     setLines((prev) => [...prev, ...newLines]);
-  }, []);
+  }, [onOpenExperience, onOpenResume, resumePdfPath]);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        executeCommand(currentInput);
-        setCurrentInput('');
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        if (commandHistory.length > 0) {
-          const newIndex = historyIndex < commandHistory.length - 1 ? historyIndex + 1 : historyIndex;
-          setHistoryIndex(newIndex);
-          setCurrentInput(commandHistory[commandHistory.length - 1 - newIndex] || '');
-        }
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        if (historyIndex > 0) {
-          const newIndex = historyIndex - 1;
-          setHistoryIndex(newIndex);
-          setCurrentInput(commandHistory[commandHistory.length - 1 - newIndex] || '');
-        } else {
-          setHistoryIndex(-1);
-          setCurrentInput('');
-        }
-      } else if (e.key === 'Tab') {
-        e.preventDefault();
-        // Auto-complete
-        const matches = [...Object.keys(COMMANDS), ...EXTRA_COMMANDS].filter((cmd) =>
-          cmd.startsWith(currentInput.toLowerCase())
-        );
-        if (matches.length === 1) {
-          setCurrentInput(matches[0]);
-        }
-      } else if (e.key === 'l' && e.ctrlKey) {
-        e.preventDefault();
-        setLines([]);
-      }
+  useImperativeHandle(ref, () => ({
+    executeExternalCommand: (command: string) => {
+      setMinimizedState(false);
+      onFocus?.();
+      executeCommand(command);
+      setTimeout(focusInput, 100);
     },
-    [currentInput, commandHistory, historyIndex, executeCommand]
-  );
+  }), [executeCommand, focusInput, onFocus, setMinimizedState]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (isCompactMobile) return;
+    if ((e.target as HTMLElement).closest('.terminal-header-buttons')) return;
+    onFocus?.();
+    setHasManualPosition(true);
+    setIsDragging(true);
+    dragStart.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    };
+  };
+
+  const handleResizeDown = (e: React.MouseEvent) => {
+    if (isCompactMobile) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(true);
+    setHasManualResize(true);
+    resizeStart.current = {
+      x: e.clientX,
+      y: e.clientY,
+      w: size.width,
+      h: size.height,
+    };
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging && !isMaximized && !isCompactMobile) {
+        setPosition({
+          x: e.clientX - dragStart.current.x,
+          y: e.clientY - dragStart.current.y,
+        });
+      }
+      if (isResizing && !isMaximized && !isCompactMobile) {
+        const deltaX = e.clientX - resizeStart.current.x;
+        const deltaY = e.clientY - resizeStart.current.y;
+        setSize({
+          width: clampValue(
+            resizeStart.current.w + deltaX,
+            TERMINAL_MIN_WIDTH,
+            Math.max(TERMINAL_MIN_WIDTH, effectiveWorkspace.width),
+          ),
+          height: clampValue(
+            resizeStart.current.h + deltaY,
+            TERMINAL_MIN_HEIGHT,
+            Math.max(TERMINAL_MIN_HEIGHT, effectiveWorkspace.height),
+          ),
+        });
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      setIsResizing(false);
+    };
+
+    if (isDragging || isResizing) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [effectiveWorkspace.height, effectiveWorkspace.width, isCompactMobile, isDragging, isResizing, isMaximized]);
+
+  useEffect(() => {
+    const nextAutoSize = getResponsiveTerminalSize(effectiveWorkspace, isCompactMobile);
+
+    if (isCompactMobile || !hasManualResize) {
+      setSize(nextAutoSize);
+      return;
+    }
+
+    setSize((prev) => ({
+      width: clampValue(prev.width, TERMINAL_MIN_WIDTH, Math.max(TERMINAL_MIN_WIDTH, effectiveWorkspace.width)),
+      height: clampValue(prev.height, TERMINAL_MIN_HEIGHT, Math.max(TERMINAL_MIN_HEIGHT, effectiveWorkspace.height)),
+    }));
+  }, [effectiveWorkspace, hasManualResize, isCompactMobile]);
+
+  useEffect(() => {
+    if (isCompactMobile || !hasManualPosition) {
+      setPosition(getDefaultTerminalOffset());
+    }
+  }, [effectiveWorkspace, hasManualPosition, isCompactMobile]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      executeCommand(currentInput);
+      setCurrentInput('');
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (commandHistory.length > 0) {
+        const newIndex = historyIndex < commandHistory.length - 1 ? historyIndex + 1 : historyIndex;
+        setHistoryIndex(newIndex);
+        setCurrentInput(commandHistory[commandHistory.length - 1 - newIndex] || '');
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIndex > 0) {
+        const newIndex = historyIndex - 1;
+        setHistoryIndex(newIndex);
+        setCurrentInput(commandHistory[commandHistory.length - 1 - newIndex] || '');
+      } else {
+        setHistoryIndex(-1);
+        setCurrentInput('');
+      }
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      const matches = [...Object.keys(COMMANDS), ...EXTRA_COMMANDS].filter((cmd) =>
+        cmd.startsWith(currentInput.toLowerCase()),
+      );
+      if (matches.length === 1) {
+        setCurrentInput(matches[0]);
+      }
+    } else if (e.key === 'l' && e.ctrlKey) {
+      e.preventDefault();
+      setLines([]);
+    }
+  }, [commandHistory, currentInput, executeCommand, historyIndex]);
 
   const getLineColor = (type: TerminalLine['type']) => {
     switch (type) {
@@ -502,8 +523,8 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
   return (
     <div
       style={{
-        transform: isMaximized ? 'none' : `translate3d(${position.x}px, ${position.y}px, 0)`,
-        width: isMaximized ? '100%' : `${size.width}px`,
+        transform: isMaximized || isCompactMobile ? 'none' : `translate3d(${position.x}px, ${position.y}px, 0)`,
+        width: isMaximized || isCompactMobile ? '100%' : `${size.width}px`,
         height: isMaximized ? '100%' : `${size.height}px`,
         position: isMaximized ? 'fixed' : 'relative',
         top: isMaximized ? 0 : 'auto',
@@ -511,29 +532,27 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
         zIndex: isMaximized ? zIndex + 1 : zIndex,
         maxWidth: '100%',
         maxHeight: '100%',
-        willChange: (isDragging || isResizing) ? 'transform, width, height' : 'auto',
+        willChange: isDragging || isResizing ? 'transform, width, height' : 'auto',
         backgroundColor: 'var(--xp-window)',
         border: '5px solid var(--xp-window-border)',
         boxShadow: '0 18px 45px var(--xp-window-shadow)',
       }}
-      className={`relative pointer-events-auto overflow-hidden shadow-2xl flex flex-col ${isMaximized ? '' : (isDragging || isResizing ? '' : 'transition-all duration-200')} ${isDragging ? 'select-none' : ''}`}
+      className={`relative pointer-events-auto overflow-hidden shadow-2xl flex flex-col ${
+        isMaximized || isCompactMobile ? '' : isDragging || isResizing ? '' : 'transition-all duration-200'
+      } ${isDragging ? 'select-none' : ''}`}
       onMouseDownCapture={onFocus}
       onClick={(e) => {
-        // Only focus if the user isn't selecting text
         const selection = window.getSelection();
         if (selection && selection.toString().length > 0) return;
-
-        // Prevent focusing if we clicked a button or interactive element
         if ((e.target as HTMLElement).closest('button, input, [role="button"]')) return;
 
         onFocus?.();
         focusInput();
       }}
     >
-      {/* Terminal Header */}
       <div
         onMouseDown={handleMouseDown}
-        className="flex items-center justify-between gap-3 px-4 py-1 cursor-move select-none text-white"
+        className={`flex items-center justify-between gap-3 ${isCompactMobile ? 'cursor-default px-3 py-1' : 'cursor-move px-4 py-1'} select-none text-white`}
         style={{
           background: 'linear-gradient(90deg, var(--xp-blue) 0%, var(--xp-blue-light) 100%)',
           borderBottom: '2px solid #163d9d',
@@ -546,34 +565,50 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
         </div>
 
         <div className="flex items-center gap-0.5 terminal-header-buttons">
-          <button
-            onClick={(e) => { e.stopPropagation(); setMinimizedState(true); }}
-            className="flex h-6 w-7 items-center justify-center text-black transition-colors"
-            style={{
-              backgroundColor: 'var(--xp-window)',
-              border: '1px solid #8f8b78',
-            }}
-          >
-            <Minus size={14} />
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); setIsMaximized(!isMaximized); }}
-            className="flex h-6 w-7 items-center justify-center text-black transition-colors"
-            style={{
-              backgroundColor: 'var(--xp-window)',
-              border: '1px solid #ffffff',
-            }}
-          >
-            {isMaximized ? <Copy size={14} className="rotate-180" /> : <Square size={14} />}
-          </button>
+          {isCompactMobile ? (
+            showCompactCloseButton ? (
+              <button
+                onClick={(e) => { e.stopPropagation(); setMinimizedState(true); }}
+                className="flex h-6 w-7 items-center justify-center text-black transition-colors"
+                style={{
+                  backgroundColor: 'var(--xp-window)',
+                  border: '1px solid #8f8b78',
+                }}
+              >
+                <X size={14} />
+              </button>
+            ) : null
+          ) : (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); setMinimizedState(true); }}
+                className="flex h-6 w-7 items-center justify-center text-black transition-colors"
+                style={{
+                  backgroundColor: 'var(--xp-window)',
+                  border: '1px solid #8f8b78',
+                }}
+              >
+                <Minus size={14} />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setIsMaximized(!isMaximized); }}
+                className="flex h-6 w-7 items-center justify-center text-black transition-colors"
+                style={{
+                  backgroundColor: 'var(--xp-window)',
+                  border: '1px solid #ffffff',
+                }}
+              >
+                {isMaximized ? <Copy size={14} className="rotate-180" /> : <Square size={14} />}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Terminal Body */}
       <div
         ref={terminalRef}
         style={{ backgroundColor: theme.bg, color: theme.text }}
-        className="flex-1 overflow-y-auto p-3 md:p-4 font-mono text-[13px] md:text-sm leading-relaxed terminal-scrollbar min-h-0"
+        className={`flex-1 overflow-y-auto ${isCompactMobile ? 'p-3 text-[12px]' : 'p-3 md:p-4 text-[13px] md:text-sm'} font-mono leading-relaxed terminal-scrollbar min-h-0`}
       >
         <div ref={contentRef}>
           {lines.map((line) => (
@@ -589,7 +624,6 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
             </div>
           ))}
 
-          {/* Current Input Line */}
           <div className="flex items-center">
             <span style={{ color: theme.text }}>{theme.prompt}</span>
             <input
@@ -599,7 +633,7 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
               onChange={(e) => setCurrentInput(e.target.value)}
               onKeyDown={handleKeyDown}
               style={{ color: theme.text, caretColor: theme.caret }}
-              className="flex-1 ml-2 bg-transparent outline-none"
+              className="ml-2 flex-1 bg-transparent outline-none"
               autoFocus
               spellCheck={false}
               autoComplete="off"
@@ -608,36 +642,13 @@ export const Terminal = forwardRef(({ themeId = 'cmd', onOpenExperience, onOpenR
         </div>
       </div>
 
-      {/* Terminal Footer */}
-      <div
-        className="hidden flex-wrap items-center justify-between gap-2 px-3 py-2 md:px-4 text-[11px] md:text-xs select-none"
-        style={{
-          backgroundColor: 'var(--xp-window)',
-          borderTop: '1px solid var(--xp-window-border)',
-          color: '#5b5b5b',
-        }}
-      >
-        <span>Type 'help' for commands</span>
-        <div className="flex items-center gap-3">
-          <span>â†‘â†“ History â€¢ Tab Autocomplete</span>
-          {!isMaximized && (
-            <div
-              onMouseDown={handleResizeDown}
-              className="cursor-nwse-resize p-1 transition-colors"
-              style={{ color: '#6a6a6a' }}
-            >
-              <div className="w-3 h-3 border-r-2 border-b-2 border-[#7d7d7d]" />
-            </div>
-          )}
-        </div>
-      </div>
-      {!isMaximized && (
+      {!isMaximized && !isCompactMobile && (
         <div
           onMouseDown={handleResizeDown}
           className="absolute bottom-0 right-0 cursor-nwse-resize p-1"
           style={{ color: '#6a6a6a' }}
         >
-          <div className="w-3 h-3 border-r-2 border-b-2 border-[#7d7d7d]" />
+          <div className="h-3 w-3 border-b-2 border-r-2 border-[#7d7d7d]" />
         </div>
       )}
     </div>

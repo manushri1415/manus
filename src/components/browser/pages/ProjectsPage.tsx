@@ -6,9 +6,12 @@ interface ProjectResult {
   description: string;
   technologies: string[];
   displayUrl: string;
-  featured?: boolean;
-  inDevelopment?: boolean;
-  clientOwned?: boolean;
+  highlight?: string;
+  note?: string;
+  detailSections?: {
+    label: string;
+    items: string[];
+  }[];
 }
 
 interface ProjectsPageProps {
@@ -20,70 +23,101 @@ const SEARCH_NAME_PREFIX = 'Manushri Muruga Kumar';
 
 const PROJECTS: ProjectResult[] = [
   {
-    title: 'Collegiate - AI-Powered College & Career Planning Platform',
+    title: 'Collegiate — AI-Powered College & Career Planning Platform',
+    highlight: 'Client-sponsored full-stack project',
     description:
-      'A client-sponsored full-stack platform supporting college and career planning. I contributed to account-management workflows, authentication-related features, database-backed functionality, API integration, pagination, and debugging across the frontend and backend.',
+      'Contributed to account-management workflows, authentication-related features, database-backed functionality, API integration, search pagination, and cross-stack debugging across the frontend and backend.',
     technologies: ['React', 'TypeScript', 'Python', 'Flask', 'Supabase', 'SQL', 'REST APIs', 'Docker'],
     displayUrl: 'www.moongle.com/manushri/projects/collegiate',
-    clientOwned: true,
+    note: 'Source code is client-owned; project details are presented at a high level.',
   },
   {
-    title: 'Evexia - Healthcare Data Transparency Platform',
+    title: 'Evexia — Healthcare Data Transparency Platform',
+    highlight: '3rd Place — ScaleU + Principled Innovation Academy Hackathon 2026',
     description:
-      'A healthcare transparency platform designed to help users understand what providers may infer from medical records before consent. The project placed third at the ScaleU + Principled Innovation Academy Hackathon 2026.',
+      'Contributed to backend development, API integration, and system architecture for a healthcare transparency platform that helps users understand what providers may infer from their medical records before they provide consent.',
     technologies: ['TypeScript', 'Next.js', 'PostgreSQL', 'Supabase', 'Drizzle ORM', 'Cloudflare Workers', 'AI APIs'],
     displayUrl: 'www.moongle.com/manushri/projects/evexia',
-    featured: true,
   },
   {
-    title: 'Censend - AI-Powered Professional Communication Extension',
+    title: 'Censend — AI-Powered Professional Communication Extension',
     description:
-      'A Chrome extension that analyzes Gmail drafts and helps users identify unclear, risky, or unprofessional wording before sending messages.',
+      'Developed a Chrome extension that analyzes Gmail drafts in real time, identifies unclear or potentially unprofessional wording, and provides context-aware suggestions before messages are sent.',
     technologies: ['JavaScript', 'Chrome Extensions API', 'OpenAI API', 'Gmail DOM Integration'],
     displayUrl: 'www.moongle.com/manushri/projects/censend',
   },
   {
     title: 'Graph Search Engine & Software Testing Framework',
     description:
-      'A Java graph-processing project supporting graph parsing, traversal algorithms, graph modification, DOT export, automated testing, and continuous integration.',
-    technologies: ['Java', 'Maven', 'JUnit', 'GitHub Actions', 'BFS', 'DFS', 'Design Patterns'],
+      'Built a Java graph-processing framework supporting graph parsing, node and edge modification, BFS, DFS, random walk, DOT export, automated testing, and continuous integration. Applied reusable search interfaces and object-oriented design patterns to organize traversal behavior.',
+    technologies: ['Java', 'Maven', 'JUnit', 'GitHub Actions', 'DOT'],
+    detailSections: [
+      {
+        label: 'Concepts',
+        items: ['BFS', 'DFS', 'Strategy Pattern', 'Template Method Pattern'],
+      },
+    ],
     displayUrl: 'www.moongle.com/manushri/projects/graph-search-engine',
   },
   {
     title: 'ASP.NET Service-Oriented Personal Dashboard',
     description:
-      'A database-backed dashboard containing authentication, role-based access, session management, event management, external API integration, and modular backend services.',
-    technologies: ['C#', 'ASP.NET Core', 'SQL Server', 'Authentication', 'REST APIs'],
+      'Developed a database-backed dashboard with authentication, role-based access control, session management, event workflows, external API integration, and modular backend services.',
+    technologies: ['C#', 'ASP.NET Core', 'SQL Server', 'REST APIs'],
+    detailSections: [
+      {
+        label: 'Concepts',
+        items: ['Authentication', 'Role-Based Access Control', 'Service-Oriented Architecture'],
+      },
+    ],
     displayUrl: 'www.moongle.com/manushri/projects/personal-dashboard',
   },
   {
     title: 'Project Management Database System',
     description:
-      'A relational database system designed around employees, projects, managers, billing, timesheets, reports, and bug-tracking workflows.',
-    technologies: ['MySQL', 'SQL', 'ER Modeling', 'Normalization', 'Relational Database Design'],
+      'Designed a normalized relational database supporting employees, managers, projects, billing, timesheets, reports, and bug-tracking workflows, with an emphasis on referential integrity and practical business relationships.',
+    technologies: ['MySQL', 'SQL'],
+    detailSections: [
+      {
+        label: 'Concepts',
+        items: ['ER Modeling', 'Normalization', 'Relational Database Design'],
+      },
+    ],
     displayUrl: 'www.moongle.com/manushri/projects/project-management-database',
   },
   {
     title: 'AI-Assisted Debugging & Testing Project',
     description:
-      'A Python project focused on identifying reproducible bugs, refactoring application logic, separating responsibilities, writing tests, and critically reviewing AI-generated code.',
+      'Investigated reproducible bugs in a Python application, refactored tightly coupled logic, separated responsibilities, added pytest coverage, and critically reviewed AI-generated code for incorrect assumptions and unreliable behavior.',
     technologies: ['Python', 'Streamlit', 'pytest', 'Git'],
     displayUrl: 'www.moongle.com/manushri/projects/ai-debugging-testing',
   },
   {
     title: 'Website Redesign & User Research Case Study',
     description:
-      'A usability-focused redesign project involving participant research, task testing, Figma prototyping, survey analysis, and qualitative and quantitative evaluation.',
-    technologies: ['Figma', 'Usability Testing', 'User Research', 'Data Analysis'],
+      'Conducted user research and task-based usability testing, created Figma prototypes, and analyzed survey and behavioral data to redesign an existing website around observed user problems.',
+    technologies: [],
+    detailSections: [
+      {
+        label: 'Tools and methods',
+        items: ['Figma', 'Usability Testing', 'User Research', 'Survey Analysis', 'Data Analysis'],
+      },
+    ],
     displayUrl: 'www.moongle.com/manushri/projects/website-redesign',
   },
   {
-    title: 'SceneStack - Production Coordination for Student Filmmakers',
+    title: 'SceneStack — Production Coordination for Student Filmmakers',
+    highlight: 'Currently in development',
     description:
-      'An in-progress platform concept for student filmmakers and small production crews to manage projects, roles, call sheets, documents, acknowledgements, and production updates.',
-    technologies: ['React', 'TypeScript', 'Python', 'PostgreSQL', 'Authentication', 'Role-Based Access Control'],
+      'Designing and developing a production-coordination platform for student filmmakers and small crews to manage projects, roles, call sheets, production documents, acknowledgements, and role-specific updates.',
+    technologies: ['React', 'TypeScript', 'Python', 'PostgreSQL'],
+    detailSections: [
+      {
+        label: 'Core concepts',
+        items: ['Authentication', 'Role-Based Access Control', 'Document Workflows'],
+      },
+    ],
     displayUrl: 'www.moongle.com/manushri/projects/scenestack',
-    inDevelopment: true,
   },
 ];
 
@@ -129,7 +163,16 @@ const popularSearchFilters: Record<(typeof popularSearches)[number], string[]> =
 };
 
 const getProjectSearchText = (project: ProjectResult) =>
-  [project.title, project.description, project.technologies.join(' '), project.displayUrl, 'project']
+  [
+    project.title,
+    project.highlight,
+    project.description,
+    project.note,
+    project.technologies.join(' '),
+    project.detailSections?.map((section) => `${section.label} ${section.items.join(' ')}`).join(' '),
+    project.displayUrl,
+    'project',
+  ]
     .join(' ')
     .toLowerCase();
 
@@ -172,10 +215,6 @@ export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
   const handleSearch = (e?: FormEvent) => {
     e?.preventDefault();
     triggerSearch(searchQuery);
-  };
-
-  const resetToAllProjects = () => {
-    triggerSearch(DEFAULT_QUERY, 'Web', null);
   };
 
   const filteredProjects = selectedPopularSearch
@@ -269,25 +308,21 @@ export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
                   >
                     {project.title}
                   </button>
-                  {project.inDevelopment && (
-                    <div className="moongle-result-label">Currently in development</div>
-                  )}
-                  {project.featured && (
-                    <div className="moongle-result-label">Featured project</div>
-                  )}
+                  {project.highlight && <div className="moongle-result-label">{project.highlight}</div>}
                   <div className="moongle-result-description">
                     {project.description}
-                    {project.clientOwned && (
-                      <div className="moongle-client-note">
-                        Client-owned code; project details shown at a high level.
-                      </div>
-                    )}
+                    {project.note && <div className="moongle-client-note">{project.note}</div>}
                   </div>
                   {project.technologies.length > 0 && (
                     <div className="moongle-result-technologies">
                       <strong>Technologies:</strong> {project.technologies.join(' · ')}
                     </div>
                   )}
+                  {project.detailSections?.map((section) => (
+                    <div key={`${project.title}-${section.label}`} className="moongle-result-technologies">
+                      <strong>{section.label}:</strong> {section.items.join(' · ')}
+                    </div>
+                  ))}
                   <div className="moongle-result-url">{project.displayUrl}</div>
                 </div>
               ))
@@ -302,25 +337,11 @@ export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
             <div className="moongle-popular-searches">
               <h3 className="moongle-sidebar-heading">Popular Searches</h3>
               <div className="moongle-popular-search-list">
-                <button
-                  type="button"
-                  onClick={resetToAllProjects}
-                  className={`moongle-popular-search-button${
-                    selectedPopularSearch === null ? ' moongle-popular-search-button-active' : ''
-                  }`}
-                  aria-pressed={selectedPopularSearch === null}
-                >
-                  All Projects
-                </button>
                 {popularSearches.map((term) => (
                   <button
                     key={term}
                     type="button"
-                    onClick={() =>
-                      selectedPopularSearch === term
-                        ? resetToAllProjects()
-                        : triggerSearch(`${SEARCH_NAME_PREFIX} ${term}`, 'Web', term)
-                    }
+                    onClick={() => triggerSearch(`${SEARCH_NAME_PREFIX} ${term}`, 'Web', term)}
                     className={`moongle-popular-search-button${
                       selectedPopularSearch === term ? ' moongle-popular-search-button-active' : ''
                     }`}

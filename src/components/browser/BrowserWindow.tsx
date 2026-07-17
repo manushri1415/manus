@@ -16,7 +16,6 @@ const XP_WINDOW_BORDER = '#80a5e7';
 const XP_WINDOW_INNER_BORDER = '#b9d0f6';
 const XP_WINDOW_FRAME = '#ece9d8';
 const XP_TITLE_BAR = 'linear-gradient(180deg, #9dc0f2 0%, #8cb2eb 10%, #80a5e7 30%, #7398de 62%, #678bd3 100%)';
-const XP_TOOLBAR_BG = 'linear-gradient(180deg, #f8f6ee 0%, #ece8da 52%, #ddd6c4 100%)';
 const XP_BUTTON_BG = 'linear-gradient(180deg, #fefefe 0%, #eef5ff 45%, #c7daf7 100%)';
 const XP_CLOSE_BG = 'linear-gradient(180deg, #f9b27d 0%, #ef7b3d 45%, #cf4d19 100%)';
 const XP_MENU_BG = 'linear-gradient(180deg, #faf8f1 0%, #f0ebde 100%)';
@@ -44,6 +43,7 @@ interface BrowserWindowProps {
   onBack?: () => void;
   onForward?: () => void;
   onRefresh?: () => void;
+  mobileFullScreen?: boolean;
 }
 
 const clampValue = (value: number, min: number, max: number) => {
@@ -55,7 +55,7 @@ const normalizeWindowState = (
   position: WindowPosition,
   size: WindowSize,
   workspaceSize: WindowSize,
-  minSize?: Partial<WindowSize>
+  minSize?: Partial<WindowSize>,
 ) => {
   const minWidth = Math.max(MIN_WINDOW_WIDTH, minSize?.width ?? MIN_WINDOW_WIDTH);
   const minHeight = Math.max(MIN_WINDOW_HEIGHT, minSize?.height ?? MIN_WINDOW_HEIGHT);
@@ -93,6 +93,7 @@ export const BrowserWindow = ({
   onBack,
   onForward,
   onRefresh,
+  mobileFullScreen = false,
 }: BrowserWindowProps) => {
   const initialState = normalizeWindowState(initialPosition, initialSize, workspaceSize, minSize);
   const [position, setPosition] = useState(initialState.position);
@@ -102,11 +103,12 @@ export const BrowserWindow = ({
   const [isResizing, setIsResizing] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const resizeStart = useRef({ x: 0, y: 0, w: 0, h: 0 });
-  const windowRef = useRef<HTMLDivElement>(null);
   const appliedInitialState = useRef('');
 
+  const fillsWorkspace = mobileFullScreen || isMaximized;
+
   useEffect(() => {
-    if (isMaximized) return;
+    if (fillsWorkspace) return;
 
     const initialStateKey = [
       initialPosition.x,
@@ -126,18 +128,19 @@ export const BrowserWindow = ({
     setPosition(nextState.position);
     setSize(nextState.size);
   }, [
+    fillsWorkspace,
     initialPosition.x,
     initialPosition.y,
-    initialSize.width,
     initialSize.height,
-    workspaceSize.width,
-    workspaceSize.height,
-    minSize?.width,
+    initialSize.width,
     minSize?.height,
-    isMaximized,
+    minSize?.width,
+    workspaceSize.height,
+    workspaceSize.width,
   ]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (mobileFullScreen) return;
     if ((e.target as HTMLElement).closest('.browser-header-buttons')) return;
     setIsDragging(true);
     onFocus?.();
@@ -148,6 +151,7 @@ export const BrowserWindow = ({
   };
 
   const handleResizeDown = (e: React.MouseEvent) => {
+    if (mobileFullScreen) return;
     e.preventDefault();
     e.stopPropagation();
     setIsResizing(true);
@@ -161,7 +165,7 @@ export const BrowserWindow = ({
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging && !isMaximized) {
+      if (isDragging && !fillsWorkspace) {
         setPosition(
           normalizeWindowState(
             {
@@ -170,11 +174,11 @@ export const BrowserWindow = ({
             },
             size,
             workspaceSize,
-            minSize
-          ).position
+            minSize,
+          ).position,
         );
       }
-      if (isResizing && !isMaximized) {
+      if (isResizing && !fillsWorkspace) {
         const deltaX = e.clientX - resizeStart.current.x;
         const deltaY = e.clientY - resizeStart.current.y;
         const nextState = normalizeWindowState(
@@ -184,7 +188,7 @@ export const BrowserWindow = ({
             height: resizeStart.current.h + deltaY,
           },
           workspaceSize,
-          minSize
+          minSize,
         );
         setPosition(nextState.position);
         setSize(nextState.size);
@@ -205,10 +209,10 @@ export const BrowserWindow = ({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, isMaximized, minSize, position, size, workspaceSize]);
+  }, [fillsWorkspace, isDragging, isResizing, minSize, position, size, workspaceSize]);
 
   useEffect(() => {
-    if (isMaximized) return;
+    if (fillsWorkspace) return;
 
     const nextState = normalizeWindowState(position, size, workspaceSize, minSize);
     if (
@@ -220,7 +224,7 @@ export const BrowserWindow = ({
       setPosition(nextState.position);
       setSize(nextState.size);
     }
-  }, [isMaximized, minSize, position, size, workspaceSize]);
+  }, [fillsWorkspace, minSize, position, size, workspaceSize]);
 
   if (isMinimized) {
     return null;
@@ -228,36 +232,33 @@ export const BrowserWindow = ({
 
   return (
     <div
-      ref={windowRef}
       style={{
-        transform: isMaximized ? 'none' : `translate3d(${position.x}px, ${position.y}px, 0)`,
-        width: isMaximized ? '100%' : `${size.width}px`,
-        height: isMaximized ? '100%' : `${size.height}px`,
+        transform: fillsWorkspace ? 'none' : `translate3d(${position.x}px, ${position.y}px, 0)`,
+        width: fillsWorkspace ? '100%' : `${size.width}px`,
+        height: fillsWorkspace ? '100%' : `${size.height}px`,
         position: 'absolute',
         top: 0,
         left: 0,
-        zIndex: isMaximized ? zIndex + 1 : zIndex,
+        zIndex: fillsWorkspace ? zIndex + 1 : zIndex,
         willChange: isDragging || isResizing ? 'transform, width, height' : 'auto',
         backgroundColor: XP_WINDOW_FRAME,
         borderTop: `1px solid ${XP_WINDOW_BORDER}`,
-        borderLeft: `3px solid ${XP_WINDOW_BORDER}`,
-        borderRight: `3px solid ${XP_WINDOW_BORDER}`,
-        borderBottom: `3px solid ${XP_WINDOW_BORDER}`,
-        borderRadius: '8px',
+        borderLeft: `4px solid ${XP_WINDOW_BORDER}`,
+        borderRight: `4px solid ${XP_WINDOW_BORDER}`,
+        borderBottom: `4px solid ${XP_WINDOW_BORDER}`,
+        borderRadius: mobileFullScreen ? '8px' : '3px',
         boxShadow: `inset 1px 0 0 ${XP_WINDOW_INNER_BORDER}, inset -1px 0 0 ${XP_WINDOW_INNER_BORDER}, inset 0 -1px 0 ${XP_WINDOW_INNER_BORDER}, 0 0 0 2px rgba(255,255,255,0.22) inset, 0 18px 45px rgba(0, 0, 0, 0.38)`,
       }}
       className={`pointer-events-auto overflow-hidden flex flex-col ${
-        isMaximized ? '' : isDragging || isResizing ? '' : 'transition-all duration-200'
+        fillsWorkspace ? '' : isDragging || isResizing ? '' : 'transition-all duration-200'
       } ${isDragging ? 'select-none' : ''}`}
       onMouseDownCapture={onFocus}
     >
-      {/* Title Bar */}
       <div
         onMouseDown={handleMouseDown}
-        className="flex items-center justify-between cursor-move select-none"
+        className={`flex items-center justify-between ${mobileFullScreen ? 'cursor-default px-3 py-2' : 'cursor-move px-[7px] py-[3px]'} select-none`}
         style={{
-          minHeight: '30px',
-          padding: '4px 6px 5px 8px',
+          minHeight: mobileFullScreen ? '30px' : '24px',
           color: '#ffffff',
           background: XP_TITLE_BAR,
           borderBottom: '1px solid #08318d',
@@ -265,7 +266,7 @@ export const BrowserWindow = ({
         }}
       >
         <span
-          className="truncate text-[13px] font-bold"
+          className={`${mobileFullScreen ? 'text-[13px]' : 'text-[12px]'} truncate font-bold`}
           style={{
             fontFamily: '"Trebuchet MS", Tahoma, sans-serif',
             letterSpacing: '0.1px',
@@ -275,84 +276,88 @@ export const BrowserWindow = ({
           {title}
         </span>
 
-        <div className="flex items-center gap-1 browser-header-buttons">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onMinimizedChange?.(true);
-            }}
-            className="flex h-[20px] w-[22px] items-center justify-center rounded-[3px] transition-transform active:translate-y-px"
-            style={{
-              background: XP_BUTTON_BG,
-              border: '1px solid #365da8',
-              boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.95), inset -1px -1px 0 rgba(60,104,173,0.45)',
-            }}
-          >
-            <Minus size={13} color="#11327d" strokeWidth={2.2} />
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMaximized(!isMaximized);
-            }}
-            className="flex h-[20px] w-[22px] items-center justify-center rounded-[3px] transition-transform active:translate-y-px"
-            style={{
-              background: XP_BUTTON_BG,
-              border: '1px solid #365da8',
-              boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.95), inset -1px -1px 0 rgba(60,104,173,0.45)',
-            }}
-          >
-            {isMaximized ? (
-              <Copy size={12} className="rotate-180" color="#11327d" strokeWidth={2.1} />
-            ) : (
-              <Square size={12} color="#11327d" strokeWidth={2.1} />
-            )}
-          </button>
+        <div className="browser-header-buttons flex items-center gap-1">
+          {!mobileFullScreen && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMinimizedChange?.(true);
+                }}
+                className="flex h-[18px] w-[20px] items-center justify-center rounded-[2px] transition-transform active:translate-y-px"
+                style={{
+                  background: XP_BUTTON_BG,
+                  border: '1px solid #365da8',
+                  boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.95), inset -1px -1px 0 rgba(60,104,173,0.45)',
+                }}
+              >
+                <Minus size={11} color="#11327d" strokeWidth={2.2} />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMaximized(!isMaximized);
+                }}
+                className="flex h-[18px] w-[20px] items-center justify-center rounded-[2px] transition-transform active:translate-y-px"
+                style={{
+                  background: XP_BUTTON_BG,
+                  border: '1px solid #365da8',
+                  boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.95), inset -1px -1px 0 rgba(60,104,173,0.45)',
+                }}
+              >
+                {isMaximized ? (
+                  <Copy size={10} className="rotate-180" color="#11327d" strokeWidth={2.1} />
+                ) : (
+                  <Square size={10} color="#11327d" strokeWidth={2.1} />
+                )}
+              </button>
+            </>
+          )}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               onClose();
             }}
-            className="flex h-[20px] w-[22px] items-center justify-center rounded-[3px] transition-transform active:translate-y-px"
+            className="flex h-[18px] w-[20px] items-center justify-center rounded-[2px] transition-transform active:translate-y-px"
             style={{
               background: XP_CLOSE_BG,
               border: '1px solid #8f2204',
               boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.55), inset -1px -1px 0 rgba(132,34,8,0.42)',
             }}
           >
-            <X size={13} color="#ffffff" strokeWidth={2.3} />
+            <X size={11} color="#ffffff" strokeWidth={2.3} />
           </button>
         </div>
       </div>
 
-      {/* Menu Bar */}
-      <div
-        className="flex items-center gap-4 px-3 py-1"
-        style={{
-          background: XP_MENU_BG,
-          borderTop: '1px solid rgba(255,255,255,0.55)',
-          borderBottom: '1px solid #c8c1af',
-          fontFamily: 'Tahoma, "Trebuchet MS", sans-serif',
-        }}
-      >
-        {menuItems.map((item) => (
-          <button
-            key={item}
-            type="button"
-            className="text-[11px] text-[#4f4b42] transition-colors hover:text-[#163a8e]"
-            style={{ background: 'none', border: 'none', padding: 0 }}
-          >
-            {item}
-          </button>
-        ))}
-      </div>
+      {!mobileFullScreen && (
+        <div
+          className="flex items-center gap-4 px-3 py-[2px]"
+          style={{
+            background: XP_MENU_BG,
+            borderTop: '1px solid rgba(255,255,255,0.55)',
+            borderBottom: '1px solid #c8c1af',
+            fontFamily: 'Tahoma, "Trebuchet MS", sans-serif',
+          }}
+        >
+          {menuItems.map((item) => (
+            <button
+              key={item}
+              type="button"
+              className="text-[10px] text-[#4f4b42] transition-colors hover:text-[#163a8e]"
+              style={{ background: 'none', border: 'none', padding: 0 }}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {/* Address Bar */}
       <div
-        className="flex items-center gap-1.5 px-2 py-1"
+        className={`flex items-center ${mobileFullScreen ? 'gap-1 px-2 py-1.5' : 'gap-1 px-2 py-[2px]'}`}
         style={{
           background: XP_MENU_BG,
           borderTop: '1px solid rgba(255,255,255,0.7)',
@@ -366,14 +371,14 @@ export const BrowserWindow = ({
             onBack?.();
           }}
           disabled={!canGoBack}
-          className="flex h-[22px] w-[24px] items-center justify-center rounded-[3px] disabled:cursor-default disabled:opacity-45"
+          className="flex h-[20px] w-[22px] items-center justify-center rounded-[2px] disabled:cursor-default disabled:opacity-45"
           style={{
             background: XP_BUTTON_BG,
             border: '1px solid #8ea3c0',
             boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
           }}
         >
-          <ArrowLeft size={13} className="text-[#215dc6]" />
+          <ArrowLeft size={12} className="text-[#215dc6]" />
         </button>
         <button
           type="button"
@@ -382,14 +387,14 @@ export const BrowserWindow = ({
             onForward?.();
           }}
           disabled={!canGoForward}
-          className="flex h-[22px] w-[24px] items-center justify-center rounded-[3px] disabled:cursor-default disabled:opacity-45"
+          className="flex h-[20px] w-[22px] items-center justify-center rounded-[2px] disabled:cursor-default disabled:opacity-45"
           style={{
             background: XP_BUTTON_BG,
             border: '1px solid #8ea3c0',
             boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
           }}
         >
-          <ArrowRight size={13} className="text-[#215dc6]" />
+          <ArrowRight size={12} className="text-[#215dc6]" />
         </button>
         <button
           type="button"
@@ -398,23 +403,25 @@ export const BrowserWindow = ({
             onRefresh?.();
           }}
           disabled={!onRefresh}
-          className="flex h-[22px] w-[24px] items-center justify-center rounded-[3px] disabled:cursor-default disabled:opacity-45"
+          className="flex h-[20px] w-[22px] items-center justify-center rounded-[2px] disabled:cursor-default disabled:opacity-45"
           style={{
             background: XP_BUTTON_BG,
             border: '1px solid #8ea3c0',
             boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
           }}
         >
-          <RotateCw size={13} className="text-[#215dc6]" />
+          <RotateCw size={12} className="text-[#215dc6]" />
         </button>
-        <span
-          className="text-[11px] text-[#4f4b42]"
-          style={{ fontFamily: 'Tahoma, "Trebuchet MS", sans-serif' }}
-        >
-          Address
-        </span>
+        {!mobileFullScreen && (
+          <span
+            className="text-[10px] text-[#4f4b42]"
+            style={{ fontFamily: 'Tahoma, "Trebuchet MS", sans-serif' }}
+          >
+            Address
+          </span>
+        )}
         <div
-          className="flex-1 rounded-[3px] px-2 py-0.5"
+          className="flex-1 rounded-[2px] px-2 py-0"
           style={{
             backgroundColor: '#ffffff',
             border: '1px solid #7f9db9',
@@ -422,45 +429,29 @@ export const BrowserWindow = ({
           }}
         >
           <span
-            className="text-xs text-[#555555]"
+            className={`${mobileFullScreen ? 'text-[11px]' : 'text-[10px]'} text-[#555555]`}
             style={{ fontFamily: 'Tahoma, "Trebuchet MS", sans-serif' }}
           >
             {url}
           </span>
         </div>
-        <button
-          type="button"
-          className="flex items-center gap-1 rounded-[3px] px-2 py-1 text-[11px] text-[#3a4559]"
-          style={{
-            background: XP_BUTTON_BG,
-            border: '1px solid #8ea3c0',
-            boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
-            fontFamily: 'Tahoma, "Trebuchet MS", sans-serif',
-          }}
-        >
-          <span>Go</span>
-          <ChevronDown size={12} className="text-[#215dc6]" />
-        </button>
+        {!mobileFullScreen && (
+          <button
+            type="button"
+            className="flex items-center gap-1 rounded-[2px] px-1.5 py-0.5 text-[10px] text-[#3a4559]"
+            style={{
+              background: XP_BUTTON_BG,
+              border: '1px solid #8ea3c0',
+              boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
+              fontFamily: 'Tahoma, "Trebuchet MS", sans-serif',
+            }}
+          >
+            <span>Go</span>
+            <ChevronDown size={10} className="text-[#215dc6]" />
+          </button>
+        )}
       </div>
 
-      {/* Links Bar */}
-      <div
-        className="flex items-center gap-4 px-3 py-1"
-        style={{
-          background: XP_TOOLBAR_BG,
-          borderTop: '1px solid rgba(255,255,255,0.55)',
-          borderBottom: '1px solid #b8b09d',
-          fontFamily: 'Tahoma, "Trebuchet MS", sans-serif',
-        }}
-      >
-        <span className="text-[11px] font-bold text-[#4f4b42]">Links</span>
-        <span className="text-[11px] text-[#215dc6]">MSN.com</span>
-        <span className="text-[11px] text-[#215dc6]">Windows Media</span>
-        <span className="text-[11px] text-[#215dc6]">Hotmail</span>
-        <span className="text-[11px] text-[#215dc6]">Favorites</span>
-      </div>
-
-      {/* Content Area */}
       <div
         className="flex-1 min-h-0 overflow-auto"
         style={{ backgroundColor: '#ffffff' }}
@@ -468,8 +459,7 @@ export const BrowserWindow = ({
         {children}
       </div>
 
-      {/* Resize Handle */}
-      {!isMaximized && (
+      {!fillsWorkspace && (
         <div
           onMouseDown={handleResizeDown}
           className="absolute bottom-0 right-0 h-4 w-4 cursor-nwse-resize"
