@@ -3,6 +3,13 @@ import { Minus, Square, X, Copy, ArrowLeft, ArrowRight, RotateCw } from 'lucide-
 
 const MIN_WINDOW_WIDTH = 400;
 const MIN_WINDOW_HEIGHT = 300;
+const XP_WINDOW_BORDER = '#80a5e7';
+const XP_WINDOW_INNER_BORDER = '#b9d0f6';
+const XP_WINDOW_FRAME = '#ece9d8';
+const XP_TITLE_BAR = 'linear-gradient(180deg, #9dc0f2 0%, #8cb2eb 10%, #80a5e7 30%, #7398de 62%, #678bd3 100%)';
+const XP_TOOLBAR_BG = 'linear-gradient(180deg, #f8f6ee 0%, #ece8da 52%, #ddd6c4 100%)';
+const XP_BUTTON_BG = 'linear-gradient(180deg, #fefefe 0%, #eef5ff 45%, #c7daf7 100%)';
+const XP_CLOSE_BG = 'linear-gradient(180deg, #f9b27d 0%, #ef7b3d 45%, #cf4d19 100%)';
 
 type WindowPosition = { x: number; y: number };
 type WindowSize = { width: number; height: number };
@@ -209,8 +216,15 @@ export const BrowserWindow = ({
         left: 0,
         zIndex: isMaximized ? zIndex + 1 : zIndex,
         willChange: isDragging || isResizing ? 'transform, width, height' : 'auto',
+        backgroundColor: XP_WINDOW_FRAME,
+        borderTop: `1px solid ${XP_WINDOW_BORDER}`,
+        borderLeft: `3px solid ${XP_WINDOW_BORDER}`,
+        borderRight: `3px solid ${XP_WINDOW_BORDER}`,
+        borderBottom: `3px solid ${XP_WINDOW_BORDER}`,
+        borderRadius: '8px',
+        boxShadow: `inset 1px 0 0 ${XP_WINDOW_INNER_BORDER}, inset -1px 0 0 ${XP_WINDOW_INNER_BORDER}, inset 0 -1px 0 ${XP_WINDOW_INNER_BORDER}, 0 0 0 2px rgba(255,255,255,0.22) inset, 0 18px 45px rgba(0, 0, 0, 0.38)`,
       }}
-      className={`pointer-events-auto bg-white border border-gray-300 rounded-lg overflow-hidden shadow-2xl flex flex-col ${
+      className={`pointer-events-auto overflow-hidden flex flex-col ${
         isMaximized ? '' : isDragging || isResizing ? '' : 'transition-all duration-200'
       } ${isDragging ? 'select-none' : ''}`}
       onMouseDownCapture={onFocus}
@@ -218,60 +232,138 @@ export const BrowserWindow = ({
       {/* Title Bar */}
       <div
         onMouseDown={handleMouseDown}
-        className="flex items-center justify-between px-2 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white cursor-move select-none"
+        className="flex items-center justify-between cursor-move select-none"
+        style={{
+          minHeight: '30px',
+          padding: '4px 6px 5px 8px',
+          color: '#ffffff',
+          background: XP_TITLE_BAR,
+          borderBottom: '1px solid #08318d',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.72), inset 1px 0 0 rgba(255,255,255,0.35), inset -1px 0 0 rgba(255,255,255,0.18)',
+        }}
       >
-        <span className="text-xs font-semibold">{title}</span>
+        <span
+          className="truncate text-[13px] font-bold"
+          style={{
+            fontFamily: '"Trebuchet MS", Tahoma, sans-serif',
+            letterSpacing: '0.1px',
+            textShadow: '1px 1px 0 rgba(0, 0, 70, 0.55)',
+          }}
+        >
+          {title}
+        </span>
 
-        <div className="flex items-center gap-0.5 browser-header-buttons">
+        <div className="flex items-center gap-1 browser-header-buttons">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onMinimizedChange?.(true);
             }}
-            className="p-0.5 hover:bg-white/20 transition-colors rounded"
+            className="flex h-[20px] w-[22px] items-center justify-center rounded-[3px] transition-transform active:translate-y-px"
+            style={{
+              background: XP_BUTTON_BG,
+              border: '1px solid #365da8',
+              boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.95), inset -1px -1px 0 rgba(60,104,173,0.45)',
+            }}
           >
-            <Minus size={14} />
+            <Minus size={13} color="#11327d" strokeWidth={2.2} />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               setIsMaximized(!isMaximized);
             }}
-            className="p-0.5 hover:bg-white/20 transition-colors rounded"
+            className="flex h-[20px] w-[22px] items-center justify-center rounded-[3px] transition-transform active:translate-y-px"
+            style={{
+              background: XP_BUTTON_BG,
+              border: '1px solid #365da8',
+              boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.95), inset -1px -1px 0 rgba(60,104,173,0.45)',
+            }}
           >
-            {isMaximized ? <Copy size={14} className="rotate-180" /> : <Square size={14} />}
+            {isMaximized ? (
+              <Copy size={12} className="rotate-180" color="#11327d" strokeWidth={2.1} />
+            ) : (
+              <Square size={12} color="#11327d" strokeWidth={2.1} />
+            )}
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               onClose();
             }}
-            className="p-0.5 hover:bg-red-500 transition-colors rounded"
+            className="flex h-[20px] w-[22px] items-center justify-center rounded-[3px] transition-transform active:translate-y-px"
+            style={{
+              background: XP_CLOSE_BG,
+              border: '1px solid #8f2204',
+              boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.55), inset -1px -1px 0 rgba(132,34,8,0.42)',
+            }}
           >
-            <X size={14} />
+            <X size={13} color="#ffffff" strokeWidth={2.3} />
           </button>
         </div>
       </div>
 
       {/* Address Bar */}
-      <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 border-b border-blue-300">
-        <button className="p-0.5 hover:bg-blue-200 rounded transition-colors">
-          <ArrowLeft size={13} className="text-blue-600" />
+      <div
+        className="flex items-center gap-1.5 px-2 py-1.5"
+        style={{
+          background: XP_TOOLBAR_BG,
+          borderTop: '1px solid rgba(255,255,255,0.78)',
+          borderBottom: '1px solid #b8b09d',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.5)',
+        }}
+      >
+        <button
+          className="flex h-[22px] w-[24px] items-center justify-center rounded-[3px]"
+          style={{
+            background: XP_BUTTON_BG,
+            border: '1px solid #8ea3c0',
+            boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
+          }}
+        >
+          <ArrowLeft size={13} className="text-[#215dc6]" />
         </button>
-        <button className="p-0.5 hover:bg-blue-200 rounded transition-colors">
-          <ArrowRight size={13} className="text-blue-600" />
+        <button
+          className="flex h-[22px] w-[24px] items-center justify-center rounded-[3px]"
+          style={{
+            background: XP_BUTTON_BG,
+            border: '1px solid #8ea3c0',
+            boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
+          }}
+        >
+          <ArrowRight size={13} className="text-[#215dc6]" />
         </button>
-        <button className="p-0.5 hover:bg-blue-200 rounded transition-colors">
-          <RotateCw size={13} className="text-blue-600" />
+        <button
+          className="flex h-[22px] w-[24px] items-center justify-center rounded-[3px]"
+          style={{
+            background: XP_BUTTON_BG,
+            border: '1px solid #8ea3c0',
+            boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
+          }}
+        >
+          <RotateCw size={13} className="text-[#215dc6]" />
         </button>
-        <div className="flex-1 bg-white border border-blue-300 rounded px-2 py-0.5">
-          <span className="text-xs text-gray-600 font-mono">{url}</span>
+        <div
+          className="flex-1 rounded-[3px] px-2 py-0.5"
+          style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid #7f9db9',
+            boxShadow: 'inset 1px 1px 2px rgba(0,0,0,0.08)',
+          }}
+        >
+          <span
+            className="text-xs text-[#555555]"
+            style={{ fontFamily: 'Tahoma, "Trebuchet MS", sans-serif' }}
+          >
+            {url}
+          </span>
         </div>
       </div>
 
       {/* Content Area */}
       <div
-        className="flex-1 min-h-0 overflow-auto bg-white"
+        className="flex-1 min-h-0 overflow-auto"
+        style={{ backgroundColor: '#ffffff' }}
       >
         {children}
       </div>
@@ -280,9 +372,16 @@ export const BrowserWindow = ({
       {!isMaximized && (
         <div
           onMouseDown={handleResizeDown}
-          className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize hover:bg-blue-400/20 transition-colors"
+          className="absolute bottom-0 right-0 h-4 w-4 cursor-nwse-resize"
+          style={{ backgroundColor: XP_WINDOW_FRAME }}
         >
-          <div className="w-full h-full border-r-2 border-b-2 border-gray-300" />
+          <div
+            className="h-full w-full"
+            style={{
+              borderRight: '2px solid #8b8679',
+              borderBottom: '2px solid #8b8679',
+            }}
+          />
         </div>
       )}
     </div>

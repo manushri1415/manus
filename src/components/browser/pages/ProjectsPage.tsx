@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import './ProjectsPage.css';
 
 interface ProjectResult {
@@ -16,6 +16,7 @@ interface ProjectsPageProps {
 }
 
 const DEFAULT_QUERY = "Manushri Muruga Kumar's projects";
+const SEARCH_NAME_PREFIX = 'Manushri Muruga Kumar';
 
 const PROJECTS: ProjectResult[] = [
   {
@@ -114,6 +115,24 @@ const popularSearches = [
   'Filmmaking Technology',
 ] as const;
 
+const popularSearchFilters: Record<(typeof popularSearches)[number], string[]> = {
+  React: ['react'],
+  TypeScript: ['typescript'],
+  Python: ['python'],
+  'Full-Stack': ['full-stack', 'full stack'],
+  Backend: ['backend', 'api', 'server'],
+  'Artificial Intelligence': ['ai', 'artificial intelligence', 'openai'],
+  Databases: ['database', 'databases', 'sql', 'mysql', 'postgresql', 'supabase', 'drizzle'],
+  Testing: ['testing', 'test', 'tests', 'pytest', 'junit', 'usability'],
+  AWS: ['aws', 'cloud', 'cloudflare'],
+  'Filmmaking Technology': ['filmmaking', 'filmmakers', 'film', 'production'],
+};
+
+const getProjectSearchText = (project: ProjectResult) =>
+  [project.title, project.description, project.technologies.join(' '), project.displayUrl, 'project']
+    .join(' ')
+    .toLowerCase();
+
 export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
   const logoPath = `${import.meta.env.BASE_URL}assets/icons/moogle.png`;
   const resumePdfPath = `${import.meta.env.BASE_URL}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`;
@@ -121,9 +140,11 @@ export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
   const [lastSearchedQuery, setLastSearchedQuery] = useState(DEFAULT_QUERY);
   const [activeNavLabel, setActiveNavLabel] = useState('Web');
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedPopularSearch, setSelectedPopularSearch] = useState<(typeof popularSearches)[number] | null>(null);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
     if (isSearching) {
       timeoutId = setTimeout(() => {
         setIsSearching(false);
@@ -135,18 +156,39 @@ export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
     };
   }, [isSearching]);
 
-  const triggerSearch = (nextQuery: string, navLabel = activeNavLabel) => {
+  const triggerSearch = (
+    nextQuery: string,
+    navLabel = activeNavLabel,
+    popularSearch: (typeof popularSearches)[number] | null = null,
+  ) => {
     const normalizedQuery = nextQuery.trim() || DEFAULT_QUERY;
     setSearchQuery(normalizedQuery);
     setLastSearchedQuery(normalizedQuery);
     setActiveNavLabel(navLabel);
+    setSelectedPopularSearch(popularSearch);
     setIsSearching(true);
   };
 
-  const handleSearch = (e?: React.FormEvent) => {
+  const handleSearch = (e?: FormEvent) => {
     e?.preventDefault();
     triggerSearch(searchQuery);
   };
+
+  const resetToAllProjects = () => {
+    triggerSearch(DEFAULT_QUERY, 'Web', null);
+  };
+
+  const filteredProjects = selectedPopularSearch
+    ? PROJECTS.filter((project) => {
+        const projectSearchText = getProjectSearchText(project);
+        return popularSearchFilters[selectedPopularSearch].some((term) => projectSearchText.includes(term));
+      })
+    : PROJECTS;
+
+  const resultsSummary =
+    filteredProjects.length === 0
+      ? `Results 0 - 0 of 0 for ${lastSearchedQuery}. (0.04 seconds)`
+      : `Results 1 - ${filteredProjects.length} of about ${filteredProjects.length.toLocaleString()} for ${lastSearchedQuery}. (0.04 seconds)`;
 
   return (
     <div className="moongle-page">
@@ -161,7 +203,7 @@ export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
               className="moongle-search-input"
               placeholder="Search..."
               onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSearch(e as React.FormEvent);
+                if (e.key === 'Enter') handleSearch(e as unknown as FormEvent);
               }}
             />
             <button onClick={() => handleSearch()} className="moongle-search-button">
@@ -207,9 +249,7 @@ export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
 
       <div className="moongle-results-bar">
         <span className="moongle-results-bar-left">{activeNavLabel}</span>
-        <span className="moongle-results-bar-right">
-          Results 1 - 9 of about 47,200 for {lastSearchedQuery}. (0.04 seconds)
-        </span>
+        <span className="moongle-results-bar-right">{resultsSummary}</span>
       </div>
 
       {isSearching ? (
@@ -219,40 +259,79 @@ export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
       ) : (
         <div className="moongle-layout">
           <div className="moongle-results">
-            {PROJECTS.map((project) => (
-              <div key={project.title} className="moongle-result">
-                <button
-                  type="button"
-                  onClick={() => triggerSearch(project.title, 'Web')}
-                  className="moongle-result-title"
-                >
-                  {project.title}
-                </button>
-                {project.inDevelopment && (
-                  <div className="moongle-result-label">Currently in development</div>
-                )}
-                {project.featured && (
-                  <div className="moongle-result-label">Featured project</div>
-                )}
-                <div className="moongle-result-description">
-                  {project.description}
-                  {project.clientOwned && (
-                    <div className="moongle-client-note">
-                      Client-owned code; project details shown at a high level.
+            {filteredProjects.length > 0 ? (
+              filteredProjects.map((project) => (
+                <div key={project.title} className="moongle-result">
+                  <button
+                    type="button"
+                    onClick={() => triggerSearch(project.title, 'Web')}
+                    className="moongle-result-title"
+                  >
+                    {project.title}
+                  </button>
+                  {project.inDevelopment && (
+                    <div className="moongle-result-label">Currently in development</div>
+                  )}
+                  {project.featured && (
+                    <div className="moongle-result-label">Featured project</div>
+                  )}
+                  <div className="moongle-result-description">
+                    {project.description}
+                    {project.clientOwned && (
+                      <div className="moongle-client-note">
+                        Client-owned code; project details shown at a high level.
+                      </div>
+                    )}
+                  </div>
+                  {project.technologies.length > 0 && (
+                    <div className="moongle-result-technologies">
+                      <strong>Technologies:</strong> {project.technologies.join(' · ')}
                     </div>
                   )}
+                  <div className="moongle-result-url">{project.displayUrl}</div>
                 </div>
-                {project.technologies.length > 0 && (
-                  <div className="moongle-result-technologies">
-                    <strong>Technologies:</strong> {project.technologies.join(' · ')}
-                  </div>
-                )}
-                <div className="moongle-result-url">{project.displayUrl}</div>
+              ))
+            ) : (
+              <div className="moongle-no-results">
+                No projects matched <strong>{selectedPopularSearch}</strong>. Try another popular search.
               </div>
-            ))}
+            )}
           </div>
 
           <div className="moongle-sidebar">
+            <div className="moongle-popular-searches">
+              <h3 className="moongle-sidebar-heading">Popular Searches</h3>
+              <div className="moongle-popular-search-list">
+                <button
+                  type="button"
+                  onClick={resetToAllProjects}
+                  className={`moongle-popular-search-button${
+                    selectedPopularSearch === null ? ' moongle-popular-search-button-active' : ''
+                  }`}
+                  aria-pressed={selectedPopularSearch === null}
+                >
+                  All Projects
+                </button>
+                {popularSearches.map((term) => (
+                  <button
+                    key={term}
+                    type="button"
+                    onClick={() =>
+                      selectedPopularSearch === term
+                        ? resetToAllProjects()
+                        : triggerSearch(`${SEARCH_NAME_PREFIX} ${term}`, 'Web', term)
+                    }
+                    className={`moongle-popular-search-button${
+                      selectedPopularSearch === term ? ' moongle-popular-search-button-active' : ''
+                    }`}
+                    aria-pressed={selectedPopularSearch === term}
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="moongle-sponsored-links">
               <h3 className="moongle-sidebar-heading">Sponsored Links</h3>
 
@@ -312,22 +391,6 @@ export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
                   Experience, technical skills, education, and selected projects.
                 </div>
                 <div className="moongle-sponsored-url">www.manushri.dev/resume</div>
-              </div>
-            </div>
-
-            <div className="moongle-popular-searches">
-              <h3 className="moongle-sidebar-heading">Popular Searches</h3>
-              <div className="moongle-popular-search-list">
-                {popularSearches.map((term) => (
-                  <button
-                    key={term}
-                    type="button"
-                    onClick={() => triggerSearch(`Manushri Muruga Kumar ${term}`, 'Web')}
-                    className="moongle-popular-search-button"
-                  >
-                    {term}
-                  </button>
-                ))}
               </div>
             </div>
           </div>

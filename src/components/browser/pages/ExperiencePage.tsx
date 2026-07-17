@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import './ExperiencePage.css';
 import { EXPERIENCE_CATEGORIES, EXPERIENCE_PHOTOS } from './experienceData';
 
@@ -10,54 +10,109 @@ interface ExperiencePageProps {
 export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => {
   const photoGridRef = useRef<HTMLDivElement>(null);
   const basePath = import.meta.env.BASE_URL;
+  const [quickSearchValue, setQuickSearchValue] = useState('');
 
   const resumePdfPath = `${basePath}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`;
   const logoPath = `${basePath}assets/icons/M-photos/themanubook-logo.png`;
   const profilePicPath = `${basePath}assets/icons/M-photos/Manu-profile-pic.jpeg`;
+  const headerArtPath = `${basePath}assets/icons/M-photos/facebook-left.png`;
   const linkedInUrl = 'https://linkedin.com/in/manushrimurugakumar';
+
+  const handleQuickSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!photoGridRef.current) {
+      return;
+    }
+
+    photoGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <div className="experience-profile-page">
       {/* Main Header */}
-      <div className="themanubook-header">
-        <img src={logoPath} alt="themanubook" className="themanubook-logo" />
-        <div className="themanubook-nav">
-          <button className="themanubook-nav-link" onClick={onClose}>
-            home
-          </button>
-          <span className="themanubook-nav-sep">·</span>
-          <button className="themanubook-nav-link" onClick={() => onNavigate?.('about')}>
-            profile
-          </button>
-          <span className="themanubook-nav-sep">·</span>
-          <span className="themanubook-nav-current">experience</span>
-          <span className="themanubook-nav-sep">·</span>
-          <button className="themanubook-nav-link" onClick={() => onNavigate?.('projects')}>
-            projects
-          </button>
-          <span className="themanubook-nav-sep">·</span>
-          <a href="mailto:manushrimkumar@gmail.com" className="themanubook-nav-link">
-            contact
-          </a>
-          <span className="themanubook-nav-sep">·</span>
-          <a href={resumePdfPath} target="_blank" rel="noopener noreferrer" className="themanubook-nav-link">
-            resume
-          </a>
-          <span className="themanubook-nav-sep">·</span>
-          <button className="themanubook-nav-link" onClick={onClose}>
-            logout
-          </button>
-        </div>
-      </div>
+      <div className="themanubook-header-shell">
+        <div className="themanubook-header">
+          <div className="themanubook-hero-art">
+            <img src={headerArtPath} alt="" className="themanubook-hero-image" aria-hidden="true" />
+          </div>
 
-      {/* Sub-Header */}
-      <div className="themanubook-subheader">
-        <div className="themanubook-subheader-left">Manushri Muruga Kumar's Profile</div>
-        <div className="themanubook-subheader-right">Arizona State University</div>
+          <div className="themanubook-brand-panel">
+            <img src={logoPath} alt="themanubook" className="themanubook-logo" />
+            <div className="themanubook-nav">
+              <button className="themanubook-nav-link" onClick={onClose}>
+                home
+              </button>
+              <button className="themanubook-nav-link" onClick={() => onNavigate?.('about')}>
+                profile
+              </button>
+              <span className="themanubook-nav-current">experience</span>
+              <button className="themanubook-nav-link" onClick={() => onNavigate?.('projects')}>
+                projects
+              </button>
+              <a href="mailto:manushrimkumar@gmail.com" className="themanubook-nav-link">
+                contact
+              </a>
+              <a href={resumePdfPath} target="_blank" rel="noopener noreferrer" className="themanubook-nav-link">
+                resume
+              </a>
+              <button className="themanubook-nav-link" onClick={onClose}>
+                logout
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Sub-Header */}
+        <div className="themanubook-subheader">
+          <div className="themanubook-subheader-left">Manushri Muruga Kumar&apos;s Profile</div>
+          <div className="themanubook-subheader-right">Arizona State University</div>
+        </div>
       </div>
 
       {/* Main Content - Single Column */}
       <div className="themanubook-content">
+        <aside className="themanubook-quick-rail">
+          <div className="themanubook-quick-box">
+            <form className="themanubook-quick-search" onSubmit={handleQuickSearchSubmit}>
+              <input
+                type="text"
+                className="themanubook-quick-input"
+                value={quickSearchValue}
+                onChange={(event) => setQuickSearchValue(event.target.value)}
+                placeholder="experience"
+                aria-label="Quick search"
+              />
+              <div className="themanubook-quick-search-row">
+                <div className="themanubook-quick-box-title">quick search</div>
+                <button type="submit" className="themanubook-quick-button">
+                  go
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div className="themanubook-quick-links">
+            <button type="button" className="themanubook-quick-link" onClick={() => onNavigate?.('about')}>
+              My Profile
+            </button>
+            <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" className="themanubook-quick-link">
+              My Network
+            </a>
+            <button type="button" className="themanubook-quick-link" onClick={() => onNavigate?.('projects')}>
+              My Projects
+            </button>
+            <a href="mailto:manushrimkumar@gmail.com" className="themanubook-quick-link">
+              My Messages
+            </a>
+            <a href={resumePdfPath} target="_blank" rel="noopener noreferrer" className="themanubook-quick-link">
+              My Resume
+            </a>
+            <button type="button" className="themanubook-quick-link" onClick={onClose}>
+              My Logout
+            </button>
+          </div>
+        </aside>
+
         {/* Picture & Actions Section */}
         <div className="themanubook-section-left">
           <div className="themanubook-box">
@@ -87,7 +142,7 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
               target="_blank"
               rel="noopener noreferrer"
               className="themanubook-ad-link"
-              aria-label="Open Manushri Muruga Kumar's résumé"
+              aria-label="Open Manushri Muruga Kumar's resume"
             >
               <img
                 src={`${basePath}assets/icons/M-photos/ads.png`}
@@ -156,10 +211,6 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
                   Full-stack engineering, backend development, product engineering, applied AI, testing, cloud (AWS)
                 </span>
               </div>
-              <div className="themanubook-info-row">
-                <span className="themanubook-info-label">Profile Status:</span>
-                <span className="themanubook-info-value">Building software, telling stories, and looking for the right team</span>
-              </div>
             </div>
 
             <div className="themanubook-info-section">
@@ -170,7 +221,7 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
               </div>
               <div className="themanubook-info-row">
                 <span className="themanubook-info-label">Degree:</span>
-                <span className="themanubook-info-value">B.S. Computer Science (Aug 2022 – Jul 2026)</span>
+                <span className="themanubook-info-value">B.S. Computer Science (Aug 2022 - Jul 2026)</span>
               </div>
               <div className="themanubook-info-row">
                 <span className="themanubook-info-label">Location:</span>
@@ -186,7 +237,7 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
               </div>
               <div className="themanubook-info-row">
                 <span className="themanubook-info-label">School:</span>
-                <span className="themanubook-info-value">Sunshine Chennai Senior Secondary School(2010-2022)</span>
+                <span className="themanubook-info-value">Sunshine Chennai Senior Secondary School (2010-2022)</span>
               </div>
             </div>
           </div>
@@ -203,11 +254,9 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
                     <div className="themanubook-entry-title">{entry.title}</div>
                     <div className="themanubook-entry-org">
                       {entry.organization}
-                      {entry.dates && <span className="themanubook-entry-dates"> — {entry.dates}</span>}
+                      {entry.dates && <span className="themanubook-entry-dates"> - {entry.dates}</span>}
                     </div>
-                    {entry.location && (
-                      <div className="themanubook-entry-location">{entry.location}</div>
-                    )}
+                    {entry.location && <div className="themanubook-entry-location">{entry.location}</div>}
                     {entry.highlights.length > 0 && (
                       <ul className="themanubook-entry-highlights">
                         {entry.highlights.map((highlight, idx) => (

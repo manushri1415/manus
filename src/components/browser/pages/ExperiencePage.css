@@ -4,13 +4,13 @@
    ======================================== */
 
 .experience-profile-page {
-  --themanubook-blue: #395899;
+  --themanubook-blue: #3b5998;
   width: 100%;
   min-height: 100%;
   display: flex;
   flex-direction: column;
   container-type: inline-size;
-  background-color: #ffffff;
+  background: linear-gradient(180deg, #edf2fb 0, #ffffff 180px);
   color: #333333;
   font-family: Arial, Verdana, Tahoma, sans-serif;
   font-size: 11px;
@@ -22,48 +22,83 @@
    Header
    ======================================== */
 
+.themanubook-header-shell {
+  width: min(calc(100% - 24px), 1000px);
+  margin: 8px auto 0;
+  border: 1px solid #6c86ba;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 1px #c3d1ee inset;
+}
+
 .themanubook-header {
+  display: grid;
+  grid-template-columns: 480px minmax(0, 1fr);
+  align-items: stretch;
+  background: var(--themanubook-blue);
+  border: 1px solid #88a0d0;
+  border-bottom: none;
+  min-height: 78px;
+}
+
+.themanubook-hero-art {
+  position: relative;
+  overflow: hidden;
+  background: var(--themanubook-blue);
+}
+
+.themanubook-hero-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: left center;
+}
+
+.themanubook-brand-panel {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 4px 12px;
-  background-color: var(--themanubook-blue);
-  border-bottom: 1px solid #1a3a5c;
-  flex-shrink: 0;
-  gap: 12px;
+  min-width: 0;
+  gap: 0;
+  padding: 2px 12px 1px;
 }
 
 .themanubook-logo {
-  height: 48px;
+  height: clamp(40px, 5.6vw, 45px);
   object-fit: contain;
   flex-shrink: 0;
+  max-width: min(100%, 500px);
 }
 
 .themanubook-nav {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 4px 12px;
   font-size: 10px;
-  flex: 1;
   min-width: 0;
+  margin-top: -2px;
 }
 
-.themanubook-nav-link, .themanubook-nav-current {
+.themanubook-nav-link,
+.themanubook-nav-current {
   background: none;
   border: none;
   color: #ffffff;
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  font-size: 13px;
+  padding-top: 4px;
+  font-family: Tahoma, Verdana, sans-serif;
+  font-size: 11px;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(20, 39, 76, 0.45);
 }
 
 .themanubook-nav-link:hover {
   text-decoration: underline;
-  opacity: 0.85;
+  opacity: 0.88;
 }
 
 .themanubook-nav-link:focus {
@@ -71,13 +106,9 @@
   outline-offset: 2px;
 }
 
-.themanubook-nav-sep {
-  color: #ffffff;
-  opacity: 0.7;
-}
-
 .themanubook-nav-current {
-  color: #ffffff;
+  font-weight: bold;
+  text-decoration: underline;
 }
 
 /* ========================================
@@ -90,22 +121,24 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 6px 16px;
-  padding: 4px 40px;
-  background-color: var(--themanubook-blue);
-  border-bottom: 1px solid #1a3a5c;
-  font-size: 11px;
-  font-weight: bold;
+  padding: 3px 8px;
+  background: var(--themanubook-blue);
+  border: 1px solid #88a0d0;
+  font-size: 10px;
   color: #ffffff;
   flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .themanubook-subheader-left {
   flex: 1;
+  min-width: 0;
 }
 
 .themanubook-subheader-right {
   flex: 1;
   text-align: right;
+  min-width: 0;
 }
 
 /* ========================================
@@ -113,10 +146,11 @@
    ======================================== */
 
 .themanubook-content {
-  display: flex;
+  display: grid;
+  grid-template-columns: 156px minmax(210px, 300px) minmax(0, 1fr);
   flex: 1 0 auto;
-  gap: 12px;
-  padding: 12px;
+  gap: 10px;
+  padding: 10px 12px 12px;
   max-width: 1000px;
   margin: 0 auto;
   width: 100%;
@@ -125,9 +159,8 @@
 }
 
 .themanubook-section-left {
-  width: min(35%, 320px);
-  min-width: 220px;
-  flex-shrink: 0;
+  width: 100%;
+  min-width: 0;
   position: sticky;
   top: 12px;
   height: fit-content;
@@ -135,10 +168,129 @@
 }
 
 .themanubook-section-right {
-  flex: 1;
+  width: 100%;
   min-width: 0;
   overflow: visible;
   padding-right: 8px;
+}
+
+/* ========================================
+   Quick Search Rail
+   ======================================== */
+
+.themanubook-quick-rail {
+  position: sticky;
+  top: 12px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: #ffffff;
+}
+
+.themanubook-quick-box,
+.themanubook-quick-links {
+  position: relative;
+  border: none;
+  background-color: #ffffff;
+}
+
+.themanubook-quick-box::before,
+.themanubook-quick-links::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(to right, #9aaeda 0 4px, transparent 8px 12px) top / 100% 2px no-repeat,
+    repeating-linear-gradient(to right, #9aaeda 0 4px, transparent 8px 12px) bottom / 100% 2px no-repeat,
+    repeating-linear-gradient(to bottom, #9aaeda 0 4px, transparent 8px 12px) left / 2px 100% no-repeat,
+    repeating-linear-gradient(to bottom, #9aaeda 0 4px, transparent 8px 12px) right / 2px 100% no-repeat;
+}
+
+.themanubook-quick-box-title {
+  font-size: 14px;
+  color: #1e1e1e;
+  font-weight: normal;
+  line-height: 1.1;
+}
+
+.themanubook-quick-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 10px 9px;
+}
+
+.themanubook-quick-search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.themanubook-quick-input {
+  min-width: 0;
+  height: 30px;
+  border: 2px solid #8f8f9f;
+  background: #e3e4e6;
+  padding: 0 8px;
+  font-size: 11px;
+  font-family: Tahoma, Verdana, sans-serif;
+  color: #333333;
+  box-sizing: border-box;
+}
+
+.themanubook-quick-input::placeholder {
+  color: #8c90a6;
+}
+
+.themanubook-quick-button {
+  height: 17px;
+  min-width: 30px;
+  padding: 0 10px;
+  border: 1px solid #4f6fa7;
+  background: linear-gradient(180deg, #7ea1df 0%, #4c72b2 100%);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: bold;
+  font-family: Tahoma, Verdana, sans-serif;
+  cursor: pointer;
+}
+
+.themanubook-quick-button:hover {
+  filter: brightness(1.03);
+}
+
+.themanubook-quick-links {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 10px;
+  gap: 5px;
+  min-height: 170px;
+}
+
+.themanubook-quick-link {
+  display: block;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  color: #4262a5;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1.2;
+  font-family: Tahoma, Verdana, sans-serif;
+}
+
+.themanubook-quick-link:hover {
+  text-decoration: underline;
+}
+
+.themanubook-quick-link:focus {
+  outline: 1px dotted #5b78b7;
+  outline-offset: 2px;
 }
 
 /* ========================================
@@ -461,23 +613,28 @@
 }
 
 @container (max-width: 860px) {
+  .themanubook-header-shell {
+    width: min(calc(100% - 20px), 1000px);
+  }
+
   .themanubook-subheader {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   .themanubook-content {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
+  .themanubook-quick-rail,
   .themanubook-section-left,
   .themanubook-section-right {
     width: 100%;
   }
 
+  .themanubook-quick-rail,
   .themanubook-section-left {
     position: static;
-    min-width: 0;
   }
 
   .themanubook-section-right {
@@ -487,17 +644,31 @@
 
 @container (max-width: 660px) {
   .themanubook-header {
-    padding-left: 10px;
-    padding-right: 10px;
+    grid-template-columns: 160px minmax(0, 1fr);
+    min-height: 68px;
+  }
+
+  .themanubook-brand-panel {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .themanubook-nav {
+    gap: 4px 8px;
+    margin-top: -1px;
+  }
+
+  .themanubook-nav-link,
+  .themanubook-nav-current {
+    font-size: 10px;
   }
 
   .themanubook-subheader {
-    padding-left: 10px;
-    padding-right: 10px;
+    font-size: 9px;
   }
 
   .themanubook-content {
-    padding: 10px;
+    padding: 8px;
   }
 
   .themanubook-info-row {
@@ -508,5 +679,37 @@
   .themanubook-info-label {
     min-width: 0;
     margin-right: 0;
+  }
+}
+
+@container (max-width: 500px) {
+  .themanubook-header-shell {
+    width: min(calc(100% - 16px), 1000px);
+    margin-top: 8px;
+  }
+
+  .themanubook-header {
+    grid-template-columns: 1fr;
+  }
+
+  .themanubook-hero-art {
+    display: block;
+    max-height: 60px;
+  }
+
+  .themanubook-brand-panel {
+    align-items: flex-start;
+  }
+
+  .themanubook-logo {
+    max-width: 250px;
+  }
+
+  .themanubook-nav {
+    justify-content: flex-start;
+  }
+
+  .themanubook-subheader-right {
+    text-align: left;
   }
 }
