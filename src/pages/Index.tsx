@@ -23,7 +23,33 @@ type WorkspaceSize = {
   height: number;
 };
 
-type DesktopWindowKey = 'terminal' | BrowserPageKey;
+type DesktopWindowKey = 'terminal' | 'browser';
+
+type BrowserWindowState = {
+  isOpen: boolean;
+  isMinimized: boolean;
+  history: BrowserPageKey[];
+  historyIndex: number;
+  refreshKey: number;
+  initialPosition: {
+    x: number;
+    y: number;
+  };
+  initialSize: {
+    width: number;
+    height: number;
+  };
+};
+
+const createDefaultBrowserWindowState = (): BrowserWindowState => ({
+  isOpen: false,
+  isMinimized: false,
+  history: [],
+  historyIndex: -1,
+  refreshKey: 0,
+  initialPosition: { x: 40, y: 40 },
+  initialSize: { width: DEFAULT_BROWSER_WIDTH, height: DEFAULT_BROWSER_HEIGHT },
+});
 
 const getInitialWorkspaceSize = (): WorkspaceSize => {
   if (typeof window === 'undefined') {
@@ -44,8 +70,7 @@ const Index = () => {
   const [wallpaper, setWallpaper] = useState<string | null>(DEFAULT_WALLPAPER);
   const [time] = useState(new Date('2005-02-15T09:19:00'));
   const [appState, setAppState] = useState<'booting' | 'desktop'>('booting');
-  const [openWindows, setOpenWindows] = useState<BrowserPageKey[]>([]);
-  const [minimizedWindows, setMinimizedWindows] = useState<Set<BrowserPageKey>>(new Set());
+  const [browserWindow, setBrowserWindow] = useState<BrowserWindowState>(createDefaultBrowserWindowState);
   const [isTerminalMinimized, setIsTerminalMinimized] = useState(false);
   const [windowStack, setWindowStack] = useState<DesktopWindowKey[]>(['terminal']);
   const terminalRef = useRef<any>(null);
@@ -110,8 +135,7 @@ const Index = () => {
   }, []);
 
   const handlePowerOff = useCallback(() => {
-    setOpenWindows([]);
-    setMinimizedWindows(new Set());
+    setBrowserWindow(createDefaultBrowserWindowState());
     setIsTerminalMinimized(false);
     setWindowStack(['terminal']);
     setAppState('booting');
@@ -123,59 +147,6 @@ const Index = () => {
       return [...filtered, windowKey];
     });
   }, []);
-
-  const activateBrowserPage = useCallback((pageKey: BrowserPageKey) => {
-    setOpenWindows((prev) => {
-      if (prev.includes(pageKey)) {
-        return prev;
-      }
-
-      return [...prev, pageKey];
-    });
-    setMinimizedWindows(new Set(openWindows.filter((key) => key !== pageKey)));
-    bringWindowToFront(pageKey);
-  }, [bringWindowToFront, openWindows]);
-
-  const openOrFocusPage = useCallback((pageKey: BrowserPageKey) => {
-    activateBrowserPage(pageKey);
-  }, [activateBrowserPage]);
-
-  const handleWindowClose = useCallback((pageKey: BrowserPageKey) => {
-    setOpenWindows((prev) => prev.filter((k) => k !== pageKey));
-    setMinimizedWindows((prev) => {
-      const next = new Set(prev);
-      next.delete(pageKey);
-      return next;
-    });
-    setWindowStack((prev) => prev.filter((key) => key !== pageKey));
-  }, []);
-
-  const handleWindowFocus = useCallback((pageKey: BrowserPageKey) => {
-    activateBrowserPage(pageKey);
-  }, [activateBrowserPage]);
-
-  const handleWindowMinimize = useCallback((pageKey: BrowserPageKey, value: boolean) => {
-    setMinimizedWindows((prev) => {
-      const next = new Set(prev);
-      if (value) {
-        next.add(pageKey);
-      } else {
-        next.delete(pageKey);
-      }
-      return next;
-    });
-    if (!value) {
-      bringWindowToFront(pageKey);
-    }
-  }, [bringWindowToFront]);
-
-  const handleIconClick = useCallback((command: string) => {
-    if (command in BROWSER_PAGES) {
-      openOrFocusPage(command as BrowserPageKey);
-    } else if (terminalRef.current) {
-      terminalRef.current.executeExternalCommand(command);
-    }
-  }, [openOrFocusPage]);
 
   const getInitialWindowState = useCallback((pageKey: BrowserPageKey) => {
     const fallbackSize = { width: DEFAULT_BROWSER_WIDTH, height: DEFAULT_BROWSER_HEIGHT };
@@ -214,12 +185,129 @@ const Index = () => {
     };
   }, [workspaceSize]);
 
+  const openBrowserPage = useCallback((pageKey: BrowserPageKey) => {
+    const initialWindowState = getInitialWindowState(pageKey);
+
+    setBrowserWindow((prev) => {
+      const currentPage = prev.history[prev.historyIndex];
+
+      if (!prev.isOpen) {
+        return {
+          isOpen: true,
+          isMinimized: false,
+          history: [pageKey],
+          historyIndex: 0,
+          refreshKey: 0,
+          initialPosition: initialWindowState.position,
+          initialSize: initialWindowState.size,
+        };
+      }
+
+      if (currentPage === pageKey) {
+        return {
+          ...prev,
+          isMinimized: false,
+        };
+      }
+
+      const nextHistory = prev.history.slice(0, prev.historyIndex + 1);
+      nextHistory.push(pageKey);
+
+      return {
+        ...prev,
+        isMinimized: false,
+        history: nextHistory,
+        historyIndex: nextHistory.length - 1,
+      };
+    });
+
+    bringWindowToFront('browser');
+  }, [bringWindowToFront, getInitialWindowState]);
+
+  const handleBrowserClose = useCallback(() => {
+    setBrowserWindow(createDefaultBrowserWindowState());
+    setWindowStack((prev) => prev.filter((key) => key !== 'browser'));
+  }, []);
+
+  const handleBrowserFocus = useCallback(() => {
+    setBrowserWindow((prev) => (
+      prev.isOpen && prev.isMinimized
+        ? { ...prev, isMinimized: false }
+        : prev
+    ));
+    bringWindowToFront('browser');
+  }, [bringWindowToFront]);
+
+  const handleBrowserMinimize = useCallback((value: boolean) => {
+    setBrowserWindow((prev) => (
+      prev.isOpen
+        ? { ...prev, isMinimized: value }
+        : prev
+    ));
+
+    if (!value) {
+      bringWindowToFront('browser');
+    }
+  }, [bringWindowToFront]);
+
+  const handleBrowserBack = useCallback(() => {
+    setBrowserWindow((prev) => {
+      if (prev.historyIndex <= 0) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        historyIndex: prev.historyIndex - 1,
+      };
+    });
+    bringWindowToFront('browser');
+  }, [bringWindowToFront]);
+
+  const handleBrowserForward = useCallback(() => {
+    setBrowserWindow((prev) => {
+      if (prev.historyIndex >= prev.history.length - 1) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        historyIndex: prev.historyIndex + 1,
+      };
+    });
+    bringWindowToFront('browser');
+  }, [bringWindowToFront]);
+
+  const handleBrowserRefresh = useCallback(() => {
+    setBrowserWindow((prev) => (
+      prev.isOpen
+        ? { ...prev, refreshKey: prev.refreshKey + 1 }
+        : prev
+    ));
+    bringWindowToFront('browser');
+  }, [bringWindowToFront]);
+
+  const handleIconClick = useCallback((command: string) => {
+    if (command in BROWSER_PAGES) {
+      openBrowserPage(command as BrowserPageKey);
+    } else if (terminalRef.current) {
+      terminalRef.current.executeExternalCommand(command);
+    }
+  }, [openBrowserPage]);
+
+  const currentBrowserPageKey =
+    browserWindow.historyIndex >= 0 ? browserWindow.history[browserWindow.historyIndex] ?? null : null;
+  const currentBrowserPage = currentBrowserPageKey ? BROWSER_PAGES[currentBrowserPageKey] : null;
+  const canGoBack = browserWindow.historyIndex > 0;
+  const canGoForward =
+    browserWindow.historyIndex >= 0 && browserWindow.historyIndex < browserWindow.history.length - 1;
+
   const activeWindow = [...windowStack].reverse().find((windowKey) => {
     if (windowKey === 'terminal') {
       return !isTerminalMinimized;
     }
 
-    return openWindows.includes(windowKey) && !minimizedWindows.has(windowKey);
+    return browserWindow.isOpen && !browserWindow.isMinimized;
   }) ?? null;
 
   const getWindowZIndex = useCallback((windowKey: DesktopWindowKey) => {
@@ -227,14 +315,25 @@ const Index = () => {
     return 10 + Math.max(0, stackIndex);
   }, [windowStack]);
 
-  const handleTaskbarWindowClick = useCallback((pageKey: BrowserPageKey) => {
-    if (activeWindow === pageKey) {
-      handleWindowMinimize(pageKey, true);
+  const handleTaskbarBrowserClick = useCallback(() => {
+    if (!browserWindow.isOpen) {
       return;
     }
 
-    activateBrowserPage(pageKey);
-  }, [activeWindow, activateBrowserPage, handleWindowMinimize]);
+    if (browserWindow.isMinimized) {
+      setBrowserWindow((prev) => ({ ...prev, isMinimized: false }));
+      bringWindowToFront('browser');
+      return;
+    }
+
+    if (activeWindow === 'browser') {
+      setBrowserWindow((prev) => ({ ...prev, isMinimized: true }));
+      return;
+    }
+
+    setBrowserWindow((prev) => ({ ...prev, isMinimized: false }));
+    bringWindowToFront('browser');
+  }, [activeWindow, browserWindow.isMinimized, browserWindow.isOpen, bringWindowToFront]);
 
   const handleTerminalFocus = useCallback(() => {
     bringWindowToFront('terminal');
@@ -254,6 +353,36 @@ const Index = () => {
 
     bringWindowToFront('terminal');
   }, [activeWindow, bringWindowToFront, isTerminalMinimized]);
+
+  const renderBrowserPage = () => {
+    switch (currentBrowserPageKey) {
+      case 'experience':
+        return (
+          <ExperiencePage
+            onClose={handleBrowserClose}
+            onNavigate={openBrowserPage}
+          />
+        );
+      case 'projects':
+        return <ProjectsPage onNavigate={openBrowserPage} />;
+      case 'contact':
+        return (
+          <ContactPage
+            onClose={handleBrowserClose}
+            onNavigate={openBrowserPage}
+          />
+        );
+      case 'about':
+        return (
+          <AboutPage
+            onClose={handleBrowserClose}
+            onNavigate={openBrowserPage}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   if (appState === 'booting') {
     return <BootSequence onComplete={handleBootComplete} />;
@@ -282,7 +411,10 @@ const Index = () => {
         className="relative overflow-hidden z-10 pointer-events-none"
         style={{ height: `calc(100vh - ${TASKBAR_HEIGHT}px)` }}
       >
-        <div className="relative z-0 flex h-full w-full items-center justify-center p-4 pointer-events-none">
+        <div
+          className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none"
+          style={{ zIndex: getWindowZIndex('terminal') }}
+        >
           <div className="flex h-full w-full items-center justify-center">
             <Terminal
               ref={terminalRef}
@@ -298,56 +430,36 @@ const Index = () => {
 
         <div
           ref={workspaceRef}
-          className="absolute z-20 pointer-events-none"
+          className="absolute pointer-events-none"
           style={{
             inset: `${WORKSPACE_PADDING}px`,
+            zIndex: getWindowZIndex('browser'),
           }}
         >
-          {/* Browser Windows */}
-          {openWindows.map((pageKey) => {
-            const page = BROWSER_PAGES[pageKey];
-            if (!page) return null;
-            const { Component } = page;
-            const initialWindowState = getInitialWindowState(pageKey);
-
-            return (
-              <BrowserWindow
-                key={pageKey}
-                title={page.title}
-                url={page.url}
-                initialPosition={initialWindowState.position}
-                initialSize={initialWindowState.size}
-                workspaceSize={workspaceSize}
-                minSize={page.minWindowSize}
-                zIndex={getWindowZIndex(pageKey)}
-                isMinimized={minimizedWindows.has(pageKey)}
-                onMinimizedChange={(v) => handleWindowMinimize(pageKey, v)}
-                onFocus={() => handleWindowFocus(pageKey)}
-                onClose={() => handleWindowClose(pageKey)}
-              >
-                {pageKey === 'experience' ? (
-                  <ExperiencePage
-                    onClose={() => handleWindowClose('experience')}
-                    onNavigate={openOrFocusPage}
-                  />
-                ) : pageKey === 'projects' ? (
-                  <ProjectsPage onNavigate={openOrFocusPage} />
-                ) : pageKey === 'contact' ? (
-                  <ContactPage
-                    onClose={() => handleWindowClose('contact')}
-                    onNavigate={openOrFocusPage}
-                  />
-                ) : pageKey === 'about' ? (
-                  <AboutPage
-                    onClose={() => handleWindowClose('about')}
-                    onNavigate={openOrFocusPage}
-                  />
-                ) : (
-                  <Component />
-                )}
-              </BrowserWindow>
-            );
-          })}
+          {browserWindow.isOpen && currentBrowserPage && (
+            <BrowserWindow
+              title={currentBrowserPage.title}
+              url={currentBrowserPage.url}
+              initialPosition={browserWindow.initialPosition}
+              initialSize={browserWindow.initialSize}
+              workspaceSize={workspaceSize}
+              minSize={currentBrowserPage.minWindowSize}
+              zIndex={getWindowZIndex('browser')}
+              isMinimized={browserWindow.isMinimized}
+              onMinimizedChange={handleBrowserMinimize}
+              onFocus={handleBrowserFocus}
+              onClose={handleBrowserClose}
+              canGoBack={canGoBack}
+              canGoForward={canGoForward}
+              onBack={handleBrowserBack}
+              onForward={handleBrowserForward}
+              onRefresh={handleBrowserRefresh}
+            >
+              <div key={`${currentBrowserPageKey}:${browserWindow.refreshKey}`} className="h-full">
+                {renderBrowserPage()}
+              </div>
+            </BrowserWindow>
+          )}
         </div>
       </main>
 
@@ -355,7 +467,7 @@ const Index = () => {
       <footer className="fixed bottom-0 left-0 right-0 z-50 flex h-[32px] items-stretch border-t border-[#7abaf8] bg-[linear-gradient(180deg,var(--xp-blue-light)_0%,var(--xp-blue)_45%,var(--xp-blue-dark)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
         <SocialLinks
           onReset={handleReset}
-          onOpenPage={openOrFocusPage}
+          onOpenPage={openBrowserPage}
           onPowerOff={handlePowerOff}
         />
 
@@ -375,27 +487,21 @@ const Index = () => {
               <span className="truncate">Terminal (Guest@Portfolio)</span>
             </button>
 
-            {openWindows.map((pageKey) => {
-              const page = BROWSER_PAGES[pageKey];
-              const isActive = activeWindow === pageKey;
-
-              return (
-                <button
-                  key={pageKey}
-                  onClick={() => handleTaskbarWindowClick(pageKey)}
-                  className="flex h-[24px] min-w-0 max-w-[220px] flex-shrink-0 items-center rounded-sm border px-2 text-[11px] font-semibold text-white shadow-[inset_1px_1px_0_rgba(255,255,255,0.35)]"
-                  style={{
-                    background: isActive
-                      ? 'linear-gradient(180deg, #3d89ff 0%, #2f6be6 48%, #1f49b9 100%)'
-                      : 'linear-gradient(180deg, #4e8df2 0%, #336ed7 50%, #2451be 100%)',
-                    borderColor: isActive ? '#173b94' : '#2b58bc',
-                    opacity: minimizedWindows.has(pageKey) ? 0.82 : 1,
-                  }}
-                >
-                  <span className="truncate">{page.label}</span>
-                </button>
-              );
-            })}
+            {browserWindow.isOpen && (
+              <button
+                onClick={handleTaskbarBrowserClick}
+                className="flex h-[24px] min-w-0 max-w-[220px] flex-shrink-0 items-center rounded-sm border px-2 text-[11px] font-semibold text-white shadow-[inset_1px_1px_0_rgba(255,255,255,0.35)]"
+                style={{
+                  background: activeWindow === 'browser'
+                    ? 'linear-gradient(180deg, #3d89ff 0%, #2f6be6 48%, #1f49b9 100%)'
+                    : 'linear-gradient(180deg, #4e8df2 0%, #336ed7 50%, #2451be 100%)',
+                  borderColor: activeWindow === 'browser' ? '#173b94' : '#2b58bc',
+                  opacity: browserWindow.isMinimized ? 0.82 : 1,
+                }}
+              >
+                <span className="truncate">Internet Explorer</span>
+              </button>
+            )}
           </div>
         </div>
 

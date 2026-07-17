@@ -154,7 +154,7 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
 
           {/* Experience Photos */}
           <div className="themanubook-box" ref={photoGridRef}>
-            <div className="themanubook-box-title">Experience Photos</div>
+            <div className="themanubook-box-title">Gallery</div>
             <div className="themanubook-photo-grid">
               {EXPERIENCE_PHOTOS.map((photo) => (
                 <div key={photo.id} className="themanubook-photo-item">

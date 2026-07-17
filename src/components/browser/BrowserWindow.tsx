@@ -1,5 +1,14 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { Minus, Square, X, Copy, ArrowLeft, ArrowRight, RotateCw } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import {
+  Minus,
+  Square,
+  X,
+  Copy,
+  ArrowLeft,
+  ArrowRight,
+  RotateCw,
+  ChevronDown,
+} from 'lucide-react';
 
 const MIN_WINDOW_WIDTH = 400;
 const MIN_WINDOW_HEIGHT = 300;
@@ -10,6 +19,9 @@ const XP_TITLE_BAR = 'linear-gradient(180deg, #9dc0f2 0%, #8cb2eb 10%, #80a5e7 3
 const XP_TOOLBAR_BG = 'linear-gradient(180deg, #f8f6ee 0%, #ece8da 52%, #ddd6c4 100%)';
 const XP_BUTTON_BG = 'linear-gradient(180deg, #fefefe 0%, #eef5ff 45%, #c7daf7 100%)';
 const XP_CLOSE_BG = 'linear-gradient(180deg, #f9b27d 0%, #ef7b3d 45%, #cf4d19 100%)';
+const XP_MENU_BG = 'linear-gradient(180deg, #faf8f1 0%, #f0ebde 100%)';
+
+const menuItems = ['File', 'Edit', 'View', 'Favorites', 'Tools', 'Help'];
 
 type WindowPosition = { x: number; y: number };
 type WindowSize = { width: number; height: number };
@@ -27,6 +39,11 @@ interface BrowserWindowProps {
   onMinimizedChange?: (v: boolean) => void;
   onFocus?: () => void;
   zIndex?: number;
+  canGoBack?: boolean;
+  canGoForward?: boolean;
+  onBack?: () => void;
+  onForward?: () => void;
+  onRefresh?: () => void;
 }
 
 const clampValue = (value: number, min: number, max: number) => {
@@ -71,6 +88,11 @@ export const BrowserWindow = ({
   onMinimizedChange,
   onFocus,
   zIndex = 20,
+  canGoBack = false,
+  canGoForward = false,
+  onBack,
+  onForward,
+  onRefresh,
 }: BrowserWindowProps) => {
   const initialState = normalizeWindowState(initialPosition, initialSize, workspaceSize, minSize);
   const [position, setPosition] = useState(initialState.position);
@@ -255,6 +277,7 @@ export const BrowserWindow = ({
 
         <div className="flex items-center gap-1 browser-header-buttons">
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onMinimizedChange?.(true);
@@ -269,6 +292,7 @@ export const BrowserWindow = ({
             <Minus size={13} color="#11327d" strokeWidth={2.2} />
           </button>
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               setIsMaximized(!isMaximized);
@@ -287,6 +311,7 @@ export const BrowserWindow = ({
             )}
           </button>
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onClose();
@@ -303,18 +328,45 @@ export const BrowserWindow = ({
         </div>
       </div>
 
+      {/* Menu Bar */}
+      <div
+        className="flex items-center gap-4 px-3 py-1"
+        style={{
+          background: XP_MENU_BG,
+          borderTop: '1px solid rgba(255,255,255,0.55)',
+          borderBottom: '1px solid #c8c1af',
+          fontFamily: 'Tahoma, "Trebuchet MS", sans-serif',
+        }}
+      >
+        {menuItems.map((item) => (
+          <button
+            key={item}
+            type="button"
+            className="text-[11px] text-[#4f4b42] transition-colors hover:text-[#163a8e]"
+            style={{ background: 'none', border: 'none', padding: 0 }}
+          >
+            {item}
+          </button>
+        ))}
+      </div>
+
       {/* Address Bar */}
       <div
-        className="flex items-center gap-1.5 px-2 py-1.5"
+        className="flex items-center gap-1.5 px-2 py-1"
         style={{
-          background: XP_TOOLBAR_BG,
-          borderTop: '1px solid rgba(255,255,255,0.78)',
-          borderBottom: '1px solid #b8b09d',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.5)',
+          background: XP_MENU_BG,
+          borderTop: '1px solid rgba(255,255,255,0.7)',
+          borderBottom: '1px solid #c2baa9',
         }}
       >
         <button
-          className="flex h-[22px] w-[24px] items-center justify-center rounded-[3px]"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onBack?.();
+          }}
+          disabled={!canGoBack}
+          className="flex h-[22px] w-[24px] items-center justify-center rounded-[3px] disabled:cursor-default disabled:opacity-45"
           style={{
             background: XP_BUTTON_BG,
             border: '1px solid #8ea3c0',
@@ -324,7 +376,13 @@ export const BrowserWindow = ({
           <ArrowLeft size={13} className="text-[#215dc6]" />
         </button>
         <button
-          className="flex h-[22px] w-[24px] items-center justify-center rounded-[3px]"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onForward?.();
+          }}
+          disabled={!canGoForward}
+          className="flex h-[22px] w-[24px] items-center justify-center rounded-[3px] disabled:cursor-default disabled:opacity-45"
           style={{
             background: XP_BUTTON_BG,
             border: '1px solid #8ea3c0',
@@ -334,7 +392,13 @@ export const BrowserWindow = ({
           <ArrowRight size={13} className="text-[#215dc6]" />
         </button>
         <button
-          className="flex h-[22px] w-[24px] items-center justify-center rounded-[3px]"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRefresh?.();
+          }}
+          disabled={!onRefresh}
+          className="flex h-[22px] w-[24px] items-center justify-center rounded-[3px] disabled:cursor-default disabled:opacity-45"
           style={{
             background: XP_BUTTON_BG,
             border: '1px solid #8ea3c0',
@@ -343,6 +407,12 @@ export const BrowserWindow = ({
         >
           <RotateCw size={13} className="text-[#215dc6]" />
         </button>
+        <span
+          className="text-[11px] text-[#4f4b42]"
+          style={{ fontFamily: 'Tahoma, "Trebuchet MS", sans-serif' }}
+        >
+          Address
+        </span>
         <div
           className="flex-1 rounded-[3px] px-2 py-0.5"
           style={{
@@ -358,6 +428,36 @@ export const BrowserWindow = ({
             {url}
           </span>
         </div>
+        <button
+          type="button"
+          className="flex items-center gap-1 rounded-[3px] px-2 py-1 text-[11px] text-[#3a4559]"
+          style={{
+            background: XP_BUTTON_BG,
+            border: '1px solid #8ea3c0',
+            boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
+            fontFamily: 'Tahoma, "Trebuchet MS", sans-serif',
+          }}
+        >
+          <span>Go</span>
+          <ChevronDown size={12} className="text-[#215dc6]" />
+        </button>
+      </div>
+
+      {/* Links Bar */}
+      <div
+        className="flex items-center gap-4 px-3 py-1"
+        style={{
+          background: XP_TOOLBAR_BG,
+          borderTop: '1px solid rgba(255,255,255,0.55)',
+          borderBottom: '1px solid #b8b09d',
+          fontFamily: 'Tahoma, "Trebuchet MS", sans-serif',
+        }}
+      >
+        <span className="text-[11px] font-bold text-[#4f4b42]">Links</span>
+        <span className="text-[11px] text-[#215dc6]">MSN.com</span>
+        <span className="text-[11px] text-[#215dc6]">Windows Media</span>
+        <span className="text-[11px] text-[#215dc6]">Hotmail</span>
+        <span className="text-[11px] text-[#215dc6]">Favorites</span>
       </div>
 
       {/* Content Area */}
