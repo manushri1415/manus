@@ -10,8 +10,8 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
-const MIN_WINDOW_WIDTH = 400;
-const MIN_WINDOW_HEIGHT = 300;
+const BROWSER_MIN_WINDOW_WIDTH = 400;
+const BROWSER_MIN_WINDOW_HEIGHT = 300;
 const XP_WINDOW_BORDER = '#80a5e7';
 const XP_WINDOW_INNER_BORDER = '#b9d0f6';
 const XP_WINDOW_FRAME = '#ece9d8';
@@ -33,6 +33,12 @@ interface BrowserWindowProps {
   initialSize: WindowSize;
   workspaceSize: WindowSize;
   minSize?: Partial<WindowSize>;
+  chromeMode?: 'browser' | 'utility';
+  showMinimizeButton?: boolean;
+  showMaximizeButton?: boolean;
+  resizable?: boolean;
+  bodyClassName?: string;
+  bodyStyle?: React.CSSProperties;
   onClose: () => void;
   isMinimized?: boolean;
   onMinimizedChange?: (v: boolean) => void;
@@ -56,9 +62,11 @@ const normalizeWindowState = (
   size: WindowSize,
   workspaceSize: WindowSize,
   minSize?: Partial<WindowSize>,
+  defaultMinWidth = BROWSER_MIN_WINDOW_WIDTH,
+  defaultMinHeight = BROWSER_MIN_WINDOW_HEIGHT,
 ) => {
-  const minWidth = Math.max(MIN_WINDOW_WIDTH, minSize?.width ?? MIN_WINDOW_WIDTH);
-  const minHeight = Math.max(MIN_WINDOW_HEIGHT, minSize?.height ?? MIN_WINDOW_HEIGHT);
+  const minWidth = Math.max(defaultMinWidth, minSize?.width ?? defaultMinWidth);
+  const minHeight = Math.max(defaultMinHeight, minSize?.height ?? defaultMinHeight);
   const maxWidth = Math.max(minWidth, workspaceSize.width || minWidth);
   const maxHeight = Math.max(minHeight, workspaceSize.height || minHeight);
   const width = clampValue(size.width, minWidth, maxWidth);
@@ -83,6 +91,12 @@ export const BrowserWindow = ({
   initialSize,
   workspaceSize,
   minSize,
+  chromeMode = 'browser',
+  showMinimizeButton = true,
+  showMaximizeButton = true,
+  resizable = true,
+  bodyClassName,
+  bodyStyle,
   onClose,
   isMinimized = false,
   onMinimizedChange,
@@ -95,7 +109,24 @@ export const BrowserWindow = ({
   onRefresh,
   mobileFullScreen = false,
 }: BrowserWindowProps) => {
-  const initialState = normalizeWindowState(initialPosition, initialSize, workspaceSize, minSize);
+  const defaultMinWidth = chromeMode === 'utility' ? 240 : BROWSER_MIN_WINDOW_WIDTH;
+  const defaultMinHeight = chromeMode === 'utility' ? 140 : BROWSER_MIN_WINDOW_HEIGHT;
+  const initialX = initialPosition.x;
+  const initialY = initialPosition.y;
+  const initialWidth = initialSize.width;
+  const initialHeight = initialSize.height;
+  const workspaceWidth = workspaceSize.width;
+  const workspaceHeight = workspaceSize.height;
+  const minWidth = minSize?.width;
+  const minHeight = minSize?.height;
+  const initialState = normalizeWindowState(
+    initialPosition,
+    initialSize,
+    workspaceSize,
+    minSize,
+    defaultMinWidth,
+    defaultMinHeight,
+  );
   const [position, setPosition] = useState(initialState.position);
   const [size, setSize] = useState(initialState.size);
   const [isMaximized, setIsMaximized] = useState(false);
@@ -106,37 +137,48 @@ export const BrowserWindow = ({
   const appliedInitialState = useRef('');
 
   const fillsWorkspace = mobileFullScreen || isMaximized;
+  const isBrowserChrome = chromeMode === 'browser';
+  const initialStateKey = [
+    initialX,
+    initialY,
+    initialWidth,
+    initialHeight,
+    workspaceWidth,
+    workspaceHeight,
+    minWidth ?? '',
+    minHeight ?? '',
+  ].join(':');
 
   useEffect(() => {
     if (fillsWorkspace) return;
 
-    const initialStateKey = [
-      initialPosition.x,
-      initialPosition.y,
-      initialSize.width,
-      initialSize.height,
-      workspaceSize.width,
-      workspaceSize.height,
-      minSize?.width ?? '',
-      minSize?.height ?? '',
-    ].join(':');
-
     if (appliedInitialState.current === initialStateKey) return;
     appliedInitialState.current = initialStateKey;
 
-    const nextState = normalizeWindowState(initialPosition, initialSize, workspaceSize, minSize);
+    const nextState = normalizeWindowState(
+      { x: initialX, y: initialY },
+      { width: initialWidth, height: initialHeight },
+      { width: workspaceWidth, height: workspaceHeight },
+      minSize ? { width: minWidth, height: minHeight } : undefined,
+      defaultMinWidth,
+      defaultMinHeight,
+    );
     setPosition(nextState.position);
     setSize(nextState.size);
   }, [
+    defaultMinHeight,
+    defaultMinWidth,
     fillsWorkspace,
-    initialPosition.x,
-    initialPosition.y,
-    initialSize.height,
-    initialSize.width,
-    minSize?.height,
-    minSize?.width,
-    workspaceSize.height,
-    workspaceSize.width,
+    initialHeight,
+    initialStateKey,
+    initialWidth,
+    initialX,
+    initialY,
+    minHeight,
+    minSize,
+    minWidth,
+    workspaceHeight,
+    workspaceWidth,
   ]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -151,7 +193,7 @@ export const BrowserWindow = ({
   };
 
   const handleResizeDown = (e: React.MouseEvent) => {
-    if (mobileFullScreen) return;
+    if (mobileFullScreen || !resizable) return;
     e.preventDefault();
     e.stopPropagation();
     setIsResizing(true);
@@ -175,6 +217,8 @@ export const BrowserWindow = ({
             size,
             workspaceSize,
             minSize,
+            defaultMinWidth,
+            defaultMinHeight,
           ).position,
         );
       }
@@ -189,6 +233,8 @@ export const BrowserWindow = ({
           },
           workspaceSize,
           minSize,
+          defaultMinWidth,
+          defaultMinHeight,
         );
         setPosition(nextState.position);
         setSize(nextState.size);
@@ -209,12 +255,23 @@ export const BrowserWindow = ({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [fillsWorkspace, isDragging, isResizing, minSize, position, size, workspaceSize]);
+  }, [
+    defaultMinHeight,
+    defaultMinWidth,
+    fillsWorkspace,
+    isDragging,
+    isResizing,
+    minSize,
+    position,
+    resizable,
+    size,
+    workspaceSize,
+  ]);
 
   useEffect(() => {
     if (fillsWorkspace) return;
 
-    const nextState = normalizeWindowState(position, size, workspaceSize, minSize);
+    const nextState = normalizeWindowState(position, size, workspaceSize, minSize, defaultMinWidth, defaultMinHeight);
     if (
       nextState.position.x !== position.x ||
       nextState.position.y !== position.y ||
@@ -224,7 +281,7 @@ export const BrowserWindow = ({
       setPosition(nextState.position);
       setSize(nextState.size);
     }
-  }, [fillsWorkspace, minSize, position, size, workspaceSize]);
+  }, [defaultMinHeight, defaultMinWidth, fillsWorkspace, minSize, position, size, workspaceSize]);
 
   if (isMinimized) {
     return null;
@@ -277,7 +334,7 @@ export const BrowserWindow = ({
         </span>
 
         <div className="browser-header-buttons flex items-center gap-1">
-          {!mobileFullScreen && (
+          {!mobileFullScreen && showMinimizeButton && (
             <>
               <button
                 type="button"
@@ -294,6 +351,10 @@ export const BrowserWindow = ({
               >
                 <Minus size={11} color="#11327d" strokeWidth={2.2} />
               </button>
+            </>
+          )}
+          {!mobileFullScreen && showMaximizeButton && (
+            <>
               <button
                 type="button"
                 onClick={(e) => {
@@ -333,7 +394,7 @@ export const BrowserWindow = ({
         </div>
       </div>
 
-      {!mobileFullScreen && (
+      {isBrowserChrome && !mobileFullScreen && (
         <div
           className="flex items-center gap-4 px-3 py-[2px]"
           style={{
@@ -356,110 +417,112 @@ export const BrowserWindow = ({
         </div>
       )}
 
-      <div
-        className={`flex items-center ${mobileFullScreen ? 'gap-1 px-2 py-1.5' : 'gap-1 px-2 py-[2px]'}`}
-        style={{
-          background: XP_MENU_BG,
-          borderTop: '1px solid rgba(255,255,255,0.7)',
-          borderBottom: '1px solid #c2baa9',
-        }}
-      >
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onBack?.();
-          }}
-          disabled={!canGoBack}
-          className="flex h-[20px] w-[22px] items-center justify-center rounded-[2px] disabled:cursor-default disabled:opacity-45"
-          style={{
-            background: XP_BUTTON_BG,
-            border: '1px solid #8ea3c0',
-            boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
-          }}
-        >
-          <ArrowLeft size={12} className="text-[#215dc6]" />
-        </button>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onForward?.();
-          }}
-          disabled={!canGoForward}
-          className="flex h-[20px] w-[22px] items-center justify-center rounded-[2px] disabled:cursor-default disabled:opacity-45"
-          style={{
-            background: XP_BUTTON_BG,
-            border: '1px solid #8ea3c0',
-            boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
-          }}
-        >
-          <ArrowRight size={12} className="text-[#215dc6]" />
-        </button>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRefresh?.();
-          }}
-          disabled={!onRefresh}
-          className="flex h-[20px] w-[22px] items-center justify-center rounded-[2px] disabled:cursor-default disabled:opacity-45"
-          style={{
-            background: XP_BUTTON_BG,
-            border: '1px solid #8ea3c0',
-            boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
-          }}
-        >
-          <RotateCw size={12} className="text-[#215dc6]" />
-        </button>
-        {!mobileFullScreen && (
-          <span
-            className="text-[10px] text-[#4f4b42]"
-            style={{ fontFamily: 'Tahoma, "Trebuchet MS", sans-serif' }}
-          >
-            Address
-          </span>
-        )}
+      {isBrowserChrome && (
         <div
-          className="flex-1 rounded-[2px] px-2 py-0"
+          className={`flex items-center ${mobileFullScreen ? 'gap-1 px-2 py-1.5' : 'gap-1 px-2 py-[2px]'}`}
           style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #7f9db9',
-            boxShadow: 'inset 1px 1px 2px rgba(0,0,0,0.08)',
+            background: XP_MENU_BG,
+            borderTop: '1px solid rgba(255,255,255,0.7)',
+            borderBottom: '1px solid #c2baa9',
           }}
         >
-          <span
-            className={`${mobileFullScreen ? 'text-[11px]' : 'text-[10px]'} text-[#555555]`}
-            style={{ fontFamily: 'Tahoma, "Trebuchet MS", sans-serif' }}
-          >
-            {url}
-          </span>
-        </div>
-        {!mobileFullScreen && (
           <button
             type="button"
-            className="flex items-center gap-1 rounded-[2px] px-1.5 py-0.5 text-[10px] text-[#3a4559]"
+            onClick={(e) => {
+              e.stopPropagation();
+              onBack?.();
+            }}
+            disabled={!canGoBack}
+            className="flex h-[20px] w-[22px] items-center justify-center rounded-[2px] disabled:cursor-default disabled:opacity-45"
             style={{
               background: XP_BUTTON_BG,
               border: '1px solid #8ea3c0',
               boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
-              fontFamily: 'Tahoma, "Trebuchet MS", sans-serif',
             }}
           >
-            <span>Go</span>
-            <ChevronDown size={10} className="text-[#215dc6]" />
+            <ArrowLeft size={12} className="text-[#215dc6]" />
           </button>
-        )}
-      </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onForward?.();
+            }}
+            disabled={!canGoForward}
+            className="flex h-[20px] w-[22px] items-center justify-center rounded-[2px] disabled:cursor-default disabled:opacity-45"
+            style={{
+              background: XP_BUTTON_BG,
+              border: '1px solid #8ea3c0',
+              boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
+            }}
+          >
+            <ArrowRight size={12} className="text-[#215dc6]" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRefresh?.();
+            }}
+            disabled={!onRefresh}
+            className="flex h-[20px] w-[22px] items-center justify-center rounded-[2px] disabled:cursor-default disabled:opacity-45"
+            style={{
+              background: XP_BUTTON_BG,
+              border: '1px solid #8ea3c0',
+              boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
+            }}
+          >
+            <RotateCw size={12} className="text-[#215dc6]" />
+          </button>
+          {!mobileFullScreen && (
+            <span
+              className="text-[10px] text-[#4f4b42]"
+              style={{ fontFamily: 'Tahoma, "Trebuchet MS", sans-serif' }}
+            >
+              Address
+            </span>
+          )}
+          <div
+            className="flex-1 rounded-[2px] px-2 py-0"
+            style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #7f9db9',
+              boxShadow: 'inset 1px 1px 2px rgba(0,0,0,0.08)',
+            }}
+          >
+            <span
+              className={`${mobileFullScreen ? 'text-[11px]' : 'text-[10px]'} text-[#555555]`}
+              style={{ fontFamily: 'Tahoma, "Trebuchet MS", sans-serif' }}
+            >
+              {url}
+            </span>
+          </div>
+          {!mobileFullScreen && (
+            <button
+              type="button"
+              className="flex items-center gap-1 rounded-[2px] px-1.5 py-0.5 text-[10px] text-[#3a4559]"
+              style={{
+                background: XP_BUTTON_BG,
+                border: '1px solid #8ea3c0',
+                boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.9)',
+                fontFamily: 'Tahoma, "Trebuchet MS", sans-serif',
+              }}
+            >
+              <span>Go</span>
+              <ChevronDown size={10} className="text-[#215dc6]" />
+            </button>
+          )}
+        </div>
+      )}
 
       <div
-        className="flex-1 min-h-0 overflow-auto"
-        style={{ backgroundColor: '#ffffff' }}
+        className={`flex-1 min-h-0 overflow-auto ${bodyClassName ?? ''}`}
+        style={{ backgroundColor: '#ffffff', ...bodyStyle }}
       >
         {children}
       </div>
 
-      {!fillsWorkspace && (
+      {!fillsWorkspace && resizable && (
         <div
           onMouseDown={handleResizeDown}
           className="absolute bottom-0 right-0 h-4 w-4 cursor-nwse-resize"

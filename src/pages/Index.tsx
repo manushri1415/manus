@@ -9,6 +9,7 @@ import { AboutPage } from '@/components/browser/pages/AboutPage';
 import { ProjectsPage } from '@/components/browser/pages/ProjectsPage';
 import { ExperiencePage } from '@/components/browser/pages/ExperiencePage';
 import { ContactPage } from '@/components/browser/pages/ContactPage';
+import { SnakeGame } from '@/components/games/SnakeGame';
 import { Image as ImageIcon } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -21,13 +22,39 @@ const DEFAULT_BROWSER_WIDTH = 980;
 const DEFAULT_BROWSER_HEIGHT = 700;
 const DEFAULT_MIN_BROWSER_WIDTH = 560;
 const DEFAULT_MIN_BROWSER_HEIGHT = 460;
+const DEFAULT_GAME_WIDTH = 500;
+const DEFAULT_GAME_HEIGHT = 560;
+const DEFAULT_MIN_GAME_WIDTH = 420;
+const DEFAULT_MIN_GAME_HEIGHT = 470;
+const DESKTOP_ICON_GUTTER = 120;
+const PHONE_LAYOUT_BREAKPOINT = 540;
+const TABLET_LAYOUT_BREAKPOINT = 768;
+const COMPACT_DESKTOP_BREAKPOINT = 1180;
+const COMPACT_DESKTOP_HEIGHT = 720;
 
 type WorkspaceSize = {
   width: number;
   height: number;
 };
 
-type DesktopWindowKey = 'terminal' | 'browser';
+type WindowFrame = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+type HomeLayoutMode = 'desktop' | 'laptop' | 'tablet' | 'phone';
+
+type HomeWindowLayout = {
+  mode: HomeLayoutMode;
+  workspace: WindowFrame;
+  terminal: WindowFrame;
+  welcomeVariant: 'desktop' | 'tablet' | 'mobile';
+  terminalCompact: boolean;
+};
+
+type DesktopWindowKey = 'terminal' | 'browser' | 'game';
 
 type BrowserWindowState = {
   isOpen: boolean;
@@ -35,6 +62,19 @@ type BrowserWindowState = {
   history: BrowserPageKey[];
   historyIndex: number;
   refreshKey: number;
+  initialPosition: {
+    x: number;
+    y: number;
+  };
+  initialSize: {
+    width: number;
+    height: number;
+  };
+};
+
+type GameWindowState = {
+  isOpen: boolean;
+  isMinimized: boolean;
   initialPosition: {
     x: number;
     y: number;
@@ -55,6 +95,20 @@ const createDefaultBrowserWindowState = (): BrowserWindowState => ({
   initialSize: { width: DEFAULT_BROWSER_WIDTH, height: DEFAULT_BROWSER_HEIGHT },
 });
 
+const createDefaultGameWindowState = (): GameWindowState => ({
+  isOpen: false,
+  isMinimized: false,
+  initialPosition: { x: 80, y: 32 },
+  initialSize: { width: DEFAULT_GAME_WIDTH, height: DEFAULT_GAME_HEIGHT },
+});
+
+const getDefaultWindowStack = (): DesktopWindowKey[] => ['terminal'];
+
+const clampValue = (value: number, min: number, max: number) => {
+  if (max < min) return max;
+  return Math.min(Math.max(value, min), max);
+};
+
 const getInitialWorkspaceSize = (): WorkspaceSize => {
   if (typeof window === 'undefined') {
     return { width: 1050, height: 580 };
@@ -66,17 +120,111 @@ const getInitialWorkspaceSize = (): WorkspaceSize => {
   };
 };
 
+const getHomeWindowLayout = (workspaceSize: WorkspaceSize, mobileIconAreaHeight: number): HomeWindowLayout => {
+  const mode: HomeLayoutMode = workspaceSize.width < PHONE_LAYOUT_BREAKPOINT
+    ? 'phone'
+    : workspaceSize.width < TABLET_LAYOUT_BREAKPOINT
+      ? 'tablet'
+      : workspaceSize.width < COMPACT_DESKTOP_BREAKPOINT || workspaceSize.height < COMPACT_DESKTOP_HEIGHT
+        ? 'laptop'
+        : 'desktop';
+
+  if (mode === 'phone' || mode === 'tablet') {
+    const workspaceY = mobileIconAreaHeight + MOBILE_TERMINAL_TOP_GAP;
+    const workspaceHeight = Math.max(
+      0,
+      workspaceSize.height - mobileIconAreaHeight - MOBILE_TERMINAL_TOP_GAP - MOBILE_TERMINAL_BOTTOM_CLEARANCE,
+    );
+    const workspace = {
+      x: 0,
+      y: workspaceY,
+      width: workspaceSize.width,
+      height: workspaceHeight,
+    };
+
+    if (mode === 'phone') {
+      return {
+        mode,
+        workspace,
+        terminal: {
+          x: 0,
+          y: 0,
+          width: workspace.width,
+          height: Math.round(clampValue(workspace.height, 250, Math.min(440, workspace.height))),
+        },
+        welcomeVariant: 'mobile',
+        terminalCompact: true,
+      };
+    }
+
+    const terminalHeight = Math.round(clampValue(workspace.height * 0.56, 280, Math.min(380, workspace.height)));
+
+    return {
+      mode,
+      workspace,
+      terminal: {
+        x: 0,
+        y: 0,
+        width: workspace.width,
+        height: terminalHeight,
+      },
+      welcomeVariant: 'tablet',
+      terminalCompact: false,
+    };
+  }
+
+  const workspace = {
+    x: DESKTOP_ICON_GUTTER,
+    y: 8,
+    width: Math.max(0, workspaceSize.width - DESKTOP_ICON_GUTTER),
+    height: Math.max(0, workspaceSize.height - 12),
+  };
+  const rightMargin = mode === 'desktop' ? 10 : 6;
+  const terminalX = mode === 'desktop'
+    ? Math.round(clampValue(workspace.width * 0.06, 18, 52))
+    : 18;
+  const terminalMaxWidth = mode === 'desktop' ? 1180 : 920;
+  const terminalWidth = Math.round(
+    clampValue(
+      workspace.width * (mode === 'desktop' ? 0.8 : 0.78),
+      mode === 'desktop' ? 700 : 560,
+      Math.min(terminalMaxWidth, workspace.width - terminalX - rightMargin),
+    ),
+  );
+  const rawTerminalHeight = Math.round(
+    clampValue(workspace.height * (mode === 'desktop' ? 0.8 : 0.76), 460, mode === 'desktop' ? 680 : 600),
+  );
+  const terminalHeight = Math.min(rawTerminalHeight, Math.max(460, workspace.height - 20));
+  const terminalY = Math.round(clampValue(workspace.height * (mode === 'desktop' ? 0.09 : 0.11), 20, 60));
+
+  return {
+    mode,
+    workspace,
+    terminal: {
+      x: terminalX,
+      y: terminalY,
+      width: terminalWidth,
+      height: terminalHeight,
+    },
+    welcomeVariant: 'desktop',
+    terminalCompact: false,
+  };
+};
+
 const Index = () => {
   const isMobile = useIsMobile();
   const DEFAULT_WALLPAPER = `${import.meta.env.BASE_URL}frieren.jpg`;
+  const resumePdfPath = `${import.meta.env.BASE_URL}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`;
 
   const [currentTheme, setCurrentTheme] = useState('cmd');
   const [wallpaper, setWallpaper] = useState<string | null>(DEFAULT_WALLPAPER);
   const [time] = useState(new Date('2005-02-15T09:19:00'));
   const [appState, setAppState] = useState<'booting' | 'desktop'>('booting');
   const [browserWindow, setBrowserWindow] = useState<BrowserWindowState>(createDefaultBrowserWindowState);
+  const [gameWindow, setGameWindow] = useState<GameWindowState>(createDefaultGameWindowState);
+  const [isTerminalOpen, setIsTerminalOpen] = useState(true);
   const [isTerminalMinimized, setIsTerminalMinimized] = useState(false);
-  const [windowStack, setWindowStack] = useState<DesktopWindowKey[]>(['terminal']);
+  const [windowStack, setWindowStack] = useState<DesktopWindowKey[]>(getDefaultWindowStack);
   const terminalRef = useRef<TerminalHandle | null>(null);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [workspaceSize, setWorkspaceSize] = useState<WorkspaceSize>(getInitialWorkspaceSize);
@@ -90,19 +238,11 @@ const Index = () => {
         : 2;
   const mobileIconRows = Math.ceil(mobileIconCount / mobileIconColumns);
   const mobileIconAreaHeight = 28 + mobileIconRows * 78;
-  const mobileTerminalTopInset = mobileIconAreaHeight + MOBILE_TERMINAL_TOP_GAP;
-  const mobileTerminalAvailableHeight = isMobile
-    ? Math.max(
-      0,
-      workspaceSize.height - mobileIconAreaHeight - MOBILE_TERMINAL_TOP_GAP - MOBILE_TERMINAL_BOTTOM_CLEARANCE,
-    )
-    : workspaceSize.height;
-  const terminalWorkspaceSize = isMobile
-    ? {
-      width: workspaceSize.width,
-      height: mobileTerminalAvailableHeight,
-    }
-    : workspaceSize;
+  const homeLayout = getHomeWindowLayout(workspaceSize, mobileIconAreaHeight);
+  const windowWorkspaceSize = {
+    width: homeLayout.workspace.width,
+    height: homeLayout.workspace.height,
+  };
 
   useEffect(() => {
     const savedWallpaper = localStorage.getItem('terminal-wallpaper');
@@ -150,6 +290,14 @@ const Index = () => {
     reader.readAsDataURL(file);
   }, [handleWallpaperChange]);
 
+  const restoreDesktopWindows = useCallback(() => {
+    setBrowserWindow(createDefaultBrowserWindowState());
+    setGameWindow(createDefaultGameWindowState());
+    setIsTerminalOpen(true);
+    setIsTerminalMinimized(false);
+    setWindowStack(getDefaultWindowStack());
+  }, []);
+
   const handleReset = useCallback(() => {
     localStorage.clear();
     setWallpaper(DEFAULT_WALLPAPER);
@@ -162,11 +310,9 @@ const Index = () => {
   }, []);
 
   const handlePowerOff = useCallback(() => {
-    setBrowserWindow(createDefaultBrowserWindowState());
-    setIsTerminalMinimized(false);
-    setWindowStack(['terminal']);
+    restoreDesktopWindows();
     setAppState('booting');
-  }, []);
+  }, [restoreDesktopWindows]);
 
   const bringWindowToFront = useCallback((windowKey: DesktopWindowKey) => {
     setWindowStack((prev) => {
@@ -185,33 +331,32 @@ const Index = () => {
       height: DEFAULT_MIN_BROWSER_HEIGHT,
     };
 
-    if (!workspaceSize.width || !workspaceSize.height) {
+    if (!windowWorkspaceSize.width || !windowWorkspaceSize.height) {
       return { size: fallbackSize, position: fallbackPosition };
     }
 
     if (isMobile) {
       return {
         size: {
-          width: workspaceSize.width,
-          height: workspaceSize.height,
+          width: windowWorkspaceSize.width,
+          height: windowWorkspaceSize.height,
         },
         position: { x: 0, y: 0 },
       };
     }
 
-    const targetWidth = Math.round(Math.min(preferredSize.width, workspaceSize.width * 0.84));
-    const targetHeight = Math.round(Math.min(preferredSize.height, workspaceSize.height * 0.9));
+    const targetWidth = Math.round(Math.min(preferredSize.width, windowWorkspaceSize.width * 0.86));
+    const targetHeight = Math.round(Math.min(preferredSize.height, windowWorkspaceSize.height * 0.9));
     const width = Math.min(
-      workspaceSize.width,
-      Math.max(Math.min(minSize.width, workspaceSize.width), targetWidth),
+      windowWorkspaceSize.width,
+      Math.max(Math.min(minSize.width, windowWorkspaceSize.width), targetWidth),
     );
     const height = Math.min(
-      workspaceSize.height,
-      Math.max(Math.min(minSize.height, workspaceSize.height), targetHeight),
+      windowWorkspaceSize.height,
+      Math.max(Math.min(minSize.height, windowWorkspaceSize.height), targetHeight),
     );
-
-    const maxX = Math.max(0, workspaceSize.width - width);
-    const maxY = Math.max(0, workspaceSize.height - height);
+    const maxX = Math.max(0, windowWorkspaceSize.width - width);
+    const maxY = Math.max(0, windowWorkspaceSize.height - height);
 
     return {
       size: { width, height },
@@ -220,7 +365,7 @@ const Index = () => {
         y: Math.round(maxY / 2),
       },
     };
-  }, [isMobile, workspaceSize]);
+  }, [isMobile, windowWorkspaceSize.height, windowWorkspaceSize.width]);
 
   const openBrowserPage = useCallback((pageKey: BrowserPageKey) => {
     const initialWindowState = getInitialWindowState(pageKey);
@@ -263,9 +408,65 @@ const Index = () => {
     bringWindowToFront('browser');
   }, [bringWindowToFront, getInitialWindowState]);
 
+  const openSnakeGame = useCallback(() => {
+    const fallbackSize = { width: DEFAULT_GAME_WIDTH, height: DEFAULT_GAME_HEIGHT };
+    const fallbackPosition = { x: 80, y: 32 };
+
+    if (!windowWorkspaceSize.width || !windowWorkspaceSize.height) {
+      setGameWindow({
+        isOpen: true,
+        isMinimized: false,
+        initialPosition: fallbackPosition,
+        initialSize: fallbackSize,
+      });
+      bringWindowToFront('game');
+      return;
+    }
+
+    if (isMobile) {
+      setGameWindow({
+        isOpen: true,
+        isMinimized: false,
+        initialPosition: { x: 0, y: 0 },
+        initialSize: {
+          width: windowWorkspaceSize.width,
+          height: windowWorkspaceSize.height,
+        },
+      });
+      bringWindowToFront('game');
+      return;
+    }
+
+    const width = Math.min(
+      windowWorkspaceSize.width,
+      Math.max(DEFAULT_MIN_GAME_WIDTH, Math.round(Math.min(DEFAULT_GAME_WIDTH, windowWorkspaceSize.width * 0.72))),
+    );
+    const height = Math.min(
+      windowWorkspaceSize.height,
+      Math.max(DEFAULT_MIN_GAME_HEIGHT, Math.round(Math.min(DEFAULT_GAME_HEIGHT, windowWorkspaceSize.height * 0.82))),
+    );
+
+    setGameWindow({
+      isOpen: true,
+      isMinimized: false,
+      initialPosition: {
+        x: Math.max(0, Math.round((windowWorkspaceSize.width - width) / 2)),
+        y: Math.max(0, Math.round((windowWorkspaceSize.height - height) / 2)),
+      },
+      initialSize: { width, height },
+    });
+
+    bringWindowToFront('game');
+  }, [bringWindowToFront, isMobile, windowWorkspaceSize.height, windowWorkspaceSize.width]);
+
   const handleBrowserClose = useCallback(() => {
     setBrowserWindow(createDefaultBrowserWindowState());
     setWindowStack((prev) => prev.filter((key) => key !== 'browser'));
+  }, []);
+
+  const handleGameClose = useCallback(() => {
+    setGameWindow(createDefaultGameWindowState());
+    setWindowStack((prev) => prev.filter((key) => key !== 'game'));
   }, []);
 
   const handleBrowserFocus = useCallback(() => {
@@ -288,6 +489,20 @@ const Index = () => {
 
     if (!value) {
       bringWindowToFront('browser');
+    }
+  }, [bringWindowToFront, isMobile]);
+
+  const handleGameMinimize = useCallback((value: boolean) => {
+    if (isMobile) return;
+
+    setGameWindow((prev) => (
+      prev.isOpen
+        ? { ...prev, isMinimized: value }
+        : prev
+    ));
+
+    if (!value) {
+      bringWindowToFront('game');
     }
   }, [bringWindowToFront, isMobile]);
 
@@ -328,16 +543,47 @@ const Index = () => {
     bringWindowToFront('browser');
   }, [bringWindowToFront]);
 
+  const handleTerminalFocus = useCallback(() => {
+    bringWindowToFront('terminal');
+  }, [bringWindowToFront]);
+
+  const handleTerminalClose = useCallback(() => {
+    setIsTerminalOpen(false);
+    setIsTerminalMinimized(false);
+    setWindowStack((prev) => prev.filter((key) => key !== 'terminal'));
+  }, []);
+
+  const handleResumeOpen = useCallback(() => {
+    window.open(resumePdfPath, '_blank', 'noopener,noreferrer');
+  }, [resumePdfPath]);
+
   const handleIconClick = useCallback((command: string) => {
     if (command === 'terminal') {
+      setIsTerminalOpen(true);
       setIsTerminalMinimized(false);
       bringWindowToFront('terminal');
-    } else if (command in BROWSER_PAGES) {
+      return;
+    }
+
+    if (command === 'resume') {
+      handleResumeOpen();
+      return;
+    }
+
+    if (command === 'play') {
+      openSnakeGame();
+      return;
+    }
+
+    if (command in BROWSER_PAGES) {
       openBrowserPage(command as BrowserPageKey);
-    } else if (terminalRef.current) {
+      return;
+    }
+
+    if (terminalRef.current) {
       terminalRef.current.executeExternalCommand(command);
     }
-  }, [bringWindowToFront, openBrowserPage]);
+  }, [bringWindowToFront, handleResumeOpen, openBrowserPage, openSnakeGame]);
 
   const currentBrowserPageKey =
     browserWindow.historyIndex >= 0 ? browserWindow.history[browserWindow.historyIndex] ?? null : null;
@@ -347,11 +593,16 @@ const Index = () => {
     browserWindow.historyIndex >= 0 && browserWindow.historyIndex < browserWindow.history.length - 1;
 
   const activeWindow = [...windowStack].reverse().find((windowKey) => {
-    if (windowKey === 'terminal') {
-      return !isTerminalMinimized;
+    switch (windowKey) {
+      case 'terminal':
+        return isTerminalOpen && !isTerminalMinimized;
+      case 'browser':
+        return browserWindow.isOpen && !browserWindow.isMinimized;
+      case 'game':
+        return gameWindow.isOpen && !gameWindow.isMinimized;
+      default:
+        return false;
     }
-
-    return browserWindow.isOpen && !browserWindow.isMinimized;
   }) ?? null;
 
   const getWindowZIndex = useCallback((windowKey: DesktopWindowKey) => {
@@ -379,11 +630,31 @@ const Index = () => {
     bringWindowToFront('browser');
   }, [activeWindow, browserWindow.isMinimized, browserWindow.isOpen, bringWindowToFront, isMobile]);
 
-  const handleTerminalFocus = useCallback(() => {
-    bringWindowToFront('terminal');
-  }, [bringWindowToFront]);
+  const handleTaskbarGameClick = useCallback(() => {
+    if (!gameWindow.isOpen || isMobile) {
+      return;
+    }
+
+    if (gameWindow.isMinimized) {
+      setGameWindow((prev) => ({ ...prev, isMinimized: false }));
+      bringWindowToFront('game');
+      return;
+    }
+
+    if (activeWindow === 'game') {
+      setGameWindow((prev) => ({ ...prev, isMinimized: true }));
+      return;
+    }
+
+    setGameWindow((prev) => ({ ...prev, isMinimized: false }));
+    bringWindowToFront('game');
+  }, [activeWindow, bringWindowToFront, gameWindow.isMinimized, gameWindow.isOpen, isMobile]);
 
   const handleTaskbarTerminalClick = useCallback(() => {
+    if (!isTerminalOpen) {
+      return;
+    }
+
     if (isMobile) {
       setIsTerminalMinimized(false);
       bringWindowToFront('terminal');
@@ -402,7 +673,7 @@ const Index = () => {
     }
 
     bringWindowToFront('terminal');
-  }, [activeWindow, bringWindowToFront, isMobile, isTerminalMinimized]);
+  }, [activeWindow, bringWindowToFront, isMobile, isTerminalMinimized, isTerminalOpen]);
 
   const renderBrowserPage = () => {
     switch (currentBrowserPageKey) {
@@ -463,62 +734,101 @@ const Index = () => {
         style={{ height: `calc(100vh - ${TASKBAR_HEIGHT}px)` }}
       >
         <div
-          className={`absolute inset-0 pointer-events-none ${isMobile ? 'flex items-center justify-center px-3' : 'flex items-center justify-center p-4'}`}
-          style={{
-            zIndex: getWindowZIndex('terminal'),
-            paddingTop: isMobile ? `${mobileTerminalTopInset}px` : undefined,
-            paddingBottom: isMobile ? `${MOBILE_TERMINAL_BOTTOM_CLEARANCE}px` : undefined,
-          }}
-        >
-          <div className={`flex h-full w-full ${isMobile ? 'items-center justify-center' : 'items-center justify-center'}`}>
-            <Terminal
-              ref={terminalRef}
-              themeId={currentTheme}
-              workspaceSize={terminalWorkspaceSize}
-              isMinimized={isTerminalMinimized}
-              onMinimizedChange={setIsTerminalMinimized}
-              onFocus={handleTerminalFocus}
-              zIndex={getWindowZIndex('terminal')}
-              isCompactMobile={isMobile}
-              showInitialHelp={!isMobile}
-              showCompactCloseButton={isMobile}
-            />
-          </div>
-        </div>
-
-        <div
           ref={workspaceRef}
-          className="absolute pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            inset: `${isMobile ? MOBILE_WORKSPACE_PADDING : WORKSPACE_PADDING}px`,
-            zIndex: getWindowZIndex('browser'),
+            padding: isMobile ? `${MOBILE_WORKSPACE_PADDING}px` : `${WORKSPACE_PADDING}px`,
           }}
         >
-          {browserWindow.isOpen && currentBrowserPage && (
-            <BrowserWindow
-              title={currentBrowserPage.title || `${currentBrowserPage.label} - Microsoft Internet Explorer`}
-              url={currentBrowserPage.url}
-              initialPosition={browserWindow.initialPosition}
-              initialSize={browserWindow.initialSize}
-              workspaceSize={workspaceSize}
-              minSize={currentBrowserPage.minWindowSize}
-              zIndex={getWindowZIndex('browser')}
-              isMinimized={browserWindow.isMinimized}
-              onMinimizedChange={handleBrowserMinimize}
-              onFocus={handleBrowserFocus}
-              onClose={handleBrowserClose}
-              canGoBack={canGoBack}
-              canGoForward={canGoForward}
-              onBack={handleBrowserBack}
-              onForward={handleBrowserForward}
-              onRefresh={handleBrowserRefresh}
-              mobileFullScreen={isMobile}
-            >
-              <div key={`${currentBrowserPageKey}:${browserWindow.refreshKey}`} className="h-full">
-                {renderBrowserPage()}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              left: `${homeLayout.workspace.x}px`,
+              top: `${homeLayout.workspace.y}px`,
+              width: `${homeLayout.workspace.width}px`,
+              height: `${homeLayout.workspace.height}px`,
+            }}
+          >
+            {isTerminalOpen && (
+              <div
+                className="absolute pointer-events-none"
+                style={{
+                  left: `${homeLayout.terminal.x}px`,
+                  top: `${homeLayout.terminal.y}px`,
+                  zIndex: getWindowZIndex('terminal'),
+                }}
+              >
+                <Terminal
+                  ref={terminalRef}
+                  themeId={currentTheme}
+                  workspaceSize={windowWorkspaceSize}
+                  preferredSize={{
+                    width: homeLayout.terminal.width,
+                    height: homeLayout.terminal.height,
+                  }}
+                  isMinimized={isTerminalMinimized}
+                  onMinimizedChange={setIsTerminalMinimized}
+                  onFocus={handleTerminalFocus}
+                  onClose={handleTerminalClose}
+                  onReboot={restoreDesktopWindows}
+                  zIndex={getWindowZIndex('terminal')}
+                  isCompactMobile={homeLayout.terminalCompact}
+                  welcomeVariant={homeLayout.welcomeVariant}
+                  showInitialHelp={false}
+                  showCompactCloseButton={homeLayout.mode === 'phone'}
+                  onPlay={openSnakeGame}
+                />
               </div>
-            </BrowserWindow>
-          )}
+            )}
+
+            {browserWindow.isOpen && currentBrowserPage && (
+              <BrowserWindow
+                title={currentBrowserPage.title || `${currentBrowserPage.label} - Microsoft Internet Explorer`}
+                url={currentBrowserPage.url}
+                initialPosition={browserWindow.initialPosition}
+                initialSize={browserWindow.initialSize}
+                workspaceSize={windowWorkspaceSize}
+                minSize={currentBrowserPage.minWindowSize}
+                zIndex={getWindowZIndex('browser')}
+                isMinimized={browserWindow.isMinimized}
+                onMinimizedChange={handleBrowserMinimize}
+                onFocus={handleBrowserFocus}
+                onClose={handleBrowserClose}
+                canGoBack={canGoBack}
+                canGoForward={canGoForward}
+                onBack={handleBrowserBack}
+                onForward={handleBrowserForward}
+                onRefresh={handleBrowserRefresh}
+                mobileFullScreen={isMobile}
+              >
+                <div key={`${currentBrowserPageKey}:${browserWindow.refreshKey}`} className="h-full">
+                  {renderBrowserPage()}
+                </div>
+              </BrowserWindow>
+            )}
+
+            {gameWindow.isOpen && (
+              <BrowserWindow
+                title="Snake.exe"
+                url="arcade://snake"
+                initialPosition={gameWindow.initialPosition}
+                initialSize={gameWindow.initialSize}
+                workspaceSize={windowWorkspaceSize}
+                minSize={{ width: DEFAULT_MIN_GAME_WIDTH, height: DEFAULT_MIN_GAME_HEIGHT }}
+                chromeMode="utility"
+                bodyClassName="overflow-hidden"
+                bodyStyle={{ backgroundColor: '#050805' }}
+                zIndex={getWindowZIndex('game')}
+                isMinimized={gameWindow.isMinimized}
+                onMinimizedChange={handleGameMinimize}
+                onFocus={() => bringWindowToFront('game')}
+                onClose={handleGameClose}
+                mobileFullScreen={isMobile}
+              >
+                <SnakeGame isWindowActive={activeWindow === 'game'} />
+              </BrowserWindow>
+            )}
+          </div>
         </div>
       </main>
 
@@ -526,6 +836,7 @@ const Index = () => {
         <SocialLinks
           onReset={handleReset}
           onOpenPage={openBrowserPage}
+          onOpenGame={openSnakeGame}
           onPowerOff={handlePowerOff}
           isMobile={isMobile}
         />
@@ -533,19 +844,21 @@ const Index = () => {
         <div className="min-w-0 flex-1 border-l border-[#3e74df] bg-[linear-gradient(180deg,var(--xp-blue-light)_0%,var(--xp-blue)_50%,var(--xp-blue-dark)_100%)]">
           {!isMobile && (
             <div className="flex h-full items-center gap-1 overflow-x-auto px-1">
-              <button
-                onClick={handleTaskbarTerminalClick}
-                className="flex h-[24px] min-w-0 max-w-[220px] flex-shrink-0 items-center rounded-sm border px-2 text-[11px] font-semibold text-white shadow-[inset_1px_1px_0_rgba(255,255,255,0.35)]"
-                style={{
-                  background: activeWindow === 'terminal'
-                    ? 'linear-gradient(180deg, #3d89ff 0%, #2f6be6 48%, #1f49b9 100%)'
-                    : 'linear-gradient(180deg, #4e8df2 0%, #336ed7 50%, #2451be 100%)',
-                  borderColor: activeWindow === 'terminal' ? '#173b94' : '#2b58bc',
-                  opacity: isTerminalMinimized ? 0.82 : 1,
-                }}
-              >
-                <span className="truncate">Terminal (Guest@Portfolio)</span>
-              </button>
+              {isTerminalOpen && (
+                <button
+                  onClick={handleTaskbarTerminalClick}
+                  className="flex h-[24px] min-w-0 max-w-[220px] flex-shrink-0 items-center rounded-sm border px-2 text-[11px] font-semibold text-white shadow-[inset_1px_1px_0_rgba(255,255,255,0.35)]"
+                  style={{
+                    background: activeWindow === 'terminal'
+                      ? 'linear-gradient(180deg, #3d89ff 0%, #2f6be6 48%, #1f49b9 100%)'
+                      : 'linear-gradient(180deg, #4e8df2 0%, #336ed7 50%, #2451be 100%)',
+                    borderColor: activeWindow === 'terminal' ? '#173b94' : '#2b58bc',
+                    opacity: isTerminalMinimized ? 0.82 : 1,
+                  }}
+                >
+                  <span className="truncate">Terminal (Guest@Portfolio)</span>
+                </button>
+              )}
 
               {browserWindow.isOpen && (
                 <button
@@ -560,6 +873,22 @@ const Index = () => {
                   }}
                 >
                   <span className="truncate">Internet Explorer</span>
+                </button>
+              )}
+
+              {gameWindow.isOpen && (
+                <button
+                  onClick={handleTaskbarGameClick}
+                  className="flex h-[24px] min-w-0 max-w-[220px] flex-shrink-0 items-center rounded-sm border px-2 text-[11px] font-semibold text-white shadow-[inset_1px_1px_0_rgba(255,255,255,0.35)]"
+                  style={{
+                    background: activeWindow === 'game'
+                      ? 'linear-gradient(180deg, #3d89ff 0%, #2f6be6 48%, #1f49b9 100%)'
+                      : 'linear-gradient(180deg, #4e8df2 0%, #336ed7 50%, #2451be 100%)',
+                    borderColor: activeWindow === 'game' ? '#173b94' : '#2b58bc',
+                    opacity: gameWindow.isMinimized ? 0.82 : 1,
+                  }}
+                >
+                  <span className="truncate">Snake.exe</span>
                 </button>
               )}
             </div>

@@ -2,6 +2,7 @@ import {
   BriefcaseBusiness,
   FileText,
   FolderOpen,
+  Gamepad2,
   Github,
   LinkedinIcon,
   Mail,
@@ -32,11 +33,13 @@ const socialLinks = [
 export const SocialLinks = ({
   onReset,
   onOpenPage,
+  onOpenGame,
   onPowerOff,
   isMobile = false,
 }: {
   onReset?: () => void;
   onOpenPage?: (pageKey: BrowserPageKey) => void;
+  onOpenGame?: () => void;
   onPowerOff?: () => void;
   isMobile?: boolean;
 }) => {
@@ -76,6 +79,7 @@ export const SocialLinks = ({
     label: string;
     pageKey?: BrowserPageKey;
     href?: string;
+    action?: () => void;
     icon?: typeof FolderOpen;
     iconSrc?: string;
   }> = [
@@ -83,6 +87,7 @@ export const SocialLinks = ({
     { label: 'Projects', pageKey: 'projects', icon: FolderOpen },
     { label: 'Experience', pageKey: 'experience', icon: BriefcaseBusiness },
     { label: 'Contact', pageKey: 'contact', icon: Phone },
+    { label: 'Play Snake', icon: Gamepad2, action: onOpenGame },
     { label: 'Resume', href: resumePdfPath, iconSrc: resumeIconSrc },
   ];
 
@@ -165,7 +170,7 @@ export const SocialLinks = ({
                 </div>
 
                 <div className="flex w-[50%] flex-col border-l border-[#9fbee6] bg-[#d3e5fb] px-2 py-2 text-[#17408b]">
-                  {systemLinks.map(({ label, pageKey, href, icon: Icon, iconSrc }) => (
+                  {systemLinks.map(({ label, pageKey, href, action, icon: Icon, iconSrc }) => (
                     href ? (
                       <a
                         key={label}
@@ -188,7 +193,16 @@ export const SocialLinks = ({
                       <button
                         key={label}
                         type="button"
-                        onClick={() => pageKey && handleOpenPage(pageKey)}
+                        onClick={() => {
+                          if (action) {
+                            handleAction(action);
+                            return;
+                          }
+
+                          if (pageKey) {
+                            handleOpenPage(pageKey);
+                          }
+                        }}
                         className={`flex items-center ${isMobile ? 'gap-2 px-2 py-[7px]' : 'gap-3 px-3 py-[8px]'} rounded-[4px] text-left transition-colors hover:bg-white/45`}
                       >
                         {iconSrc ? (

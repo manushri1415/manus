@@ -5,7 +5,7 @@ interface DesktopIconProps {
     icon?: LucideIcon | null;
     label: string;
     command: string;
-    onDoubleClick: (command: string) => void;
+    onActivate: (command: string) => void;
     initialPos: { x: number; y: number };
     iconSrc?: string;
     isMobile?: boolean;
@@ -15,18 +15,21 @@ const DesktopIcon = ({
     icon: Icon,
     label,
     command,
-    onDoubleClick,
+    onActivate,
     initialPos,
     iconSrc,
     isMobile = false,
 }: DesktopIconProps) => {
     const [pos, setPos] = useState(initialPos);
+    const [isPointerDown, setIsPointerDown] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const dragStart = useRef({ x: 0, y: 0 });
+    const movedDuringPress = useRef(false);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         if (isMobile) return;
-        setIsDragging(true);
+        setIsPointerDown(true);
+        movedDuringPress.current = false;
         dragStart.current = {
             x: e.clientX - pos.x,
             y: e.clientY - pos.y
@@ -34,26 +37,38 @@ const DesktopIcon = ({
     };
 
     const handleClick = () => {
-        if (!isDragging) {
-            onDoubleClick(command);
+        if (!movedDuringPress.current) {
+            onActivate(command);
         }
     };
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
-            if (isDragging) {
-                setPos({
-                    x: e.clientX - dragStart.current.x,
-                    y: e.clientY - dragStart.current.y
-                });
+            if (!isPointerDown) {
+                return;
+            }
+
+            const nextX = e.clientX - dragStart.current.x;
+            const nextY = e.clientY - dragStart.current.y;
+            const deltaX = nextX - pos.x;
+            const deltaY = nextY - pos.y;
+
+            if (!movedDuringPress.current && Math.hypot(deltaX, deltaY) >= 4) {
+                movedDuringPress.current = true;
+                setIsDragging(true);
+            }
+
+            if (movedDuringPress.current) {
+                setPos({ x: nextX, y: nextY });
             }
         };
 
         const handleMouseUp = () => {
+            setIsPointerDown(false);
             setIsDragging(false);
         };
 
-        if (isDragging) {
+        if (isPointerDown) {
             window.addEventListener('mousemove', handleMouseMove);
             window.addEventListener('mouseup', handleMouseUp);
         }
@@ -62,7 +77,7 @@ const DesktopIcon = ({
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [isDragging]);
+    }, [isPointerDown, pos.x, pos.y]);
 
     return (
         <div
@@ -132,7 +147,7 @@ export const DesktopIcons = ({
                         icon={icon.icon}
                         label={icon.label}
                         command={icon.command}
-                        onDoubleClick={onIconClick}
+                        onActivate={onIconClick}
                         initialPos={icon.pos}
                         iconSrc={icon.iconSrc}
                         isMobile={isMobile}
