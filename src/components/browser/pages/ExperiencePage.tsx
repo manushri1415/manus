@@ -1,6 +1,5 @@
-import { FormEvent, useRef, useState } from 'react';
 import './ExperiencePage.css';
-import { EXPERIENCE_CATEGORIES, EXPERIENCE_PHOTOS } from './experienceData';
+import { EXPERIENCE_CATEGORIES } from './experienceData';
 
 interface ExperiencePageProps {
   onClose?: () => void;
@@ -8,24 +7,13 @@ interface ExperiencePageProps {
 }
 
 export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => {
-  const photoGridRef = useRef<HTMLDivElement>(null);
   const basePath = import.meta.env.BASE_URL;
-  const [quickSearchValue, setQuickSearchValue] = useState('');
 
   const resumePdfPath = `${basePath}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`;
   const logoPath = `${basePath}assets/icons/M-photos/themanubook-logo.png`;
   const profilePicPath = `${basePath}assets/icons/M-photos/Manu-profile-pic.jpeg`;
   const headerArtPath = `${basePath}assets/icons/M-photos/facebook-left.png`;
   const linkedInUrl = 'https://linkedin.com/in/manushrimurugakumar';
-
-  const handleQuickSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!photoGridRef.current) {
-      return;
-    }
-
-    photoGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
 
   return (
     <div className="experience-profile-page">
@@ -69,51 +57,8 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
         </div>
       </div>
 
-      {/* Main Content - Single Column */}
+      {/* Main Content */}
       <div className="themanubook-content">
-        <aside className="themanubook-quick-rail">
-          <div className="themanubook-quick-box">
-            <form className="themanubook-quick-search" onSubmit={handleQuickSearchSubmit}>
-              <input
-                type="text"
-                className="themanubook-quick-input"
-                value={quickSearchValue}
-                onChange={(event) => setQuickSearchValue(event.target.value)}
-                placeholder="experience"
-                aria-label="Quick search"
-              />
-              <div className="themanubook-quick-search-row">
-                <div className="themanubook-quick-box-title">quick search</div>
-                <button type="submit" className="themanubook-quick-button">
-                  go
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <div className="themanubook-quick-links">
-            <button type="button" className="themanubook-quick-link" onClick={() => onNavigate?.('about')}>
-              My Profile
-            </button>
-            <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" className="themanubook-quick-link">
-              My Network
-            </a>
-            <button type="button" className="themanubook-quick-link" onClick={() => onNavigate?.('projects')}>
-              My Projects
-            </button>
-            <a href="mailto:manushrimkumar@gmail.com" className="themanubook-quick-link">
-              My Messages
-            </a>
-            <a href={resumePdfPath} target="_blank" rel="noopener noreferrer" className="themanubook-quick-link">
-              My Resume
-            </a>
-            <button type="button" className="themanubook-quick-link" onClick={onClose}>
-              My Logout
-            </button>
-          </div>
-        </aside>
-
-        {/* Profile Summary Section */}
         <div className="themanubook-section-left">
           <div className="themanubook-box">
             <div className="themanubook-box-title">Picture</div>
@@ -134,7 +79,9 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
               Connect on LinkedIn
             </a>
           </div>
+        </div>
 
+        <div className="themanubook-section-middle">
           <div className="themanubook-info-panel">
             <div className="themanubook-info-title">Information</div>
 
@@ -206,14 +153,11 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
           </div>
         </div>
 
-        {/* Experience Details Section */}
         <div className="themanubook-section-right">
-          {/* All Experience Categories */}
           {EXPERIENCE_CATEGORIES.map((category) => (
             <div key={category.id}>
               <div className="themanubook-category-label">{category.label}</div>
 
-              {/* Experience Entries */}
               <div className="themanubook-experience-entries">
                 {category.entries.map((entry) => (
                   <div key={entry.id} className="themanubook-entry">
@@ -249,7 +193,6 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
             </div>
           ))}
 
-          {/* Classified Ad */}
           <div className="themanubook-ad-container">
             <a
               href={resumePdfPath}
@@ -264,23 +207,6 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
                 className="themanubook-ad-image"
               />
             </a>
-          </div>
-
-          {/* Experience Photos */}
-          <div className="themanubook-box themanubook-gallery-box" ref={photoGridRef}>
-            <div className="themanubook-box-title">Gallery</div>
-            <div className="themanubook-photo-grid">
-              {EXPERIENCE_PHOTOS.map((photo) => (
-                <div key={photo.id} className="themanubook-photo-item">
-                  <img
-                    src={`${basePath}${photo.thumbnail}`}
-                    alt={photo.alt}
-                    className="themanubook-photo-thumbnail"
-                  />
-                  <div className="themanubook-photo-caption">{photo.caption}</div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>

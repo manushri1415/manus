@@ -1,12 +1,13 @@
 /* ========================================
    themanubook Profile Page
-   Single-column scrollable layout
+   Three-column profile layout
    ======================================== */
 
 .experience-profile-page {
   --themanubook-blue: #3b5998;
   width: 100%;
   min-height: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   container-type: inline-size;
@@ -15,7 +16,7 @@
   font-family: Arial, Verdana, Tahoma, sans-serif;
   font-size: 11px;
   line-height: 1.4;
-  overflow: visible;
+  overflow: hidden;
 }
 
 /* ========================================
@@ -142,153 +143,45 @@
 }
 
 /* ========================================
-   Main Content - Two Column
+   Main Content
    ======================================== */
 
 .themanubook-content {
   display: grid;
-  grid-template-columns: 156px minmax(250px, 340px) minmax(0, 1fr);
-  flex: 1 0 auto;
-  gap: 10px;
+  grid-template-columns: minmax(220px, 248px) minmax(280px, 332px) minmax(0, 1fr);
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  gap: 12px;
   padding: 10px 12px 12px;
   max-width: 1000px;
   margin: 0 auto;
   width: 100%;
-  align-items: flex-start;
-  overflow: visible;
+  align-items: stretch;
+  overflow: hidden;
 }
 
 .themanubook-section-left {
   width: 100%;
   min-width: 0;
-  height: fit-content;
-  overflow: visible;
+  align-self: start;
+}
+
+.themanubook-section-middle {
+  width: 100%;
+  min-width: 0;
+  align-self: start;
 }
 
 .themanubook-section-right {
   width: 100%;
   min-width: 0;
-  overflow: visible;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding-right: 8px;
-}
-
-/* ========================================
-   Quick Search Rail
-   ======================================== */
-
-.themanubook-quick-rail {
-  position: sticky;
-  top: 12px;
-  align-self: start;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background-color: #ffffff;
-}
-
-.themanubook-quick-box,
-.themanubook-quick-links {
-  position: relative;
-  border: none;
-  background-color: #ffffff;
-}
-
-.themanubook-quick-box::before,
-.themanubook-quick-links::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(to right, #9aaeda 0 4px, transparent 8px 12px) top / 100% 2px no-repeat,
-    repeating-linear-gradient(to right, #9aaeda 0 4px, transparent 8px 12px) bottom / 100% 2px no-repeat,
-    repeating-linear-gradient(to bottom, #9aaeda 0 4px, transparent 8px 12px) left / 2px 100% no-repeat,
-    repeating-linear-gradient(to bottom, #9aaeda 0 4px, transparent 8px 12px) right / 2px 100% no-repeat;
-}
-
-.themanubook-quick-box-title {
-  font-size: 14px;
-  color: #1e1e1e;
-  font-weight: normal;
-  line-height: 1.1;
-}
-
-.themanubook-quick-search {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px 10px 9px;
-}
-
-.themanubook-quick-search-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px;
-}
-
-.themanubook-quick-input {
-  min-width: 0;
-  height: 30px;
-  border: 2px solid #8f8f9f;
-  background: #e3e4e6;
-  padding: 0 8px;
-  font-size: 11px;
-  font-family: Tahoma, Verdana, sans-serif;
-  color: #333333;
-  box-sizing: border-box;
-}
-
-.themanubook-quick-input::placeholder {
-  color: #8c90a6;
-}
-
-.themanubook-quick-button {
-  height: 17px;
-  min-width: 30px;
-  padding: 0 10px;
-  border: 1px solid #4f6fa7;
-  background: linear-gradient(180deg, #7ea1df 0%, #4c72b2 100%);
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: bold;
-  font-family: Tahoma, Verdana, sans-serif;
-  cursor: pointer;
-}
-
-.themanubook-quick-button:hover {
-  filter: brightness(1.03);
-}
-
-.themanubook-quick-links {
-  display: flex;
-  flex-direction: column;
-  padding: 12px 10px;
-  gap: 5px;
-  min-height: 170px;
-}
-
-.themanubook-quick-link {
-  display: block;
-  background: none;
-  border: none;
-  padding: 0;
-  text-align: left;
-  color: #4262a5;
-  text-decoration: none;
-  cursor: pointer;
-  font-size: 11px;
-  line-height: 1.2;
-  font-family: Tahoma, Verdana, sans-serif;
-}
-
-.themanubook-quick-link:hover {
-  text-decoration: underline;
-}
-
-.themanubook-quick-link:focus {
-  outline: 1px dotted #5b78b7;
-  outline-offset: 2px;
 }
 
 /* ========================================
@@ -311,7 +204,7 @@
 }
 
 .themanubook-picture-box {
-  padding: 12px 8px;
+  padding: 14px 12px;
   text-align: center;
   background-color: #f9f9f9;
   display: flex;
@@ -320,8 +213,7 @@
 }
 
 .themanubook-picture {
-  max-width: 200px;
-  width: auto;
+  width: min(100%, 190px);
   height: auto;
   object-fit: contain;
   border: 1px solid #cccccc;
@@ -333,7 +225,7 @@
 
 .themanubook-action-link {
   border: 1px solid #999999;
-  padding: 6px 8px;
+  padding: 8px 10px;
   background-color: #f9f9f9;
   margin-bottom: 8px;
 }
@@ -386,47 +278,6 @@
 
 .themanubook-ad-link:hover .themanubook-ad-image {
   opacity: 0.95;
-}
-
-/* ========================================
-   Photo Grid
-   ======================================== */
-
-.themanubook-photo-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  padding: 8px;
-  background-color: #f9f9f9;
-}
-
-.themanubook-photo-item {
-  text-align: center;
-}
-
-.themanubook-photo-thumbnail {
-  width: 100%;
-  aspect-ratio: 1;
-  border: 1px solid #999999;
-  background-color: #ffffff;
-  object-fit: cover;
-  display: block;
-}
-
-.themanubook-photo-thumbnail:hover {
-  border-color: #666666;
-}
-
-.themanubook-photo-thumbnail:focus {
-  outline: 1px dotted #0066cc;
-  outline-offset: 2px;
-}
-
-.themanubook-photo-caption {
-  font-size: 10px;
-  margin-top: 2px;
-  color: #333333;
-  word-wrap: break-word;
 }
 
 /* ========================================
@@ -621,17 +472,18 @@
   }
 
   .themanubook-content {
+    height: auto;
     grid-template-columns: 1fr;
+    align-items: flex-start;
+    overflow: visible;
   }
 
-  .themanubook-quick-rail {
-    display: none;
-  }
-
-  .themanubook-quick-rail,
   .themanubook-section-left,
+  .themanubook-section-middle,
   .themanubook-section-right {
     width: 100%;
+    max-height: none;
+    overflow: visible;
   }
 
   .themanubook-section-right {
@@ -669,11 +521,11 @@
   }
 
   .themanubook-picture-box {
-    padding: 10px 8px;
+    padding: 10px;
   }
 
   .themanubook-picture {
-    max-width: min(100%, 180px);
+    width: min(100%, 180px);
   }
 
   .themanubook-info-row {
@@ -720,15 +572,5 @@
 
   .themanubook-ad-container {
     margin-top: 10px;
-  }
-
-  .themanubook-photo-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@container (max-width: 420px) {
-  .themanubook-gallery-box {
-    display: none;
   }
 }
