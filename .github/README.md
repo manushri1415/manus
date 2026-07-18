@@ -1,289 +1,86 @@
-`tfish` is a stunning, fully interactive terminal-based portfolio website that simulates a complete operating system experience. Built with React, TypeScript, and Vite, this template transforms your portfolio into an immersive desktop environment with a BIOS boot sequence, login screen, draggable icons, and a functional terminal.
+# MANU OS
 
-![Preview](./preview.gif)
+MANU OS is an interactive portfolio built as a Windows XP-inspired desktop experience. Instead of a standard landing page, the app opens with a boot screen, drops visitors onto a nostalgic desktop, and lets them explore Manushri's story through draggable windows, retro web parodies, terminal commands, and a mini-game.
 
-**[https://iamovi.github.io/tfish/](https://iamovi.github.io/tfish/)**
+## Current App Snapshot
+
+As of July 18, 2026, the app currently includes:
+
+- 1 animated boot sequence
+- 6 desktop icons: My Story, Projects, Experience, Resume, Contact, and Terminal
+- 4 browser-style portfolio pages: MTube, Moogle, themanubook, and ManuPress
+- 9 project entries in the Moogle projects experience
+- 7 experience entries across 3 experience categories
+- 10 built-in terminal commands: `help`, `whoami`, `about-os`, `tech`, `credits`, `cat`, `fortune`, `clear`, `reboot`, and `play`
+- 1 Snake mini-game with keyboard and touch controls
+- Custom wallpaper upload with local persistence
+- Responsive desktop and window behavior for desktop, tablet, and phone layouts
+
+## What The App Does
+
+- Simulates a retro desktop with a taskbar, Start menu, movable desktop icons, and layered windows
+- Presents the About page as a video-platform parody with image lightboxes and related content
+- Presents projects as a search-engine parody with filtering, highlighted work, and sponsored links
+- Presents experience as a social-profile parody with structured experience, education, and resume links
+- Presents contact info in a publisher-style page with external links and a work-in-progress contact form
+- Includes a terminal-first intro so visitors can explore the portfolio through commands as well as UI navigation
 
 ## Screenshots
 
 <table>
   <tr>
-    <td><img src="./screenshoots/i.png" width="300" alt="i" /></td>
-    <td><img src="./screenshoots/ii.png" width="300" alt="ii" /></td>
+    <td><img src="../public/assets/icons/M-photos/1.png" width="100%" alt="Desktop view with terminal open" /></td>
+    <td><img src="../public/assets/icons/M-photos/2.png" width="100%" alt="MTube about page" /></td>
   </tr>
   <tr>
-    <td><img src="./screenshoots/iii.png" width="300" alt="iii" /></td>
-    <td><img src="./screenshoots/iv.png" width="300" alt="iv" /></td>
+    <td><img src="../public/assets/icons/M-photos/3.png" width="100%" alt="themanubook experience page" /></td>
+    <td><img src="../public/assets/icons/M-photos/4.png" width="100%" alt="Moogle projects page" /></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="../public/assets/icons/M-photos/5.png" width="100%" alt="Snake mini-game window" /></td>
   </tr>
 </table>
 
-## Installation
+## Stack
+
+- React 18
+- TypeScript
+- Vite
+- React Router
+- Tailwind CSS
+- Custom CSS for the retro UI themes and page-specific styling
+
+## Local Development
 
 ### Prerequisites
-- Node.js 18+ or Bun
-- npm, yarn, or bun
 
-### Quick Start
+- Node.js 18+
+- npm
+
+### Run The App
 
 ```bash
-# Clone the repository
-git clone https://github.com/iamovi/tfish.git
-cd tfish
-
-# Install dependencies
 npm install
-# or
-bun install
-
-# Start development server
 npm run dev
-# or
-bun dev
-
-# Build for production
-npm run build
-# or
-bun run build
 ```
 
-The app will be available at `http://localhost:5173`
+The development server runs on `http://localhost:8080`.
 
-## 🎨 Customization Guide
+### Production Build
 
-### 1. Personal Information
-
-Edit `src/components/Terminal.tsx` to update your details:
-
-```tsx
-// Update the welcome message
-const WELCOME_MESSAGE = `Hello, World! I'm [Your Name]
-I'm a [Your Title/Role].
-
-Type 'help' to see available commands.`;
-
-// Update the about command
-about: {
-  description: 'Learn about me',
-  action: () => (
-    <div className="my-4 space-y-4">
-      <div className="border border-border rounded-lg overflow-hidden w-64 bg-secondary/50 shadow-lg">
-        <img 
-          src="YOUR_IMAGE_URL_HERE" 
-          alt="Your Name" 
-          className="w-full h-auto object-cover"
-        />
-      </div>
-      <div className="font-mono leading-relaxed bg-secondary/30 p-4 border border-border rounded-lg">
-        <div className="text-terminal-cyan font-bold mb-2">┌ ABOUT ME ┐</div>
-        <p className="mb-4 text-foreground/90">
-          Your bio here...
-        </p>
-      </div>
-    </div>
-  ),
-},
-```
-
-### 2. Skills
-
-Update your technical skills in the `skills` command:
-
-```tsx
-skills: {
-  description: 'View my technical skills',
-  action: () => `
-┌─────────────────────────────────────────────────────────────┐
-│  TECHNICAL SKILLS                                           │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  Languages                                                  │
-│  ─────────────────────────────────────────────                  │
-│  • Your Language 1                                          │
-│  • Your Language 2                                          │
-│                                                             │
-│  Frameworks & Libraries                                     │
-│  ─────────────────────────────────────────                  │
-│  • Your Framework 1                                         │
-│  • Your Framework 2                                         │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-`,
-},
-```
-
-### 3. Projects
-
-Update the `projects` command with your work:
-
-```tsx
-projects: {
-  description: 'Browse my projects',
-  action: () => `
-┌─────────────────────────────────────────────────────────────┐
-│  FEATURED PROJECTS                                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  01. Your Project Name                                      │
-│      ──────────────────────────────────                     │
-│      Project description here                               │
-│      → github.com/yourusername/project                      │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-`,
-},
-```
-
-### 4. Contact Information
-
-Update your contact details:
-
-```tsx
-contact: {
-  description: 'Get my contact information',
-  action: () => `
-┌─────────────────────────────────────────────────────────────┐
-│  CONTACT                                                    │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  📧 Email      your.email@example.com                       │
-│  🐙 GitHub     github.com/yourusername                      │
-│  🐦 Twitter    twitter.com/yourusername                     │
-│  🌐 Website    yourwebsite.com                              │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-`,
-},
-```
-
-### 5. Username
-
-Change the terminal username in `src/components/Terminal.tsx`:
-
-```tsx
-// Find these lines and replace 'ren' with your username
-prompt: 'yourusername@ubuntu:~$',
-prompt: 'C:\\Users\\yourusername>',
-prompt: 'PS C:\\Users\\yourusername>',
-```
-
-### 6. Login Screen
-
-Update the login screen in `src/components/LoginScreen.tsx`:
-
-```tsx
-<h1 className="text-3xl font-semibold text-white mb-2 drop-shadow-lg">
-  Your Name
-</h1>
-```
-
-### 7. Start Menu
-
-Update the start menu profile in `src/components/SocialLinks.tsx`:
-
-```tsx
-<div className="text-sm font-semibold text-white">Your Name</div>
-<div className="text-[11px] text-white/50">Your Title</div>
-```
-
-### 8. Default Wallpaper
-
-Replace `public/frieren.jpg` with your own image, or update the default in `src/pages/Index.tsx`:
-
-```tsx
-const [wallpaper, setWallpaper] = useState<string | null>('/your-image.jpg');
-```
-
-### 9. Desktop Icons
-
-Customize icons in `src/components/DesktopIcons.tsx`:
-
-```tsx
-const icons = [
-  { icon: User, label: 'About Me', command: 'about', pos: { x: 20, y: 20 } },
-  { icon: Folder, label: 'Projects', command: 'projects', pos: { x: 20, y: 120 } },
-  // Add or remove icons as needed
-];
-```
-
-### 10. Add Custom Commands
-
-Add new commands in `src/components/Terminal.tsx`:
-
-```tsx
-const COMMANDS: Record<string, { description: string; action: () => string | React.ReactNode }> = {
-  // ... existing commands
-  
-  yourcmd: {
-    description: 'Your command description',
-    action: () => 'Your command output',
-  },
-};
-```
-
-Don't forget to add it to the help menu!
-
-## 🎭 Theme Customization
-
-Themes are defined in `src/components/Terminal.tsx`. Add your own:
-
-```tsx
-case 'yourtheme':
-  return {
-    bg: '#000000',           // Background color
-    text: '#ffffff',         // Text color
-    prompt: 'user@host:~$',  // Command prompt
-    header: 'Your Theme',    // Window title
-    welcome: WELCOME_MESSAGE,
-    caret: '#ffffff'         // Cursor color
-  };
-```
-
-Then add it to the theme selector in `src/components/SocialLinks.tsx`:
-
-```tsx
-const themes = [
-  // ... existing themes
-  { name: 'Your Theme', color: '#000000', id: 'yourtheme' },
-];
-```
-
----
-
-## Deployment
-
-### Vercel
 ```bash
 npm run build
-# Deploy the 'dist' folder to Vercel
 ```
 
-### Netlify
-```bash
-npm run build
-# Deploy the 'dist' folder to Netlify
-```
+The app is configured for GitHub Pages deployment, and the Vite base path is set to `/manus/`.
 
-### GitHub Pages
-```bash
-npm run build
-# Push the 'dist' folder to gh-pages branch
-```
+## Project Notes
 
-## Contributing
+- The contact form UI is present, but submission is not wired to a backend yet.
+- The resume opens from a bundled PDF in `public/assets/icons/M-photos/`.
+- The Snake game stores its best score in local storage.
+- The wallpaper picker also stores the selected wallpaper in local storage.
 
-Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest new features
-- Submit pull requests
-- Improve documentation
+## Credit
 
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-
-**Made with ❤️ by [Ovi ren](https://iamovi.github.io), for developers**
-
-Star ⭐ this repo if you found it helpful!
-
-Thanks for reading!
+This project was originally inspired by the `tfish` portfolio concept and has since been heavily customized into the current MANU OS experience.
