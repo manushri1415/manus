@@ -16,6 +16,32 @@ export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
   // Restructured layout: video on left, bio on right
   const logoPath = `${import.meta.env.BASE_URL}assets/icons/Heading.png`;
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
+  const relatedVideos = [
+    {
+      id: 'me-at-the-zoo',
+      embedUrl: 'https://www.youtube.com/embed/jNQXAC9IVRw',
+      title: 'Me at the zoo',
+      iframeTitle: 'Related video zero',
+    },
+    {
+      id: 'my-snowboarding-skillz',
+      embedUrl: 'https://www.youtube.com/embed/LeAltgu_pbM',
+      title: 'My Snowboarding Skillz',
+      iframeTitle: 'Related video zero one',
+    },
+    {
+      id: 'sodalis',
+      embedUrl: 'https://www.youtube.com/embed/hsx0wmsrPAM',
+      title: 'Meet Sodalis: A Better Way for Students to Connect',
+      iframeTitle: 'Related video one',
+    },
+    {
+      id: 'hope-short-film',
+      embedUrl: 'https://www.youtube.com/embed/j2wNxcnJy-Q',
+      title: 'THERE IS HOPE ! SHORT FILM | DEPRESSION',
+      iframeTitle: 'Related video two',
+    },
+  ];
 
   const openLightbox = (src: string, alt: string) => {
     setLightboxImage({ src: `${import.meta.env.BASE_URL}${src}`, alt });
@@ -82,7 +108,7 @@ export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
                     />
                   </div>
                     <div className= "video-title-info"> 
-                      <h2 className="mtube-video-title-small">My Childhood Memories: 2005 – 2022</h2>
+                      <h2 className="mtube-video-title-small">My Childhood Memories: 2005 – 2021</h2>
                       <div className="mtube-rating-section">
                         <span className="mtube-stars">★★★★★</span>
                         <span className="mtube-rating-text">Rate this video</span>
@@ -238,6 +264,28 @@ export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
               </div>
             </div>
           </div>
+
+          <aside className="mtube-sidebar">
+            <div className="mtube-sidebar-section">
+              <h3 className="mtube-sidebar-title">Related Videos</h3>
+              <div className="mtube-related-grid mtube-related-grid-sidebar">
+                {relatedVideos.map((video) => (
+                  <div key={video.id} className="mtube-related-card">
+                    <div className="mtube-related-video">
+                      <iframe
+                        src={video.embedUrl}
+                        title={video.iframeTitle}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        loading="lazy"
+                      />
+                    </div>
+                    <p className="mtube-related-title">{video.title}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
 

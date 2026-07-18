@@ -515,7 +515,7 @@
    Director Videos (Sidebar)
    ======================================== */
 .mtube-sidebar {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 20px;
   min-width: 0;
@@ -844,6 +844,19 @@
 /* ========================================
    Responsive Styles
    ======================================== */
+@container (min-width: 920px) {
+  .mtube-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 280px);
+    gap: 14px;
+    align-items: start;
+  }
+
+  .mtube-sidebar {
+    display: flex;
+  }
+}
+
 @container (max-width: 920px) {
   .mtube-links-section {
     justify-content: flex-start;
