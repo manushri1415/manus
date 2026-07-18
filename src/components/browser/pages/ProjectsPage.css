@@ -152,18 +152,20 @@
   display: flex;
   flex: 1 0 auto;
   align-items: flex-start;
+  flex-wrap: wrap;
   background-color: #ffffff;
 }
 
 /* Results Column */
 .moongle-results {
-  flex: 1;
+  flex: 999 1 560px;
   padding: 16px 20px;
   min-width: 0;
   border-right: 1px solid #e8e8e8;
 }
 
 .moongle-result {
+  max-width: 100%;
   margin-bottom: 24px;
   padding-bottom: 16px;
 }
@@ -201,6 +203,7 @@
   color: #545454;
   line-height: 1.5;
   margin: 4px 0;
+  overflow-wrap: anywhere;
   word-break: break-word;
 }
 
@@ -216,6 +219,7 @@
   color: #777777;
   margin: 4px 0;
   line-height: 1.4;
+  overflow-wrap: anywhere;
   word-break: break-word;
 }
 
@@ -223,7 +227,11 @@
   color: #006621;
   font-size: 12px;
   margin: 4px 0;
-  word-break: break-all;
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .moongle-no-results {
@@ -250,9 +258,10 @@
 
 /* Sidebar */
 .moongle-sidebar {
+  flex: 0 1 260px;
   width: min(260px, 32%);
+  min-width: 0;
   padding: 16px 12px;
-  flex-shrink: 0;
   background-color: #f9f9f9;
   font-size: 12px;
 }
@@ -308,7 +317,11 @@
 .moongle-sponsored-url {
   color: #006621;
   font-size: 11px;
-  word-break: break-all;
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 /* Popular Searches */
@@ -426,5 +439,82 @@
   .moongle-result {
     margin-bottom: 18px;
     padding-bottom: 12px;
+  }
+}
+
+@container (max-width: 480px) {
+  .moongle-header {
+    padding-top: 10px;
+  }
+
+  .moongle-header-top {
+    gap: 12px;
+  }
+
+  .moongle-logo {
+    height: 40px;
+  }
+
+  .moongle-header-right {
+    width: 100%;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .moongle-search-input,
+  .moongle-search-button {
+    width: 100%;
+  }
+
+  .moongle-search-input {
+    flex-basis: auto;
+  }
+
+  .moongle-navigation-left,
+  .moongle-nav-right {
+    flex-basis: 100%;
+  }
+
+  .moongle-results-bar {
+    gap: 4px 8px;
+  }
+
+  .moongle-result-title {
+    font-size: 13px;
+  }
+
+  .moongle-result-description {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .moongle-result-technologies,
+  .moongle-result-url,
+  .moongle-sponsored-description,
+  .moongle-sponsored-url {
+    font-size: 11px;
+  }
+}
+
+@container (max-width: 400px) {
+  .moongle-header,
+  .moongle-navigation,
+  .moongle-results-bar,
+  .moongle-results,
+  .moongle-sidebar {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .moongle-navigation-left,
+  .moongle-nav-right {
+    gap: 6px 10px;
+  }
+
+  .moongle-result {
+    margin-bottom: 16px;
+    padding-bottom: 10px;
   }
 }

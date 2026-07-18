@@ -6,6 +6,7 @@ type Position = { x: number; y: number };
 
 type SnakeGameProps = {
   isWindowActive?: boolean;
+  isCompactViewport?: boolean;
 };
 
 const GRID_SIZE = 20;
@@ -53,7 +54,7 @@ const shouldShowTouchControls = () => {
 
 const pickRandom = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)];
 
-export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
+export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: SnakeGameProps) => {
   const [snake, setSnake] = useState<Position[]>(() => initialSnake());
   const [food, setFood] = useState<Position>({ x: 15, y: 10 });
   const [direction, setDirection] = useState<Direction>('RIGHT');
@@ -290,7 +291,7 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
         if (areSamePosition(nextHead, food)) {
           setScore((prev) => {
             const nextScore = prev + 10;
-            const offersCollected = nextScore / 10;
+            const nextOffersCollected = nextScore / 10;
 
             setHighScore((currentHighScore) => {
               const nextHighScore = Math.max(currentHighScore, nextScore);
@@ -302,7 +303,7 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
               return nextHighScore;
             });
 
-            if (offersCollected >= goalOffers) {
+            if (nextOffersCollected >= goalOffers) {
               setHasWon(true);
               setIsPaused(true);
             }
@@ -330,19 +331,21 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
   const bestOffers = highScore / 10;
   const cellSizePx = boardSizePx > 0 ? boardSizePx / GRID_SIZE : 0;
   const headSizePx = cellSizePx > 0 ? Math.max(38, Math.min(48, cellSizePx * 2.75)) : DEFAULT_HEAD_SIZE;
+  const usesTouchLayout = isCompactViewport || showTouchControls;
+  const canTogglePause = hasStarted && !gameOver && !hasWon;
 
   const liveStatus = hasWon
     ? 'She got the job.'
     : gameOver
-    ? `Application rejected. Applications sent: ${offersCollected}.`
-    : !hasStarted
-      ? `ManuSnake ready. Help Manushri apply to ${goalOffers} jobs. Use Arrow Keys or WASD to start.`
-      : isPaused
-        ? `Game paused. Score ${score}. High score ${highScore}.`
-        : `Running. Score ${score}. High score ${highScore}.`;
+      ? `Application rejected. Applications sent: ${offersCollected}.`
+      : !hasStarted
+        ? `ManuSnake ready. Help Manushri apply to ${goalOffers} jobs. ${usesTouchLayout ? 'Use the touch pad or arrow keys to start.' : 'Use Arrow Keys or WASD to start.'}`
+        : isPaused
+          ? `Game paused. Score ${score}. High score ${highScore}.`
+          : `Running. Score ${score}. High score ${highScore}.`;
 
   return (
-    <div className="manu-snake">
+    <div className={`manu-snake${usesTouchLayout ? ' manu-snake--compact' : ''}`}>
       <div className="manu-snake__status" aria-live="polite">
         {liveStatus}
       </div>
@@ -351,6 +354,8 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
         <div className="manu-snake__score-row">
           <span className="manu-snake__score-label">Applications: {offersCollected}/{goalOffers}</span>
           <span className="manu-snake__score-label">Best: {bestOffers}</span>
+        </div>
+        <div className="manu-snake__actions">
           <button type="button" className="manu-snake__button" onClick={resetGame}>
             New Game
           </button>
@@ -362,7 +367,7 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
           ref={rootRef}
           tabIndex={0}
           role="application"
-          aria-label="ManuSnake game board. Use Arrow Keys or WASD to move. Press Space to pause."
+          aria-label={`ManuSnake game board. ${usesTouchLayout ? 'Use the touch controls or Arrow Keys or WASD to move.' : 'Use Arrow Keys or WASD to move.'} Press Space to pause.`}
           onKeyDown={handleKeyDown}
           onMouseDown={(event) => {
             event.stopPropagation();
@@ -438,7 +443,7 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
                     top: `${(food.y + 0.5) * CELL_PERCENT}%`,
                   }}
                 >
-                  <span>✉️</span>
+                  <span>@</span>
                 </div>
               </>
             )}
@@ -448,15 +453,15 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
                 <div className="manu-snake__overlay-title">MANUSNAKE.EXE</div>
                 <p>Quick, help Manushri apply to {goalOffers} jobs.</p>
                 <p>Goal: submit {goalOffers} applications</p>
-                <p>Use Arrow Keys or WASD to start</p>
-                <p>Space to pause</p>
+                <p>{usesTouchLayout ? 'Tap any direction to start' : 'Use Arrow Keys or WASD to start'}</p>
+                <p>Pause anytime with Space or the pause button</p>
               </div>
             )}
 
             {hasStarted && isPaused && !gameOver && !hasWon && (
               <div className="manu-snake__overlay">
                 <div className="manu-snake__overlay-title">GAME PAUSED</div>
-                <p>Press Space to continue</p>
+                <p>Press Space or Resume to continue</p>
               </div>
             )}
 
@@ -485,9 +490,11 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
           </div>
         </div>
 
-        <p className="manu-snake__hint">Arrow Keys / WASD to move • Space to pause</p>
+        <p className="manu-snake__hint">
+          {usesTouchLayout ? 'Touch pad or Arrow Keys / WASD to move. Use Space or Pause to stop.' : 'Arrow Keys / WASD to move. Space to pause.'}
+        </p>
 
-        {showTouchControls && (
+        {usesTouchLayout && (
           <div className="manu-snake__touch-controls" aria-label="Touch controls">
             <button
               type="button"
@@ -497,7 +504,7 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
               onTouchStart={(event) => event.stopPropagation()}
               onClick={() => handleMoveInput('UP')}
             >
-              ▲
+              Up
             </button>
             <button
               type="button"
@@ -507,7 +514,7 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
               onTouchStart={(event) => event.stopPropagation()}
               onClick={() => handleMoveInput('LEFT')}
             >
-              ◀
+              Left
             </button>
             <button
               type="button"
@@ -517,7 +524,7 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
               onTouchStart={(event) => event.stopPropagation()}
               onClick={() => handleMoveInput('DOWN')}
             >
-              ▼
+              Down
             </button>
             <button
               type="button"
@@ -527,7 +534,7 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
               onTouchStart={(event) => event.stopPropagation()}
               onClick={() => handleMoveInput('RIGHT')}
             >
-              ▶
+              Right
             </button>
             <button
               type="button"
@@ -536,7 +543,7 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
               onMouseDown={(event) => event.stopPropagation()}
               onTouchStart={(event) => event.stopPropagation()}
               onClick={() => {
-                if (!hasStarted || gameOver || hasWon) {
+                if (!canTogglePause) {
                   return;
                 }
 
@@ -544,7 +551,7 @@ export const SnakeGame = ({ isWindowActive = true }: SnakeGameProps) => {
                 setIsPaused((prev) => !prev);
               }}
             >
-              Pause
+              {isPaused ? 'Resume' : 'Pause'}
             </button>
           </div>
         )}

@@ -57,6 +57,34 @@ const clampValue = (value: number, min: number, max: number) => {
   return Math.min(Math.max(value, min), max);
 };
 
+const getCompactRestoredWindowState = (
+  workspaceSize: WindowSize,
+  minSize: Partial<WindowSize> | undefined,
+  defaultMinWidth: number,
+  defaultMinHeight: number,
+  chromeMode: 'browser' | 'utility',
+) => {
+  const widthRatio = chromeMode === 'utility' ? 0.94 : 0.96;
+  const heightRatio = chromeMode === 'utility' ? 0.84 : 0.9;
+  const targetSize = {
+    width: Math.round(workspaceSize.width * widthRatio),
+    height: Math.round(workspaceSize.height * heightRatio),
+  };
+  const centeredPosition = {
+    x: Math.round((workspaceSize.width - targetSize.width) / 2),
+    y: Math.round((workspaceSize.height - targetSize.height) / 2),
+  };
+
+  return normalizeWindowState(
+    centeredPosition,
+    targetSize,
+    workspaceSize,
+    minSize,
+    defaultMinWidth,
+    defaultMinHeight,
+  );
+};
+
 const normalizeWindowState = (
   position: WindowPosition,
   size: WindowSize,
@@ -65,8 +93,10 @@ const normalizeWindowState = (
   defaultMinWidth = BROWSER_MIN_WINDOW_WIDTH,
   defaultMinHeight = BROWSER_MIN_WINDOW_HEIGHT,
 ) => {
-  const minWidth = Math.max(defaultMinWidth, minSize?.width ?? defaultMinWidth);
-  const minHeight = Math.max(defaultMinHeight, minSize?.height ?? defaultMinHeight);
+  const preferredMinWidth = Math.max(defaultMinWidth, minSize?.width ?? defaultMinWidth);
+  const preferredMinHeight = Math.max(defaultMinHeight, minSize?.height ?? defaultMinHeight);
+  const minWidth = workspaceSize.width > 0 ? Math.min(preferredMinWidth, workspaceSize.width) : preferredMinWidth;
+  const minHeight = workspaceSize.height > 0 ? Math.min(preferredMinHeight, workspaceSize.height) : preferredMinHeight;
   const maxWidth = Math.max(minWidth, workspaceSize.width || minWidth);
   const maxHeight = Math.max(minHeight, workspaceSize.height || minHeight);
   const width = clampValue(size.width, minWidth, maxWidth);
@@ -130,13 +160,15 @@ export const BrowserWindow = ({
   const [position, setPosition] = useState(initialState.position);
   const [size, setSize] = useState(initialState.size);
   const [isMaximized, setIsMaximized] = useState(false);
+  const [isViewportFullscreen, setIsViewportFullscreen] = useState(mobileFullScreen);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const resizeStart = useRef({ x: 0, y: 0, w: 0, h: 0 });
   const appliedInitialState = useRef('');
+  const previousMobileFullScreen = useRef(mobileFullScreen);
 
-  const fillsWorkspace = mobileFullScreen || isMaximized;
+  const fillsWorkspace = isViewportFullscreen || isMaximized;
   const isBrowserChrome = chromeMode === 'browser';
   const initialStateKey = [
     initialX,
@@ -148,6 +180,17 @@ export const BrowserWindow = ({
     minWidth ?? '',
     minHeight ?? '',
   ].join(':');
+
+  useEffect(() => {
+    if (mobileFullScreen && !previousMobileFullScreen.current) {
+      setIsViewportFullscreen(true);
+      setIsMaximized(false);
+    } else if (!mobileFullScreen && previousMobileFullScreen.current) {
+      setIsViewportFullscreen(false);
+    }
+
+    previousMobileFullScreen.current = mobileFullScreen;
+  }, [mobileFullScreen]);
 
   useEffect(() => {
     if (fillsWorkspace) return;
@@ -182,7 +225,7 @@ export const BrowserWindow = ({
   ]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (mobileFullScreen) return;
+    if (fillsWorkspace) return;
     if ((e.target as HTMLElement).closest('.browser-header-buttons')) return;
     setIsDragging(true);
     onFocus?.();
@@ -193,7 +236,7 @@ export const BrowserWindow = ({
   };
 
   const handleResizeDown = (e: React.MouseEvent) => {
-    if (mobileFullScreen || !resizable) return;
+    if (fillsWorkspace || !resizable) return;
     e.preventDefault();
     e.stopPropagation();
     setIsResizing(true);
@@ -283,6 +326,27 @@ export const BrowserWindow = ({
     }
   }, [defaultMinHeight, defaultMinWidth, fillsWorkspace, minSize, position, size, workspaceSize]);
 
+  const handleMaximizeToggle = () => {
+    if (mobileFullScreen) {
+      if (isViewportFullscreen) {
+        const restoredState = getCompactRestoredWindowState(
+          workspaceSize,
+          minSize,
+          defaultMinWidth,
+          defaultMinHeight,
+          chromeMode,
+        );
+        setPosition(restoredState.position);
+        setSize(restoredState.size);
+      }
+
+      setIsViewportFullscreen((prev) => !prev);
+      return;
+    }
+
+    setIsMaximized((prev) => !prev);
+  };
+
   if (isMinimized) {
     return null;
   }
@@ -297,13 +361,16 @@ export const BrowserWindow = ({
         top: 0,
         left: 0,
         zIndex: fillsWorkspace ? zIndex + 1 : zIndex,
+        boxSizing: 'border-box',
+        maxWidth: '100%',
+        maxHeight: '100%',
         willChange: isDragging || isResizing ? 'transform, width, height' : 'auto',
         backgroundColor: XP_WINDOW_FRAME,
         borderTop: `1px solid ${XP_WINDOW_BORDER}`,
         borderLeft: `4px solid ${XP_WINDOW_BORDER}`,
         borderRight: `4px solid ${XP_WINDOW_BORDER}`,
         borderBottom: `4px solid ${XP_WINDOW_BORDER}`,
-        borderRadius: mobileFullScreen ? '8px' : '3px',
+        borderRadius: fillsWorkspace ? '8px' : '3px',
         boxShadow: `inset 1px 0 0 ${XP_WINDOW_INNER_BORDER}, inset -1px 0 0 ${XP_WINDOW_INNER_BORDER}, inset 0 -1px 0 ${XP_WINDOW_INNER_BORDER}, 0 0 0 2px rgba(255,255,255,0.22) inset, 0 18px 45px rgba(0, 0, 0, 0.38)`,
       }}
       className={`pointer-events-auto overflow-hidden flex flex-col ${
@@ -313,9 +380,9 @@ export const BrowserWindow = ({
     >
       <div
         onMouseDown={handleMouseDown}
-        className={`flex items-center justify-between ${mobileFullScreen ? 'cursor-default px-3 py-2' : 'cursor-move px-[7px] py-[3px]'} select-none`}
+        className={`flex items-center justify-between ${fillsWorkspace ? 'cursor-default px-3 py-2' : 'cursor-move px-[7px] py-[3px]'} select-none`}
         style={{
-          minHeight: mobileFullScreen ? '30px' : '24px',
+          minHeight: fillsWorkspace ? '30px' : '24px',
           color: '#ffffff',
           background: XP_TITLE_BAR,
           borderBottom: '1px solid #08318d',
@@ -323,7 +390,7 @@ export const BrowserWindow = ({
         }}
       >
         <span
-          className={`${mobileFullScreen ? 'text-[13px]' : 'text-[12px]'} truncate font-bold`}
+          className={`${fillsWorkspace ? 'text-[13px]' : 'text-[12px]'} truncate font-bold`}
           style={{
             fontFamily: '"Trebuchet MS", Tahoma, sans-serif',
             letterSpacing: '0.1px',
@@ -334,7 +401,7 @@ export const BrowserWindow = ({
         </span>
 
         <div className="browser-header-buttons flex items-center gap-1">
-          {!mobileFullScreen && showMinimizeButton && (
+          {showMinimizeButton && (
             <>
               <button
                 type="button"
@@ -353,13 +420,13 @@ export const BrowserWindow = ({
               </button>
             </>
           )}
-          {!mobileFullScreen && showMaximizeButton && (
+          {showMaximizeButton && (
             <>
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsMaximized(!isMaximized);
+                  handleMaximizeToggle();
                 }}
                 className="flex h-[18px] w-[20px] items-center justify-center rounded-[2px] transition-transform active:translate-y-px"
                 style={{
@@ -368,7 +435,7 @@ export const BrowserWindow = ({
                   boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.95), inset -1px -1px 0 rgba(60,104,173,0.45)',
                 }}
               >
-                {isMaximized ? (
+                {fillsWorkspace ? (
                   <Copy size={10} className="rotate-180" color="#11327d" strokeWidth={2.1} />
                 ) : (
                   <Square size={10} color="#11327d" strokeWidth={2.1} />
@@ -394,7 +461,7 @@ export const BrowserWindow = ({
         </div>
       </div>
 
-      {isBrowserChrome && !mobileFullScreen && (
+      {isBrowserChrome && !fillsWorkspace && (
         <div
           className="flex items-center gap-4 px-3 py-[2px]"
           style={{
@@ -419,7 +486,7 @@ export const BrowserWindow = ({
 
       {isBrowserChrome && (
         <div
-          className={`flex items-center ${mobileFullScreen ? 'gap-1 px-2 py-1.5' : 'gap-1 px-2 py-[2px]'}`}
+          className={`flex items-center ${fillsWorkspace ? 'gap-1 px-2 py-1.5' : 'gap-1 px-2 py-[2px]'}`}
           style={{
             background: XP_MENU_BG,
             borderTop: '1px solid rgba(255,255,255,0.7)',
@@ -483,7 +550,7 @@ export const BrowserWindow = ({
             </span>
           )}
           <div
-            className="flex-1 rounded-[2px] px-2 py-0"
+            className="flex-1 min-w-0 overflow-hidden rounded-[2px] px-2 py-0"
             style={{
               backgroundColor: '#ffffff',
               border: '1px solid #7f9db9',
@@ -491,7 +558,7 @@ export const BrowserWindow = ({
             }}
           >
             <span
-              className={`${mobileFullScreen ? 'text-[11px]' : 'text-[10px]'} text-[#555555]`}
+              className={`${fillsWorkspace ? 'text-[11px]' : 'text-[10px]'} block truncate whitespace-nowrap text-[#555555]`}
               style={{ fontFamily: 'Tahoma, "Trebuchet MS", sans-serif' }}
             >
               {url}
@@ -500,7 +567,7 @@ export const BrowserWindow = ({
           {!mobileFullScreen && (
             <button
               type="button"
-              className="flex items-center gap-1 rounded-[2px] px-1.5 py-0.5 text-[10px] text-[#3a4559]"
+              className="flex shrink-0 items-center gap-1 rounded-[2px] px-1.5 py-0.5 text-[10px] text-[#3a4559]"
               style={{
                 background: XP_BUTTON_BG,
                 border: '1px solid #8ea3c0',

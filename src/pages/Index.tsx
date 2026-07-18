@@ -29,6 +29,7 @@ const DEFAULT_MIN_GAME_HEIGHT = 470;
 const DESKTOP_ICON_GUTTER = 120;
 const PHONE_LAYOUT_BREAKPOINT = 540;
 const TABLET_LAYOUT_BREAKPOINT = 768;
+const TOUCH_TABLET_BREAKPOINT = 1280;
 const COMPACT_DESKTOP_BREAKPOINT = 1180;
 const COMPACT_DESKTOP_HEIGHT = 720;
 
@@ -120,10 +121,14 @@ const getInitialWorkspaceSize = (): WorkspaceSize => {
   };
 };
 
-const getHomeWindowLayout = (workspaceSize: WorkspaceSize, mobileIconAreaHeight: number): HomeWindowLayout => {
+const getHomeWindowLayout = (
+  workspaceSize: WorkspaceSize,
+  mobileIconAreaHeight: number,
+  preferTouchLayout: boolean,
+): HomeWindowLayout => {
   const mode: HomeLayoutMode = workspaceSize.width < PHONE_LAYOUT_BREAKPOINT
     ? 'phone'
-    : workspaceSize.width < TABLET_LAYOUT_BREAKPOINT
+    : workspaceSize.width < TABLET_LAYOUT_BREAKPOINT || (preferTouchLayout && workspaceSize.width < TOUCH_TABLET_BREAKPOINT)
       ? 'tablet'
       : workspaceSize.width < COMPACT_DESKTOP_BREAKPOINT || workspaceSize.height < COMPACT_DESKTOP_HEIGHT
         ? 'laptop'
@@ -228,8 +233,16 @@ const Index = () => {
   const terminalRef = useRef<TerminalHandle | null>(null);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [workspaceSize, setWorkspaceSize] = useState<WorkspaceSize>(getInitialWorkspaceSize);
+  const [isCoarsePointer, setIsCoarsePointer] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    return window.matchMedia('(pointer: coarse)').matches;
+  });
+  const usesTouchOptimizedLayout = isMobile || isCoarsePointer;
   const mobileIconCount = 6;
-  const mobileIconColumns = !isMobile
+  const mobileIconColumns = !usesTouchOptimizedLayout
     ? 6
     : workspaceSize.width >= 480
       ? 6
@@ -238,10 +251,23 @@ const Index = () => {
         : 2;
   const mobileIconRows = Math.ceil(mobileIconCount / mobileIconColumns);
   const mobileIconAreaHeight = 28 + mobileIconRows * 78;
-  const homeLayout = getHomeWindowLayout(workspaceSize, mobileIconAreaHeight);
-  const windowWorkspaceSize = {
+  const homeLayout = getHomeWindowLayout(workspaceSize, mobileIconAreaHeight, usesTouchOptimizedLayout);
+  const isCompactViewport = homeLayout.mode === 'phone' || homeLayout.mode === 'tablet';
+  const terminalWorkspaceSize = {
     width: homeLayout.workspace.width,
     height: homeLayout.workspace.height,
+  };
+  const appWorkspace = isCompactViewport
+    ? {
+      x: 0,
+      y: 0,
+      width: workspaceSize.width,
+      height: workspaceSize.height,
+    }
+    : homeLayout.workspace;
+  const appWindowWorkspaceSize = {
+    width: appWorkspace.width,
+    height: appWorkspace.height,
   };
 
   useEffect(() => {
@@ -272,6 +298,23 @@ const Index = () => {
       resizeObserver.disconnect();
       window.removeEventListener('resize', updateWorkspaceSize);
     };
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(pointer: coarse)');
+    const updatePointerMode = () => {
+      setIsCoarsePointer(mediaQuery.matches);
+    };
+
+    updatePointerMode();
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', updatePointerMode);
+      return () => mediaQuery.removeEventListener('change', updatePointerMode);
+    }
+
+    mediaQuery.addListener(updatePointerMode);
+    return () => mediaQuery.removeListener(updatePointerMode);
   }, []);
 
   const handleWallpaperChange = useCallback((newWallpaper: string) => {
@@ -331,32 +374,32 @@ const Index = () => {
       height: DEFAULT_MIN_BROWSER_HEIGHT,
     };
 
-    if (!windowWorkspaceSize.width || !windowWorkspaceSize.height) {
+    if (!appWindowWorkspaceSize.width || !appWindowWorkspaceSize.height) {
       return { size: fallbackSize, position: fallbackPosition };
     }
 
-    if (isMobile) {
+    if (isCompactViewport) {
       return {
         size: {
-          width: windowWorkspaceSize.width,
-          height: windowWorkspaceSize.height,
+          width: appWindowWorkspaceSize.width,
+          height: appWindowWorkspaceSize.height,
         },
         position: { x: 0, y: 0 },
       };
     }
 
-    const targetWidth = Math.round(Math.min(preferredSize.width, windowWorkspaceSize.width * 0.86));
-    const targetHeight = Math.round(Math.min(preferredSize.height, windowWorkspaceSize.height * 0.9));
+    const targetWidth = Math.round(Math.min(preferredSize.width, appWindowWorkspaceSize.width * 0.86));
+    const targetHeight = Math.round(Math.min(preferredSize.height, appWindowWorkspaceSize.height * 0.9));
     const width = Math.min(
-      windowWorkspaceSize.width,
-      Math.max(Math.min(minSize.width, windowWorkspaceSize.width), targetWidth),
+      appWindowWorkspaceSize.width,
+      Math.max(Math.min(minSize.width, appWindowWorkspaceSize.width), targetWidth),
     );
     const height = Math.min(
-      windowWorkspaceSize.height,
-      Math.max(Math.min(minSize.height, windowWorkspaceSize.height), targetHeight),
+      appWindowWorkspaceSize.height,
+      Math.max(Math.min(minSize.height, appWindowWorkspaceSize.height), targetHeight),
     );
-    const maxX = Math.max(0, windowWorkspaceSize.width - width);
-    const maxY = Math.max(0, windowWorkspaceSize.height - height);
+    const maxX = Math.max(0, appWindowWorkspaceSize.width - width);
+    const maxY = Math.max(0, appWindowWorkspaceSize.height - height);
 
     return {
       size: { width, height },
@@ -365,7 +408,7 @@ const Index = () => {
         y: Math.round(maxY / 2),
       },
     };
-  }, [isMobile, windowWorkspaceSize.height, windowWorkspaceSize.width]);
+  }, [appWindowWorkspaceSize.height, appWindowWorkspaceSize.width, isCompactViewport]);
 
   const openBrowserPage = useCallback((pageKey: BrowserPageKey) => {
     const initialWindowState = getInitialWindowState(pageKey);
@@ -412,7 +455,7 @@ const Index = () => {
     const fallbackSize = { width: DEFAULT_GAME_WIDTH, height: DEFAULT_GAME_HEIGHT };
     const fallbackPosition = { x: 80, y: 32 };
 
-    if (!windowWorkspaceSize.width || !windowWorkspaceSize.height) {
+    if (!appWindowWorkspaceSize.width || !appWindowWorkspaceSize.height) {
       setGameWindow({
         isOpen: true,
         isMinimized: false,
@@ -423,14 +466,14 @@ const Index = () => {
       return;
     }
 
-    if (isMobile) {
+    if (isCompactViewport) {
       setGameWindow({
         isOpen: true,
         isMinimized: false,
         initialPosition: { x: 0, y: 0 },
         initialSize: {
-          width: windowWorkspaceSize.width,
-          height: windowWorkspaceSize.height,
+          width: appWindowWorkspaceSize.width,
+          height: appWindowWorkspaceSize.height,
         },
       });
       bringWindowToFront('game');
@@ -438,26 +481,26 @@ const Index = () => {
     }
 
     const width = Math.min(
-      windowWorkspaceSize.width,
-      Math.max(DEFAULT_MIN_GAME_WIDTH, Math.round(Math.min(DEFAULT_GAME_WIDTH, windowWorkspaceSize.width * 0.72))),
+      appWindowWorkspaceSize.width,
+      Math.max(DEFAULT_MIN_GAME_WIDTH, Math.round(Math.min(DEFAULT_GAME_WIDTH, appWindowWorkspaceSize.width * 0.72))),
     );
     const height = Math.min(
-      windowWorkspaceSize.height,
-      Math.max(DEFAULT_MIN_GAME_HEIGHT, Math.round(Math.min(DEFAULT_GAME_HEIGHT, windowWorkspaceSize.height * 0.82))),
+      appWindowWorkspaceSize.height,
+      Math.max(DEFAULT_MIN_GAME_HEIGHT, Math.round(Math.min(DEFAULT_GAME_HEIGHT, appWindowWorkspaceSize.height * 0.82))),
     );
 
     setGameWindow({
       isOpen: true,
       isMinimized: false,
       initialPosition: {
-        x: Math.max(0, Math.round((windowWorkspaceSize.width - width) / 2)),
-        y: Math.max(0, Math.round((windowWorkspaceSize.height - height) / 2)),
+        x: Math.max(0, Math.round((appWindowWorkspaceSize.width - width) / 2)),
+        y: Math.max(0, Math.round((appWindowWorkspaceSize.height - height) / 2)),
       },
       initialSize: { width, height },
     });
 
     bringWindowToFront('game');
-  }, [bringWindowToFront, isMobile, windowWorkspaceSize.height, windowWorkspaceSize.width]);
+  }, [appWindowWorkspaceSize.height, appWindowWorkspaceSize.width, bringWindowToFront, isCompactViewport]);
 
   const handleBrowserClose = useCallback(() => {
     setBrowserWindow(createDefaultBrowserWindowState());
@@ -479,8 +522,6 @@ const Index = () => {
   }, [bringWindowToFront]);
 
   const handleBrowserMinimize = useCallback((value: boolean) => {
-    if (isMobile) return;
-
     setBrowserWindow((prev) => (
       prev.isOpen
         ? { ...prev, isMinimized: value }
@@ -490,11 +531,9 @@ const Index = () => {
     if (!value) {
       bringWindowToFront('browser');
     }
-  }, [bringWindowToFront, isMobile]);
+  }, [bringWindowToFront]);
 
   const handleGameMinimize = useCallback((value: boolean) => {
-    if (isMobile) return;
-
     setGameWindow((prev) => (
       prev.isOpen
         ? { ...prev, isMinimized: value }
@@ -504,7 +543,7 @@ const Index = () => {
     if (!value) {
       bringWindowToFront('game');
     }
-  }, [bringWindowToFront, isMobile]);
+  }, [bringWindowToFront]);
 
   const handleBrowserBack = useCallback(() => {
     setBrowserWindow((prev) => {
@@ -611,7 +650,7 @@ const Index = () => {
   }, [windowStack]);
 
   const handleTaskbarBrowserClick = useCallback(() => {
-    if (!browserWindow.isOpen || isMobile) {
+    if (!browserWindow.isOpen || usesTouchOptimizedLayout) {
       return;
     }
 
@@ -628,10 +667,10 @@ const Index = () => {
 
     setBrowserWindow((prev) => ({ ...prev, isMinimized: false }));
     bringWindowToFront('browser');
-  }, [activeWindow, browserWindow.isMinimized, browserWindow.isOpen, bringWindowToFront, isMobile]);
+  }, [activeWindow, browserWindow.isMinimized, browserWindow.isOpen, bringWindowToFront, usesTouchOptimizedLayout]);
 
   const handleTaskbarGameClick = useCallback(() => {
-    if (!gameWindow.isOpen || isMobile) {
+    if (!gameWindow.isOpen || usesTouchOptimizedLayout) {
       return;
     }
 
@@ -648,14 +687,14 @@ const Index = () => {
 
     setGameWindow((prev) => ({ ...prev, isMinimized: false }));
     bringWindowToFront('game');
-  }, [activeWindow, bringWindowToFront, gameWindow.isMinimized, gameWindow.isOpen, isMobile]);
+  }, [activeWindow, bringWindowToFront, gameWindow.isMinimized, gameWindow.isOpen, usesTouchOptimizedLayout]);
 
   const handleTaskbarTerminalClick = useCallback(() => {
     if (!isTerminalOpen) {
       return;
     }
 
-    if (isMobile) {
+    if (usesTouchOptimizedLayout) {
       setIsTerminalMinimized(false);
       bringWindowToFront('terminal');
       return;
@@ -673,7 +712,7 @@ const Index = () => {
     }
 
     bringWindowToFront('terminal');
-  }, [activeWindow, bringWindowToFront, isMobile, isTerminalMinimized, isTerminalOpen]);
+  }, [activeWindow, bringWindowToFront, isTerminalMinimized, isTerminalOpen, usesTouchOptimizedLayout]);
 
   const renderBrowserPage = () => {
     switch (currentBrowserPageKey) {
@@ -725,7 +764,7 @@ const Index = () => {
 
       <DesktopIcons
         onIconClick={handleIconClick}
-        isMobile={isMobile}
+        isMobile={usesTouchOptimizedLayout}
         mobileColumns={mobileIconColumns}
       />
 
@@ -737,7 +776,7 @@ const Index = () => {
           ref={workspaceRef}
           className="absolute inset-0 pointer-events-none"
           style={{
-            padding: isMobile ? `${MOBILE_WORKSPACE_PADDING}px` : `${WORKSPACE_PADDING}px`,
+            padding: usesTouchOptimizedLayout ? `${MOBILE_WORKSPACE_PADDING}px` : `${WORKSPACE_PADDING}px`,
           }}
         >
           <div
@@ -761,7 +800,7 @@ const Index = () => {
                 <Terminal
                   ref={terminalRef}
                   themeId={currentTheme}
-                  workspaceSize={windowWorkspaceSize}
+                  workspaceSize={terminalWorkspaceSize}
                   preferredSize={{
                     width: homeLayout.terminal.width,
                     height: homeLayout.terminal.height,
@@ -780,14 +819,24 @@ const Index = () => {
                 />
               </div>
             )}
+          </div>
 
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              left: `${appWorkspace.x}px`,
+              top: `${appWorkspace.y}px`,
+              width: `${appWorkspace.width}px`,
+              height: `${appWorkspace.height}px`,
+            }}
+          >
             {browserWindow.isOpen && currentBrowserPage && (
               <BrowserWindow
                 title={currentBrowserPage.title || `${currentBrowserPage.label} - Microsoft Internet Explorer`}
                 url={currentBrowserPage.url}
                 initialPosition={browserWindow.initialPosition}
                 initialSize={browserWindow.initialSize}
-                workspaceSize={windowWorkspaceSize}
+                workspaceSize={appWindowWorkspaceSize}
                 minSize={currentBrowserPage.minWindowSize}
                 zIndex={getWindowZIndex('browser')}
                 isMinimized={browserWindow.isMinimized}
@@ -799,7 +848,7 @@ const Index = () => {
                 onBack={handleBrowserBack}
                 onForward={handleBrowserForward}
                 onRefresh={handleBrowserRefresh}
-                mobileFullScreen={isMobile}
+                mobileFullScreen={isCompactViewport}
               >
                 <div key={`${currentBrowserPageKey}:${browserWindow.refreshKey}`} className="h-full">
                   {renderBrowserPage()}
@@ -813,7 +862,7 @@ const Index = () => {
                 url="arcade://snake"
                 initialPosition={gameWindow.initialPosition}
                 initialSize={gameWindow.initialSize}
-                workspaceSize={windowWorkspaceSize}
+                workspaceSize={appWindowWorkspaceSize}
                 minSize={{ width: DEFAULT_MIN_GAME_WIDTH, height: DEFAULT_MIN_GAME_HEIGHT }}
                 chromeMode="utility"
                 bodyClassName="overflow-hidden"
@@ -823,9 +872,9 @@ const Index = () => {
                 onMinimizedChange={handleGameMinimize}
                 onFocus={() => bringWindowToFront('game')}
                 onClose={handleGameClose}
-                mobileFullScreen={isMobile}
+                mobileFullScreen={isCompactViewport}
               >
-                <SnakeGame isWindowActive={activeWindow === 'game'} />
+                <SnakeGame isWindowActive={activeWindow === 'game'} isCompactViewport={isCompactViewport} />
               </BrowserWindow>
             )}
           </div>
@@ -838,11 +887,11 @@ const Index = () => {
           onOpenPage={openBrowserPage}
           onOpenGame={openSnakeGame}
           onPowerOff={handlePowerOff}
-          isMobile={isMobile}
+          isMobile={usesTouchOptimizedLayout}
         />
 
         <div className="min-w-0 flex-1 border-l border-[#3e74df] bg-[linear-gradient(180deg,var(--xp-blue-light)_0%,var(--xp-blue)_50%,var(--xp-blue-dark)_100%)]">
-          {!isMobile && (
+          {!usesTouchOptimizedLayout && (
             <div className="flex h-full items-center gap-1 overflow-x-auto px-1">
               {isTerminalOpen && (
                 <button
@@ -896,7 +945,7 @@ const Index = () => {
         </div>
 
         <div className="flex items-stretch border-l border-[#6bc6fb] bg-[linear-gradient(180deg,var(--xp-blue-light)_0%,var(--xp-blue)_45%,var(--xp-blue-dark)_100%)] shadow-[inset_1px_0_0_rgba(255,255,255,0.35)]">
-          <label className={`flex cursor-pointer items-center border-r border-[#51b8f2] ${isMobile ? 'px-2.5' : 'px-3'} text-white/90 transition-colors hover:bg-white/10`}>
+          <label className={`flex cursor-pointer items-center border-r border-[#51b8f2] ${usesTouchOptimizedLayout ? 'px-2.5' : 'px-3'} text-white/90 transition-colors hover:bg-white/10`}>
             <ImageIcon className="h-4 w-4" />
             <input
               type="file"
@@ -906,7 +955,7 @@ const Index = () => {
             />
           </label>
 
-          <div className={`select-none ${isMobile ? 'px-2.5 text-[10px]' : 'px-4 text-[11px]'} py-[3px] text-right font-sans font-medium leading-tight text-white [text-shadow:1px_1px_1px_rgba(0,0,0,0.45)]`}>
+          <div className={`select-none ${usesTouchOptimizedLayout ? 'px-2.5 text-[10px]' : 'px-4 text-[11px]'} py-[3px] text-right font-sans font-medium leading-tight text-white [text-shadow:1px_1px_1px_rgba(0,0,0,0.45)]`}>
             {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             <br />
             {time.toLocaleDateString()}

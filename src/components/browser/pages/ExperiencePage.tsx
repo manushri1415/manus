@@ -113,7 +113,7 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
           </div>
         </aside>
 
-        {/* Picture & Actions Section */}
+        {/* Profile Summary Section */}
         <div className="themanubook-section-left">
           <div className="themanubook-box">
             <div className="themanubook-box-title">Picture</div>
@@ -135,43 +135,6 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
             </a>
           </div>
 
-          {/* Classified Ad */}
-          <div className="themanubook-ad-container">
-            <a
-              href={resumePdfPath}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="themanubook-ad-link"
-              aria-label="Open Manushri Muruga Kumar's resume"
-            >
-              <img
-                src={`${basePath}assets/icons/M-photos/ads.png`}
-                alt="Congratulations! You discovered a new-grad software engineer. Click here to hire."
-                className="themanubook-ad-image"
-              />
-            </a>
-          </div>
-
-          {/* Experience Photos */}
-          <div className="themanubook-box" ref={photoGridRef}>
-            <div className="themanubook-box-title">Gallery</div>
-            <div className="themanubook-photo-grid">
-              {EXPERIENCE_PHOTOS.map((photo) => (
-                <div key={photo.id} className="themanubook-photo-item">
-                  <img
-                    src={`${basePath}${photo.thumbnail}`}
-                    alt={photo.alt}
-                    className="themanubook-photo-thumbnail"
-                  />
-                  <div className="themanubook-photo-caption">{photo.caption}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Information Panel Section */}
-        <div className="themanubook-section-right">
           <div className="themanubook-info-panel">
             <div className="themanubook-info-title">Information</div>
 
@@ -241,7 +204,10 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
               </div>
             </div>
           </div>
+        </div>
 
+        {/* Experience Details Section */}
+        <div className="themanubook-section-right">
           {/* All Experience Categories */}
           {EXPERIENCE_CATEGORIES.map((category) => (
             <div key={category.id}>
@@ -282,6 +248,40 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
               </div>
             </div>
           ))}
+
+          {/* Classified Ad */}
+          <div className="themanubook-ad-container">
+            <a
+              href={resumePdfPath}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="themanubook-ad-link"
+              aria-label="Open Manushri Muruga Kumar's resume"
+            >
+              <img
+                src={`${basePath}assets/icons/M-photos/ads.png`}
+                alt="Congratulations! You discovered a new-grad software engineer. Click here to hire."
+                className="themanubook-ad-image"
+              />
+            </a>
+          </div>
+
+          {/* Experience Photos */}
+          <div className="themanubook-box themanubook-gallery-box" ref={photoGridRef}>
+            <div className="themanubook-box-title">Gallery</div>
+            <div className="themanubook-photo-grid">
+              {EXPERIENCE_PHOTOS.map((photo) => (
+                <div key={photo.id} className="themanubook-photo-item">
+                  <img
+                    src={`${basePath}${photo.thumbnail}`}
+                    alt={photo.alt}
+                    className="themanubook-photo-thumbnail"
+                  />
+                  <div className="themanubook-photo-caption">{photo.caption}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

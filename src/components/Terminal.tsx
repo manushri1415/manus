@@ -22,6 +22,11 @@ type WindowSize = {
   height: number;
 };
 
+type WindowPosition = {
+  x: number;
+  y: number;
+};
+
 type WelcomeVariant = 'desktop' | 'tablet' | 'mobile';
 
 export type TerminalHandle = {
@@ -134,6 +139,10 @@ const clampValue = (value: number, min: number, max: number) => {
   return Math.min(Math.max(value, min), max);
 };
 
+const isSameWindowSize = (a: WindowSize, b: WindowSize) => a.width === b.width && a.height === b.height;
+
+const isSameWindowPosition = (a: WindowPosition, b: WindowPosition) => a.x === b.x && a.y === b.y;
+
 const getFallbackWorkspaceSize = (): WindowSize => {
   if (typeof window === 'undefined') {
     return { width: 1200, height: 700 };
@@ -157,7 +166,7 @@ const getWelcomeMessage = (variant: WelcomeVariant) => {
 };
 
 const normalizeTerminalWindowState = (
-  position: { x: number; y: number },
+  position: WindowPosition,
   size: WindowSize,
   workspace: WindowSize,
   isCompactMobile: boolean,
@@ -313,6 +322,7 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
   const [hasManualPosition, setHasManualPosition] = useState(false);
   const [hasManualResize, setHasManualResize] = useState(false);
   const isMinimized = controlledIsMinimized ?? internalIsMinimized;
+  const fillsWorkspaceWidth = isCompactMobile || Math.abs(size.width - effectiveWorkspace.width) <= 1;
 
   const setMinimizedState = useCallback((value: boolean) => {
     if (controlledIsMinimized === undefined) {
@@ -547,20 +557,27 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
     const nextAutoSize = getResponsiveTerminalSize(effectiveWorkspace, isCompactMobile, preferredSize);
 
     if (isCompactMobile || !hasManualResize) {
-      setSize(nextAutoSize);
+      setSize((prev) => (isSameWindowSize(prev, nextAutoSize) ? prev : nextAutoSize));
       return;
     }
 
-    setSize((prev) => normalizeTerminalWindowState(position, prev, effectiveWorkspace, false).size);
+    setSize((prev) => {
+      const nextSize = normalizeTerminalWindowState(position, prev, effectiveWorkspace, false).size;
+      return isSameWindowSize(prev, nextSize) ? prev : nextSize;
+    });
   }, [effectiveWorkspace, hasManualResize, isCompactMobile, position, preferredSize]);
 
   useEffect(() => {
     if (isCompactMobile || !hasManualPosition) {
-      setPosition(getDefaultTerminalOffset());
+      const defaultPosition = getDefaultTerminalOffset();
+      setPosition((prev) => (isSameWindowPosition(prev, defaultPosition) ? prev : defaultPosition));
       return;
     }
 
-    setPosition((prev) => normalizeTerminalWindowState(prev, size, effectiveWorkspace, false).position);
+    setPosition((prev) => {
+      const nextPosition = normalizeTerminalWindowState(prev, size, effectiveWorkspace, false).position;
+      return isSameWindowPosition(prev, nextPosition) ? prev : nextPosition;
+    });
   }, [effectiveWorkspace, hasManualPosition, isCompactMobile, size]);
 
   const handleKeyDown = useCallback((e: ReactKeyboardEvent<HTMLInputElement>) => {
@@ -629,12 +646,13 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
     <div
       style={{
         transform: isMaximized || isCompactMobile ? 'none' : `translate3d(${position.x}px, ${position.y}px, 0)`,
-        width: isMaximized || isCompactMobile ? '100%' : `${size.width}px`,
+        width: isMaximized || fillsWorkspaceWidth ? '100%' : `${size.width}px`,
         height: isMaximized ? '100%' : `${size.height}px`,
         position: isMaximized ? 'fixed' : 'relative',
         top: isMaximized ? 0 : 'auto',
         left: isMaximized ? 0 : 'auto',
         zIndex: isMaximized ? zIndex + 1 : zIndex,
+        boxSizing: 'border-box',
         maxWidth: '100%',
         maxHeight: '100%',
         willChange: isDragging || isResizing ? 'transform, width, height' : 'auto',
