@@ -1,6 +1,6 @@
-# MANU OS
+# Mindows 2005
 
-MANU OS is an interactive portfolio built as a Windows XP-inspired desktop experience. Instead of a standard landing page, the app opens with a boot screen, drops visitors onto a nostalgic desktop, and lets them explore Manushri's story through draggable windows, retro web parodies, terminal commands, and a mini-game.
+Mindows 2005 is an interactive portfolio built as a Windows XP-inspired desktop experience. Instead of a standard landing page, the app opens with a boot screen, drops visitors onto a nostalgic desktop, and lets them explore Manushri's story through draggable windows, retro web parodies, terminal commands, and a mini-game.
 
 ## Current App Snapshot
 
@@ -83,4 +83,4 @@ The app is configured for GitHub Pages deployment, and the Vite base path is set
 
 ## Credit
 
-This project was originally inspired by the `tfish` portfolio concept and has since been heavily customized into the current MANU OS experience.
+This project was originally inspired by the `tfish` portfolio concept and has since been heavily customized into the current Mindows 2005 experience.
