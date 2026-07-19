@@ -82,7 +82,8 @@ const MOBILE_WELCOME_MESSAGE = `MANU OS - MOBILE MODE
 
 Welcome! I'm Manushri.
 
-This is my 2005-inspired interactive portfolio.
+This is my 2005-inspired interactive portfolio. I wanted it to feel nostalgic, curious, and a little handmade, like discovering an old machine full of personality.
+
 Tap an app to explore my work.
 
 Try typing: help`;
@@ -645,12 +646,11 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
   return (
     <div
       style={{
-        transform: isMaximized || isCompactMobile ? 'none' : `translate3d(${position.x}px, ${position.y}px, 0)`,
-        width: isMaximized || fillsWorkspaceWidth ? '100%' : `${size.width}px`,
-        height: isMaximized ? '100%' : `${size.height}px`,
-        position: isMaximized ? 'fixed' : 'relative',
+        transform: isMaximized ? 'none' : isCompactMobile ? 'translateX(-46%)' : `translate3d(${position.x}px, ${position.y}px, 0)`,
+        width: isMaximized ? '100%' : isCompactMobile ? `${size.width}px` : fillsWorkspaceWidth ? '100%' : `${size.width}px`,    
+        position: isMaximized ? 'fixed' : 'relative',  
         top: isMaximized ? 0 : 'auto',
-        left: isMaximized ? 0 : 'auto',
+        left: isMaximized ? 0 : isCompactMobile ? '50%' : 'auto', marginTop: isCompactMobile ? '20px' : undefined,
         zIndex: isMaximized ? zIndex + 1 : zIndex,
         boxSizing: 'border-box',
         maxWidth: '100%',
