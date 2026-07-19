@@ -648,6 +648,7 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
       style={{
         transform: isMaximized ? 'none' : isCompactMobile ? 'translateX(-46%)' : `translate3d(${position.x}px, ${position.y}px, 0)`,
         width: isMaximized ? '100%' : isCompactMobile ? `${size.width}px` : fillsWorkspaceWidth ? '100%' : `${size.width}px`,    
+        height: isMaximized ? '100%' : `${size.height}px`,
         position: isMaximized ? 'fixed' : 'relative',  
         top: isMaximized ? 0 : 'auto',
         left: isMaximized ? 0 : isCompactMobile ? '50%' : 'auto', marginTop: isCompactMobile ? '20px' : undefined,
