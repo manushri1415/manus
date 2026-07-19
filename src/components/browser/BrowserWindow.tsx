@@ -170,6 +170,8 @@ export const BrowserWindow = ({
 
   const fillsWorkspace = isViewportFullscreen || isMaximized;
   const isBrowserChrome = chromeMode === 'browser';
+  const isCompactMobile = workspaceWidth <= 600;
+  const mobileGap = 16;
   const initialStateKey = [
     initialX,
     initialY,
@@ -236,7 +238,7 @@ export const BrowserWindow = ({
   };
 
   const handleResizeDown = (e: React.MouseEvent) => {
-    if (fillsWorkspace || !resizable) return;
+    if (fillsWorkspace || isCompactMobile || !resizable) return;
     e.preventDefault();
     e.stopPropagation();
     setIsResizing(true);
@@ -312,7 +314,7 @@ export const BrowserWindow = ({
   ]);
 
   useEffect(() => {
-    if (fillsWorkspace) return;
+    if (fillsWorkspace || isCompactMobile) return;
 
     const nextState = normalizeWindowState(position, size, workspaceSize, minSize, defaultMinWidth, defaultMinHeight);
     if (
@@ -354,23 +356,25 @@ export const BrowserWindow = ({
   return (
     <div
       style={{
-        transform: fillsWorkspace ? 'none' : `translate3d(${position.x}px, ${position.y}px, 0)`,
-        width: fillsWorkspace ? '100%' : `${size.width}px`,
-        height: fillsWorkspace ? '100%' : `${size.height}px`,
-        position: 'absolute',
+        transform: fillsWorkspace ? 'none' : isCompactMobile? `translate3d(${mobileGap}px, ${mobileGap}px, 0)`: `translate3d(${position.x}px, ${position.y}px, 0)`,
+        width:  fillsWorkspace ? 'auto': isCompactMobile? `${size.width}px=` : `${size.width}px`,
+        height: fillsWorkspace ? 'auto' : isCompactMobile ? 'calc(100% - 80px)' : `${size.height}px`,
+        position: fillsWorkspace ? 'fixed' : 'absolute',
         top: 0,
         left: 0,
-        zIndex: fillsWorkspace ? zIndex + 1 : zIndex,
+        right: fillsWorkspace ? 0 : 'auto',
+        zIndex: zIndex,
         boxSizing: 'border-box',
         maxWidth: '100%',
         maxHeight: '100%',
+        bottom: fillsWorkspace ? '34px' : 'auto',
         willChange: isDragging || isResizing ? 'transform, width, height' : 'auto',
         backgroundColor: XP_WINDOW_FRAME,
         borderTop: `1px solid ${XP_WINDOW_BORDER}`,
         borderLeft: `4px solid ${XP_WINDOW_BORDER}`,
         borderRight: `4px solid ${XP_WINDOW_BORDER}`,
         borderBottom: `4px solid ${XP_WINDOW_BORDER}`,
-        borderRadius: fillsWorkspace ? '8px' : '3px',
+        borderRadius: fillsWorkspace ? '0' : '3px',
         boxShadow: `inset 1px 0 0 ${XP_WINDOW_INNER_BORDER}, inset -1px 0 0 ${XP_WINDOW_INNER_BORDER}, inset 0 -1px 0 ${XP_WINDOW_INNER_BORDER}, 0 0 0 2px rgba(255,255,255,0.22) inset, 0 18px 45px rgba(0, 0, 0, 0.38)`,
       }}
       className={`pointer-events-auto overflow-hidden flex flex-col ${
@@ -589,7 +593,7 @@ export const BrowserWindow = ({
         {children}
       </div>
 
-      {!fillsWorkspace && resizable && (
+      {!fillsWorkspace && !isCompactMobile && resizable && (
         <div
           onMouseDown={handleResizeDown}
           className="absolute bottom-0 right-0 h-4 w-4 cursor-nwse-resize"

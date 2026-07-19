@@ -472,10 +472,14 @@
   }
 
   .themanubook-content {
-    height: auto;
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
     grid-template-columns: 1fr;
     align-items: flex-start;
-    overflow: visible;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .themanubook-section-left,
@@ -489,6 +493,7 @@
   .themanubook-section-right {
     padding-right: 0;
   }
+  
 }
 
 @container (max-width: 660px) {

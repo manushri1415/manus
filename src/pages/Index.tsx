@@ -13,7 +13,7 @@ import { SnakeGame } from '@/components/games/SnakeGame';
 import { Image as ImageIcon } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const TASKBAR_HEIGHT = 38;
+const TASKBAR_HEIGHT = 32;
 const WORKSPACE_PADDING = 16;
 const MOBILE_WORKSPACE_PADDING = 8;
 const MOBILE_TERMINAL_TOP_GAP = 12;
@@ -776,7 +776,7 @@ const Index = () => {
           ref={workspaceRef}
           className="absolute inset-0 pointer-events-none"
           style={{
-            padding: usesTouchOptimizedLayout ? `${MOBILE_WORKSPACE_PADDING}px` : `${WORKSPACE_PADDING}px`,
+            padding: isCompactViewport ? 0 : `${WORKSPACE_PADDING}px`,
           }}
         >
           <div
@@ -848,7 +848,7 @@ const Index = () => {
                 onBack={handleBrowserBack}
                 onForward={handleBrowserForward}
                 onRefresh={handleBrowserRefresh}
-                mobileFullScreen={isCompactViewport}
+                mobileFullScreen={workspaceSize.width <= 600}
               >
                 <div key={`${currentBrowserPageKey}:${browserWindow.refreshKey}`} className="h-full">
                   {renderBrowserPage()}

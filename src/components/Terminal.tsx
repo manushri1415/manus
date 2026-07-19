@@ -651,7 +651,7 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
         position: isMaximized ? 'fixed' : 'relative',  
         top: isMaximized ? 0 : 'auto',
         left: isMaximized ? 0 : isCompactMobile ? '50%' : 'auto', marginTop: isCompactMobile ? '20px' : undefined,
-        zIndex: isMaximized ? zIndex + 1 : zIndex,
+        zIndex: isMaximized ? zIndex + 1: zIndex,
         boxSizing: 'border-box',
         maxWidth: '100%',
         maxHeight: '100%',
