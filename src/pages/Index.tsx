@@ -480,21 +480,15 @@ const Index = () => {
       return;
     }
 
-    const width = Math.min(
-      appWindowWorkspaceSize.width,
-      Math.max(DEFAULT_MIN_GAME_WIDTH, Math.round(Math.min(DEFAULT_GAME_WIDTH, appWindowWorkspaceSize.width * 0.72))),
-    );
-    const height = Math.min(
-      appWindowWorkspaceSize.height,
-      Math.max(DEFAULT_MIN_GAME_HEIGHT, Math.round(Math.min(DEFAULT_GAME_HEIGHT, appWindowWorkspaceSize.height * 0.82))),
-    );
+    const width = DEFAULT_GAME_WIDTH;
+    const height = appWindowWorkspaceSize.height;
 
     setGameWindow({
       isOpen: true,
       isMinimized: false,
       initialPosition: {
         x: Math.max(0, Math.round((appWindowWorkspaceSize.width - width) / 2)),
-        y: Math.max(0, Math.round((appWindowWorkspaceSize.height - height) / 2)),
+        y: 0,
       },
       initialSize: { width, height },
     });

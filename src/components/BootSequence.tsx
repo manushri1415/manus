@@ -82,7 +82,7 @@ export const BootSequence = ({ onComplete }: { onComplete: () => void }) => {
                     <img
                         src={startupImageSrc}
                         alt="Windows 2005 startup screen"
-                        className="h-full w-full select-none object-contain"
+                        className="h-full w-full select-none object-contain scale-110 lg:scale-100"
                         draggable={false}
                         style={{
                             animation: 'boot-logo-breathe 2.2s ease-in-out infinite',

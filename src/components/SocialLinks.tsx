@@ -9,7 +9,7 @@ import {
   Phone,
   UserRound,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { BrowserPageKey } from './browser/pages/registry';
 
 const socialLinks = [
@@ -44,6 +44,26 @@ export const SocialLinks = ({
   isMobile?: boolean;
 }) => {
   const [isStartOpen, setIsStartOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsStartOpen(false);
+      }
+    };
+
+    if (isStartOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isStartOpen]);
+
   const startLogoSrc = `${import.meta.env.BASE_URL}assets/icons/start-logo.png`;
   const profileIconSrc = `${import.meta.env.BASE_URL}assets/icons/profile.png`;
   const projectsIconSrc = `${import.meta.env.BASE_URL}assets/icons/projects.png`;
@@ -104,7 +124,7 @@ export const SocialLinks = ({
   return (
     <div className="flex h-full items-center">
       <div className="flex h-full items-center">
-        <div className="relative">
+        <div className="relative" ref={menuRef}>
           <button
             onClick={() => setIsStartOpen(!isStartOpen)}
             className={`flex h-full ${isMobile ? 'min-w-[78px] pr-3' : 'min-w-[84px] pr-4'} items-center gap-1.5 rounded-r-[10px] border border-[#2f7d2d] px-2.5 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),inset_0_-1px_0_rgba(0,0,0,0.25)] transition-all ${

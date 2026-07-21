@@ -75,7 +75,14 @@ Hello! I'm Manushri.
 
 This portfolio is a 2005-inspired desktop built to feel like opening an old personal computer instead of a standard template.
 
+Every icon, window, and page reveals a different part of my projects, experience, personality, and creative interests.
+
+Built with:
+React | TypeScript | CSS | curiosity | too much attention to detail
+
 Use an app icon to explore my work.
+Some parts of the system contain hidden interactions (Easter Eggs!!).
+
 Try typing: help`;
 
 const MOBILE_WELCOME_MESSAGE = `MANU OS - MOBILE MODE
