@@ -7,10 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "build:aws": "vite build --mode aws",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "preview:aws": "vite preview --mode aws"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

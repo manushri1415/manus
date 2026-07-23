@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [react()],
-  base: "/manus/",
+  base: mode === "aws" ? "/" :"/manus/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
