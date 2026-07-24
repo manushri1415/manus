@@ -8,6 +8,7 @@ type GameMode = 'manusnake' | 'classic';
 type SnakeGameProps = {
   isWindowActive?: boolean;
   isCompactViewport?: boolean;
+  deviceKind?: 'phone' | 'tablet';
 };
 
 const GRID_SIZE = 20;
@@ -57,7 +58,7 @@ const shouldShowTouchControls = () => {
 
 const pickRandom = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)];
 
-export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: SnakeGameProps) => {
+export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false, deviceKind }: SnakeGameProps) => {
   const [snake, setSnake] = useState<Position[]>(() => initialSnake());
   const [food, setFood] = useState<Position>({ x: 15, y: 10 });
   const [direction, setDirection] = useState<Direction>('RIGHT');
@@ -388,8 +389,11 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
           ? `Game paused. Score ${score}. High score ${highScore}.`
           : `Running. Score ${score}. High score ${highScore}.`;
 
+  const deviceClass = usesTouchLayout && deviceKind ? ` manu-snake--${deviceKind}` : '';
+  const modeClass = isClassicMode ? ' manu-snake--classic' : '';
+
   return (
-    <div className={`manu-snake${usesTouchLayout ? ' manu-snake--compact' : ''}`}>
+    <div className={`manu-snake${usesTouchLayout ? ' manu-snake--compact' : ''}${deviceClass}${modeClass}`}>
       <div className="manu-snake__status" aria-live="polite">
         {liveStatus}
       </div>
@@ -408,7 +412,10 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
             </>
           )}
         </div>
-        <div className="manu-snake__mode-toggle">
+        <div className="manu-snake__actions">
+          <button type="button" className="manu-snake__button" onClick={resetGame}>
+            New Game
+          </button>
           <button
             type="button"
             className="manu-snake__mode-button"
@@ -428,14 +435,10 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
             Classic
           </button>
         </div>
-        <div className="manu-snake__actions">
-          <button type="button" className="manu-snake__button" onClick={resetGame}>
-            New Game
-          </button>
-        </div>
       </div>
 
       <div className="manu-snake__playfield">
+        <div className="manu-snake__board-frame">
         <div
           ref={rootRef}
           tabIndex={0}
@@ -463,6 +466,21 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
                   const isHead = index === 0;
 
                   if (isHead) {
+                    if (isClassicMode) {
+                      return (
+                        <div
+                          key={`${segment.x}-${segment.y}-${index}`}
+                          className="manu-snake__head manu-snake__head--classic"
+                          style={{
+                            left: `${segment.x * CELL_PERCENT}%`,
+                            top: `${segment.y * CELL_PERCENT}%`,
+                            width: `calc(${CELL_PERCENT}% - 2px)`,
+                            height: `calc(${CELL_PERCENT}% - 2px)`,
+                          }}
+                        />
+                      );
+                    }
+
                     const headHalf = headSizePx / 2;
                     const headCenterX = cellSizePx > 0 ? (segment.x + 0.5) * cellSizePx : 0;
                     const headCenterY = cellSizePx > 0 ? (segment.y + 0.5) * cellSizePx : 0;
@@ -563,6 +581,7 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
             )}
           </div>
         </div>
+        </div>
 
         <p className="manu-snake__hint">
           {usesTouchLayout ? 'Touch pad or Arrow Keys / WASD to move. Use Space or Pause to stop.' : 'Arrow Keys / WASD to move. Space to pause.'}
@@ -629,7 +648,7 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
             </button>
           </div>
         )}
-      </div>
+        </div>
     </div>
   );
 };

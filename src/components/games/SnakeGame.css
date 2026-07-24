@@ -5,8 +5,8 @@
   gap: 8px;
   overflow: hidden;
   background: #050805;
-  color: #00ff33;
-  padding: 10px 10px 12px;
+  color: #0c140d;
+  padding: 10px;
   font-family: "Lucida Console", "Courier New", monospace;
 }
 
@@ -44,11 +44,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.manu-snake__mode-toggle {
-  display: flex;
-  gap: 0;
+  justify-content: center;
 }
 
 .manu-snake__mode-button {
@@ -60,13 +56,9 @@
   box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.92);
   font-family: Tahoma, "Trebuchet MS", sans-serif;
   font-size: 11px;
-  padding: 3px 8px;
+  padding: 3px 10px;
   min-width: 68px;
   cursor: pointer;
-}
-
-.manu-snake__mode-button:first-child {
-  border-right: none;
 }
 
 .manu-snake__mode-button[aria-pressed="true"] {
@@ -139,10 +131,19 @@
   gap: 8px;
 }
 
-.manu-snake__board-shell {
-  width: min(100%, 440px);
+.manu-snake__board-frame {
+  container-type: size;
   flex: 1 1 auto;
   min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.manu-snake__board-shell {
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
   padding: 4px;
   border: 2px solid #6d735f;
   background: #080b08;
@@ -277,8 +278,8 @@
 }
 
 .manu-snake--compact .manu-snake__board-shell {
-  width: min(100%, 620px, calc(100vh - 220px));
-  max-width: 100%;
+  width: min(100cqw, 100cqh, 620px);
+  height: min(100cqw, 100cqh, 620px);
 }
 
 .manu-snake--compact .manu-snake__hint {
@@ -343,6 +344,59 @@
   font-size: 13px;
 }
 
+.manu-snake--tablet .manu-snake__board-shell {
+  width: min(100cqw, 100cqh, 760px);
+  height: min(100cqw, 100cqh, 760px);
+}
+
+.manu-snake--tablet .manu-snake__button,
+.manu-snake--tablet .manu-snake__mode-button {
+  min-height: 38px;
+  padding: 7px 16px;
+  font-size: 13px;
+}
+
+.manu-snake--tablet .manu-snake__hint {
+  font-size: 13px;
+}
+
+.manu-snake--tablet .manu-snake__touch-controls {
+  width: min(100%, 420px);
+  grid-template-columns: repeat(3, minmax(88px, 116px));
+  grid-template-rows: repeat(3, 58px);
+  gap: 12px;
+}
+
+.manu-snake--tablet .manu-snake__touch-button {
+  min-height: 58px;
+  font-size: 14px;
+}
+
+@media (min-width: 680px) and (orientation: landscape) {
+  .manu-snake--tablet .manu-snake__playfield {
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  .manu-snake--tablet .manu-snake__board-frame {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+  }
+
+  .manu-snake--tablet .manu-snake__hint {
+    display: none;
+  }
+
+  .manu-snake--tablet .manu-snake__touch-controls {
+    flex: 0 0 auto;
+    align-self: center;
+    margin-top: 0;
+  }
+}
+
 @media (max-width: 640px) {
   .manu-snake {
     padding: 8px 8px 10px;
@@ -356,10 +410,6 @@
 
   .manu-snake__mode-toggle {
     justify-content: center;
-  }
-
-  .manu-snake__board-shell {
-    width: 100%;
   }
 
   .manu-snake__touch-controls {
@@ -404,3 +454,95 @@
     transform: none;
   }
 }
+
+.manu-snake--classic {
+  background: #ffffff;
+  color: #0c140d;
+}
+
+.manu-snake--classic .manu-snake__score-row {
+  color: #0c140d;
+}
+
+.manu-snake--classic .manu-snake__score-label {
+  text-shadow: none;
+}
+
+.manu-snake--classic .manu-snake__board-shell {
+  border: 4px solid #0c140d;
+  background: #ffffff;
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.12),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.manu-snake--classic .manu-snake__board-shell.is-focused {
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.12),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(12, 20, 13, 0.58),
+    0 0 18px rgba(12, 20, 13, 0.18);
+}
+
+.manu-snake--classic .manu-snake__board {
+  border: 3px solid #0c140d;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(rgba(12, 20, 13, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(12, 20, 13, 0.15) 1px, transparent 1px);
+  box-shadow:
+    inset 0 0 18px rgba(12, 20, 13, 0.08),
+    0 0 16px rgba(12, 20, 13, 0.1);
+}
+
+.manu-snake--classic .manu-snake__segment {
+  background: #000000;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  width: calc(100% / 20) !important;
+  height: calc(100% / 20) !important;
+}
+
+.manu-snake--classic .manu-snake__food {
+  color: #0c140d;
+  text-shadow: none;
+}
+
+.manu-snake--classic .manu-snake__overlay {
+  background: transparent;
+  color: #0c140d;
+  text-shadow: none;
+}
+
+.manu-snake--classic .manu-snake__overlay-note {
+  color: #0c140d;
+}
+
+.manu-snake--classic .manu-snake__head--classic {
+  position: absolute;
+  transform: none;
+  background: #000000;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  width: calc(100% / 20) !important;
+  height: calc(100% / 20) !important;
+  z-index: 2;
+}
+
+.manu-snake--classic .manu-snake__hint {
+  color: #0c140d;
+}
+
+.manu-snake--classic .manu-snake__mode-button[aria-pressed="true"] {
+  box-shadow: inset -1px -1px 0 rgba(255, 255, 255, 0.35), inset 0 0 0 1px rgba(12, 20, 13, 0.65);
+}
+
+.manu-snake--classic .manu-snake__button:focus-visible,
+.manu-snake--classic .manu-snake__mode-button:focus-visible,
+.manu-snake--classic .manu-snake__touch-button:focus-visible,
+.manu-snake--classic .manu-snake__board-shell:focus-visible {
+  outline-color: #0c140d;
+}
+

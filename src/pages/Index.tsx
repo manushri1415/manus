@@ -481,14 +481,14 @@ const Index = () => {
     }
 
     const width = DEFAULT_GAME_WIDTH;
-    const height = appWindowWorkspaceSize.height;
+    const height = Math.min(DEFAULT_GAME_HEIGHT, appWindowWorkspaceSize.height);
 
     setGameWindow({
       isOpen: true,
       isMinimized: false,
       initialPosition: {
         x: Math.max(0, Math.round((appWindowWorkspaceSize.width - width) / 2)),
-        y: 0,
+        y: Math.max(0, Math.round((appWindowWorkspaceSize.height - height) / 2)),
       },
       initialSize: { width, height },
     });
@@ -868,7 +868,11 @@ const Index = () => {
                 onClose={handleGameClose}
                 mobileFullScreen={isCompactViewport}
               >
-                <SnakeGame isWindowActive={activeWindow === 'game'} isCompactViewport={isCompactViewport} />
+                <SnakeGame
+                  isWindowActive={activeWindow === 'game'}
+                  isCompactViewport={isCompactViewport}
+                  deviceKind={homeLayout.mode === 'phone' || homeLayout.mode === 'tablet' ? homeLayout.mode : undefined}
+                />
               </BrowserWindow>
             )}
           </div>
