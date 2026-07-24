@@ -223,7 +223,7 @@ const Index = () => {
 
   const [currentTheme, setCurrentTheme] = useState('cmd');
   const [wallpaper, setWallpaper] = useState<string | null>(DEFAULT_WALLPAPER);
-  const [time] = useState(new Date('2005-02-15T09:19:00'));
+  const [time] = useState(new Date('2005-02-15T09:39:00'));
   const [appState, setAppState] = useState<'booting' | 'desktop'>('booting');
   const [browserWindow, setBrowserWindow] = useState<BrowserWindowState>(createDefaultBrowserWindowState);
   const [gameWindow, setGameWindow] = useState<GameWindowState>(createDefaultGameWindowState);

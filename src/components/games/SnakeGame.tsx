@@ -3,6 +3,7 @@ import './SnakeGame.css';
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 type Position = { x: number; y: number };
+type GameMode = 'manusnake' | 'classic';
 
 type SnakeGameProps = {
   isWindowActive?: boolean;
@@ -13,10 +14,12 @@ const GRID_SIZE = 20;
 const INITIAL_SPEED = 150;
 const MIN_SPEED = 72;
 const HIGH_SCORE_STORAGE_KEY = 'manuSnakeHighScore';
+const HIGH_SCORE_STORAGE_KEY_CLASSIC = 'manuSnakeHighScore_classic';
 const GAME_HEAD_SRC = `${import.meta.env.BASE_URL}assets/icons/gamehead.png`;
 const CELL_PERCENT = 100 / GRID_SIZE;
 const OFFER_GOALS = [4, 5, 6, 7, 8, 9];
 const DEFAULT_HEAD_SIZE = 42;
+const DEFAULT_GAME_MODE: GameMode = 'manusnake';
 
 const directionVectors: Record<Direction, Position> = {
   UP: { x: 0, y: -1 },
@@ -59,7 +62,8 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
   const [food, setFood] = useState<Position>({ x: 15, y: 10 });
   const [direction, setDirection] = useState<Direction>('RIGHT');
   const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useState(0);
+  const [highScoreManuSnake, setHighScoreManuSnake] = useState(0);
+  const [highScoreClassic, setHighScoreClassic] = useState(0);
   const [speed, setSpeed] = useState(INITIAL_SPEED);
   const [isPaused, setIsPaused] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
@@ -68,11 +72,15 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
   const [isFocused, setIsFocused] = useState(false);
   const [showTouchControls, setShowTouchControls] = useState(() => shouldShowTouchControls());
   const [goalOffers, setGoalOffers] = useState(() => pickRandom(OFFER_GOALS));
+  const [gameMode, setGameMode] = useState<GameMode>(DEFAULT_GAME_MODE);
 
   const directionRef = useRef<Direction>('RIGHT');
   const rootRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const [boardSizePx, setBoardSizePx] = useState(0);
+
+  const isClassicMode = gameMode === 'classic';
+  const highScore = isClassicMode ? highScoreClassic : highScoreManuSnake;
 
   const generateFood = useCallback((currentSnake: Position[]) => {
     let nextFood = { x: 0, y: 0 };
@@ -114,11 +122,19 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
 
   useEffect(() => {
     try {
-      const storedHighScore = window.localStorage.getItem(HIGH_SCORE_STORAGE_KEY);
-      if (storedHighScore) {
-        const parsed = Number(storedHighScore);
+      const storedManuSnakeScore = window.localStorage.getItem(HIGH_SCORE_STORAGE_KEY);
+      if (storedManuSnakeScore) {
+        const parsed = Number(storedManuSnakeScore);
         if (!Number.isNaN(parsed)) {
-          setHighScore(parsed);
+          setHighScoreManuSnake(parsed);
+        }
+      }
+
+      const storedClassicScore = window.localStorage.getItem(HIGH_SCORE_STORAGE_KEY_CLASSIC);
+      if (storedClassicScore) {
+        const parsed = Number(storedClassicScore);
+        if (!Number.isNaN(parsed)) {
+          setHighScoreClassic(parsed);
         }
       }
     } catch {
@@ -214,6 +230,14 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
     updateDirection(nextDirection);
   }, [focusBoard, isWindowActive, updateDirection]);
 
+  const handleSelectMode = useCallback((mode: GameMode) => {
+    if (mode === gameMode || (hasStarted && !gameOver && !hasWon)) {
+      return;
+    }
+    setGameMode(mode);
+    resetGame();
+  }, [gameMode, hasStarted, gameOver, hasWon, resetGame]);
+
   const handleKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (!isWindowActive || !isFocused) {
       return;
@@ -293,17 +317,20 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
             const nextScore = prev + 10;
             const nextOffersCollected = nextScore / 10;
 
-            setHighScore((currentHighScore) => {
+            const setHighScoreFn = isClassicMode ? setHighScoreClassic : setHighScoreManuSnake;
+            const storageKey = isClassicMode ? HIGH_SCORE_STORAGE_KEY_CLASSIC : HIGH_SCORE_STORAGE_KEY;
+
+            setHighScoreFn((currentHighScore) => {
               const nextHighScore = Math.max(currentHighScore, nextScore);
               try {
-                window.localStorage.setItem(HIGH_SCORE_STORAGE_KEY, String(nextHighScore));
+                window.localStorage.setItem(storageKey, String(nextHighScore));
               } catch {
                 // Ignore storage failures.
               }
               return nextHighScore;
             });
 
-            if (nextOffersCollected >= goalOffers) {
+            if (!isClassicMode && nextOffersCollected >= goalOffers) {
               setHasWon(true);
               setIsPaused(true);
             }
@@ -311,7 +338,7 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
             return nextScore;
           });
 
-          if (score / 10 + 1 < goalOffers) {
+          if (isClassicMode || score / 10 + 1 < goalOffers) {
             setFood(generateFood(nextSnake));
             setSpeed((prev) => Math.max(MIN_SPEED, prev - 4));
           }
@@ -325,7 +352,7 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
     }, speed);
 
     return () => window.clearInterval(intervalId);
-  }, [food, gameOver, generateFood, goalOffers, hasStarted, hasWon, isPaused, score, speed]);
+  }, [food, gameOver, generateFood, goalOffers, hasStarted, hasWon, isPaused, score, speed, isClassicMode]);
 
   const offersCollected = score / 10;
   const bestOffers = highScore / 10;
@@ -334,12 +361,29 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
   const usesTouchLayout = isCompactViewport || showTouchControls;
   const canTogglePause = hasStarted && !gameOver && !hasWon;
 
+  const copy = {
+    overlayTitle: isClassicMode ? 'CLASSIC SNAKE' : 'MANUSNAKE.EXE',
+    overlayBody: isClassicMode
+      ? ['Eat, grow, survive.', 'No limit — see how far you can go.']
+      : [`Quick, help Manushri apply to ${goalOffers} jobs.`, `Goal: submit ${goalOffers} applications`],
+    gameOverTitle: isClassicMode ? 'GAME OVER' : 'APPLICATION REJECTED',
+    gameOverMessage: isClassicMode ? `Final score: ${score}` : `Applications sent: ${offersCollected}`,
+    gameOverButtonLabel: isClassicMode ? 'Play Again' : 'Apply Again',
+    readyStatus: isClassicMode
+      ? `Classic Snake ready. ${usesTouchLayout ? 'Use the touch pad or arrow keys to start.' : 'Use Arrow Keys or WASD to start.'}`
+      : `ManuSnake ready. Help Manushri apply to ${goalOffers} jobs. ${usesTouchLayout ? 'Use the touch pad or arrow keys to start.' : 'Use Arrow Keys or WASD to start.'}`,
+    gameOverStatus: isClassicMode
+      ? `Game over. Score: ${score}.`
+      : `Application rejected. Applications sent: ${offersCollected}.`,
+    boardAriaLabel: isClassicMode ? 'Classic Snake game board' : 'ManuSnake game board',
+  };
+
   const liveStatus = hasWon
     ? 'She got the job.'
     : gameOver
-      ? `Application rejected. Applications sent: ${offersCollected}.`
+      ? copy.gameOverStatus
       : !hasStarted
-        ? `ManuSnake ready. Help Manushri apply to ${goalOffers} jobs. ${usesTouchLayout ? 'Use the touch pad or arrow keys to start.' : 'Use Arrow Keys or WASD to start.'}`
+        ? copy.readyStatus
         : isPaused
           ? `Game paused. Score ${score}. High score ${highScore}.`
           : `Running. Score ${score}. High score ${highScore}.`;
@@ -352,8 +396,37 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
 
       <div className="manu-snake__toolbar">
         <div className="manu-snake__score-row">
-          <span className="manu-snake__score-label">Applications: {offersCollected}/{goalOffers}</span>
-          <span className="manu-snake__score-label">Best: {bestOffers}</span>
+          {isClassicMode ? (
+            <>
+              <span className="manu-snake__score-label">Score: {score}</span>
+              <span className="manu-snake__score-label">Best: {highScore}</span>
+            </>
+          ) : (
+            <>
+              <span className="manu-snake__score-label">Applications: {offersCollected}/{goalOffers}</span>
+              <span className="manu-snake__score-label">Best: {bestOffers}</span>
+            </>
+          )}
+        </div>
+        <div className="manu-snake__mode-toggle">
+          <button
+            type="button"
+            className="manu-snake__mode-button"
+            aria-pressed={gameMode === 'manusnake'}
+            onClick={() => handleSelectMode('manusnake')}
+            disabled={gameMode !== 'manusnake' && (hasStarted && !gameOver && !hasWon)}
+          >
+            ManuSnake
+          </button>
+          <button
+            type="button"
+            className="manu-snake__mode-button"
+            aria-pressed={gameMode === 'classic'}
+            onClick={() => handleSelectMode('classic')}
+            disabled={gameMode !== 'classic' && (hasStarted && !gameOver && !hasWon)}
+          >
+            Classic
+          </button>
         </div>
         <div className="manu-snake__actions">
           <button type="button" className="manu-snake__button" onClick={resetGame}>
@@ -367,7 +440,7 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
           ref={rootRef}
           tabIndex={0}
           role="application"
-          aria-label={`ManuSnake game board. ${usesTouchLayout ? 'Use the touch controls or Arrow Keys or WASD to move.' : 'Use Arrow Keys or WASD to move.'} Press Space to pause.`}
+          aria-label={`${copy.boardAriaLabel}. ${usesTouchLayout ? 'Use the touch controls or Arrow Keys or WASD to move.' : 'Use Arrow Keys or WASD to move.'} Press Space to pause.`}
           onKeyDown={handleKeyDown}
           onMouseDown={(event) => {
             event.stopPropagation();
@@ -450,9 +523,10 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
 
             {!hasStarted && !gameOver && (
               <div className="manu-snake__overlay">
-                <div className="manu-snake__overlay-title">MANUSNAKE.EXE</div>
-                <p>Quick, help Manushri apply to {goalOffers} jobs.</p>
-                <p>Goal: submit {goalOffers} applications</p>
+                <div className="manu-snake__overlay-title">{copy.overlayTitle}</div>
+                {copy.overlayBody.map((line, idx) => (
+                  <p key={idx}>{line}</p>
+                ))}
                 <p>{usesTouchLayout ? 'Tap any direction to start' : 'Use Arrow Keys or WASD to start'}</p>
                 <p>Pause anytime with Space or the pause button</p>
               </div>
@@ -467,7 +541,7 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
 
             {hasWon && (
               <div className="manu-snake__overlay">
-                <div className="manu-snake__overlay-title">SHE GOT THE JOB</div>
+                <div className="manu-snake__overlay-title">SHE GOT THE JOB!!</div>
                 <p>All the applications paid off.</p>
                 <p>Applications sent: {offersCollected} / {goalOffers}</p>
                 <button type="button" className="manu-snake__button" onClick={resetGame}>
@@ -479,10 +553,10 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false }: 
 
             {gameOver && (
               <div className="manu-snake__overlay">
-                <div className="manu-snake__overlay-title">APPLICATION REJECTED</div>
-                <p>Applications sent: {score / 10}</p>
+                <div className="manu-snake__overlay-title">{copy.gameOverTitle}</div>
+                <p>{copy.gameOverMessage}</p>
                 <button type="button" className="manu-snake__button" onClick={resetGame}>
-                  Apply Again
+                  {copy.gameOverButtonLabel}
                 </button>
                 <p className="manu-snake__overlay-note">Windows recommends trying again.</p>
               </div>

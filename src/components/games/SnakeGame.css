@@ -46,6 +46,50 @@
   gap: 8px;
 }
 
+.manu-snake__mode-toggle {
+  display: flex;
+  gap: 0;
+}
+
+.manu-snake__mode-button {
+  border: 1px solid #8d8d82;
+  border-right-color: #4c4c45;
+  border-bottom-color: #4c4c45;
+  background: linear-gradient(180deg, #f4f4ef 0%, #d2d2c7 100%);
+  color: #111111;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.92);
+  font-family: Tahoma, "Trebuchet MS", sans-serif;
+  font-size: 11px;
+  padding: 3px 8px;
+  min-width: 68px;
+  cursor: pointer;
+}
+
+.manu-snake__mode-button:first-child {
+  border-right: none;
+}
+
+.manu-snake__mode-button[aria-pressed="true"] {
+  box-shadow: inset -1px -1px 0 rgba(255, 255, 255, 0.35), inset 0 0 0 1px rgba(0, 255, 51, 0.58);
+  transform: translateY(1px);
+  background: linear-gradient(180deg, #e8e8e3 0%, #c9c9bc 100%);
+}
+
+.manu-snake__mode-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.manu-snake__mode-button:active:not(:disabled) {
+  box-shadow: inset -1px -1px 0 rgba(255, 255, 255, 0.35);
+  transform: translateY(1px);
+}
+
+.manu-snake__mode-button:focus-visible {
+  outline: 1px dotted #d3ffd6;
+  outline-offset: 2px;
+}
+
 .manu-snake__score-label {
   white-space: nowrap;
   text-shadow: 0 0 5px rgba(0, 255, 51, 0.28);
@@ -225,6 +269,13 @@
   font-size: 12px;
 }
 
+.manu-snake--compact .manu-snake__mode-button {
+  min-width: 90px;
+  min-height: 34px;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
 .manu-snake--compact .manu-snake__board-shell {
   width: min(100%, 620px, calc(100vh - 220px));
   max-width: 100%;
@@ -301,6 +352,10 @@
     flex-wrap: wrap;
     justify-content: center;
     font-size: 11px;
+  }
+
+  .manu-snake__mode-toggle {
+    justify-content: center;
   }
 
   .manu-snake__board-shell {
