@@ -6,7 +6,7 @@ import {
   forwardRef,
   useImperativeHandle,
   type KeyboardEvent as ReactKeyboardEvent,
-  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
 import { Minus, Square, Copy, X } from 'lucide-react';
@@ -35,6 +35,7 @@ export type TerminalHandle = {
 
 type TerminalProps = {
   themeId?: string;
+  initialPosition?: WindowPosition;
   workspaceSize?: WindowSize;
   preferredSize?: WindowSize;
   isMinimized?: boolean;
@@ -140,6 +141,8 @@ const FORTUNE_MESSAGES = [
 
 const TERMINAL_MIN_WIDTH = 300;
 const TERMINAL_MIN_HEIGHT = 380;
+const WINDOW_VISIBLE_EDGE = 96;
+const WINDOW_VISIBLE_TITLE_BAR = 32;
 const AUTO_COMPLETE_COMMANDS = ['help', 'whoami', 'about-os', 'tech', 'credits', 'cat', 'fortune', 'clear', 'reboot', 'play'];
 
 const clampValue = (value: number, min: number, max: number) => {
@@ -150,6 +153,27 @@ const clampValue = (value: number, min: number, max: number) => {
 const isSameWindowSize = (a: WindowSize, b: WindowSize) => a.width === b.width && a.height === b.height;
 
 const isSameWindowPosition = (a: WindowPosition, b: WindowPosition) => a.x === b.x && a.y === b.y;
+
+const getLoosePositionBounds = (workspace: WindowSize, size: WindowSize, isCompactMobile: boolean) => {
+  if (isCompactMobile) {
+    return {
+      minX: 0,
+      maxX: Math.max(0, workspace.width - size.width),
+      minY: 0,
+      maxY: Math.max(0, workspace.height - size.height),
+    };
+  }
+
+  const visibleEdge = Math.min(WINDOW_VISIBLE_EDGE, Math.max(1, size.width));
+  const visibleTitleBar = Math.min(WINDOW_VISIBLE_TITLE_BAR, Math.max(1, size.height));
+
+  return {
+    minX: Math.min(0, visibleEdge - size.width),
+    maxX: Math.max(0, workspace.width - visibleEdge),
+    minY: 0,
+    maxY: Math.max(0, workspace.height - visibleTitleBar),
+  };
+};
 
 const getFallbackWorkspaceSize = (): WindowSize => {
   if (typeof window === 'undefined') {
@@ -185,13 +209,12 @@ const normalizeTerminalWindowState = (
   const maxHeight = Math.max(minHeight, workspace.height || minHeight);
   const width = clampValue(size.width, minWidth, maxWidth);
   const height = clampValue(size.height, minHeight, maxHeight);
-  const maxX = Math.max(0, workspace.width - width);
-  const maxY = Math.max(0, workspace.height - height);
+  const bounds = getLoosePositionBounds(workspace, { width, height }, isCompactMobile);
 
   return {
     position: {
-      x: clampValue(position.x, 0, maxX),
-      y: clampValue(position.y, 0, maxY),
+      x: clampValue(position.x, bounds.minX, bounds.maxX),
+      y: clampValue(position.y, bounds.minY, bounds.maxY),
     },
     size: { width, height },
   };
@@ -204,7 +227,7 @@ const getResponsiveTerminalSize = (
 ): WindowSize => {
   if (isCompactMobile) {
     return {
-      width: Math.max(0, workspace.width),
+      width: Math.max(0, workspace.width - 32),
       height: Math.round(clampValue(workspace.height * 0.84, 260, Math.min(440, workspace.height))),
     };
   }
@@ -222,10 +245,7 @@ const getResponsiveTerminalSize = (
   };
 };
 
-const getDefaultTerminalOffset = () => ({
-  x: 0,
-  y: 0,
-});
+const getDefaultTerminalOffset = (initialPosition: WindowPosition) => ({ ...initialPosition });
 
 const getInitialLines = (welcomeMessage: string, showInitialHelp: boolean): TerminalLine[] => {
   const nextLines: TerminalLine[] = [{ id: 0, type: 'output', content: welcomeMessage }];
@@ -243,6 +263,7 @@ const getInitialLines = (welcomeMessage: string, showInitialHelp: boolean): Term
 
 export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
   themeId = 'cmd',
+  initialPosition,
   workspaceSize,
   preferredSize,
   isMinimized: controlledIsMinimized,
@@ -259,6 +280,9 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
 }, ref) => {
   const welcomeMessage = getWelcomeMessage(welcomeVariant);
   const effectiveWorkspace = workspaceSize ?? getFallbackWorkspaceSize();
+  const initialTerminalX = initialPosition?.x ?? 0;
+  const initialTerminalY = initialPosition?.y ?? 0;
+  const initialTerminalSize = getResponsiveTerminalSize(effectiveWorkspace, isCompactMobile, preferredSize);
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -323,8 +347,15 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [internalIsMinimized, setInternalIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
-  const [position, setPosition] = useState(() => getDefaultTerminalOffset());
-  const [size, setSize] = useState(() => getResponsiveTerminalSize(effectiveWorkspace, isCompactMobile, preferredSize));
+  const [position, setPosition] = useState(() => (
+    normalizeTerminalWindowState(
+      { x: initialTerminalX, y: initialTerminalY },
+      initialTerminalSize,
+      effectiveWorkspace,
+      isCompactMobile,
+    ).position
+  ));
+  const [size, setSize] = useState(() => initialTerminalSize);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [hasManualPosition, setHasManualPosition] = useState(false);
@@ -359,10 +390,27 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
     setIsMaximized(false);
     setHasManualPosition(false);
     setHasManualResize(false);
-    setPosition(getDefaultTerminalOffset());
-    setSize(getResponsiveTerminalSize(effectiveWorkspace, isCompactMobile, preferredSize));
+    const nextSize = getResponsiveTerminalSize(effectiveWorkspace, isCompactMobile, preferredSize);
+    setPosition(
+      normalizeTerminalWindowState(
+        { x: initialTerminalX, y: initialTerminalY },
+        nextSize,
+        effectiveWorkspace,
+        isCompactMobile,
+      ).position,
+    );
+    setSize(nextSize);
     setMinimizedState(false);
-  }, [effectiveWorkspace, isCompactMobile, preferredSize, setMinimizedState, showInitialHelp, theme.welcome]);
+  }, [
+    effectiveWorkspace,
+    initialTerminalX,
+    initialTerminalY,
+    isCompactMobile,
+    preferredSize,
+    setMinimizedState,
+    showInitialHelp,
+    theme.welcome,
+  ]);
 
   useEffect(() => {
     const nextLines = getInitialLines(theme.welcome, showInitialHelp);
@@ -486,9 +534,11 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
     },
   }), [executeCommand, focusInput, onFocus, setMinimizedState]);
 
-  const handleMouseDown = (e: ReactMouseEvent) => {
+  const handleMouseDown = (e: ReactPointerEvent) => {
     if (isCompactMobile) return;
     if ((e.target as HTMLElement).closest('.terminal-header-buttons')) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
     onFocus?.();
     setHasManualPosition(true);
     setIsDragging(true);
@@ -498,10 +548,11 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
     };
   };
 
-  const handleResizeDown = (e: ReactMouseEvent) => {
+  const handleResizeDown = (e: ReactPointerEvent) => {
     if (isCompactMobile) return;
     e.preventDefault();
     e.stopPropagation();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
     setIsResizing(true);
     setHasManualResize(true);
     resizeStart.current = {
@@ -513,7 +564,7 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
   };
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = (e: PointerEvent) => {
       if (isDragging && !isMaximized && !isCompactMobile) {
         setPosition(
           normalizeTerminalWindowState(
@@ -551,13 +602,15 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
     };
 
     if (isDragging || isResizing) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('pointermove', handleMouseMove);
+      window.addEventListener('pointerup', handleMouseUp);
+      window.addEventListener('pointercancel', handleMouseUp);
     }
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('pointermove', handleMouseMove);
+      window.removeEventListener('pointerup', handleMouseUp);
+      window.removeEventListener('pointercancel', handleMouseUp);
     };
   }, [effectiveWorkspace, isCompactMobile, isDragging, isMaximized, isResizing, position, size]);
 
@@ -577,7 +630,12 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
 
   useEffect(() => {
     if (isCompactMobile || !hasManualPosition) {
-      const defaultPosition = getDefaultTerminalOffset();
+      const defaultPosition = normalizeTerminalWindowState(
+        getDefaultTerminalOffset({ x: initialTerminalX, y: initialTerminalY }),
+        size,
+        effectiveWorkspace,
+        isCompactMobile,
+      ).position;
       setPosition((prev) => (isSameWindowPosition(prev, defaultPosition) ? prev : defaultPosition));
       return;
     }
@@ -586,7 +644,7 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
       const nextPosition = normalizeTerminalWindowState(prev, size, effectiveWorkspace, false).position;
       return isSameWindowPosition(prev, nextPosition) ? prev : nextPosition;
     });
-  }, [effectiveWorkspace, hasManualPosition, isCompactMobile, size]);
+  }, [effectiveWorkspace, hasManualPosition, initialTerminalX, initialTerminalY, isCompactMobile, size]);
 
   const handleKeyDown = useCallback((e: ReactKeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -653,12 +711,12 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
   return (
     <div
       style={{
-        transform: isMaximized ? 'none' : isCompactMobile ? 'translateX(-46%)' : `translate3d(${position.x}px, ${position.y}px, 0)`,
+        transform: isMaximized ? 'none' : isCompactMobile ? 'translateX(-50%)' : `translate3d(${position.x}px, ${position.y}px, 0)`,
         width: isMaximized ? '100%' : isCompactMobile ? `${size.width}px` : fillsWorkspaceWidth ? '100%' : `${size.width}px`,    
         height: isMaximized ? '100%' : `${size.height}px`,
-        position: isMaximized ? 'fixed' : 'relative',  
-        top: isMaximized ? 0 : 'auto',
-        left: isMaximized ? 0 : isCompactMobile ? '50%' : 'auto', marginTop: isCompactMobile ? '20px' : undefined,
+        position: isMaximized ? 'fixed' : 'absolute',
+        top: 0,
+        left: isMaximized ? 0 : isCompactMobile ? '50%' : 0, marginTop: isCompactMobile ? '20px' : undefined,
         zIndex: isMaximized ? zIndex + 1: zIndex,
         boxSizing: 'border-box',
         maxWidth: '100%',
@@ -671,7 +729,7 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
       className={`relative pointer-events-auto flex flex-col overflow-hidden shadow-2xl ${
         isMaximized || isCompactMobile ? '' : isDragging || isResizing ? '' : 'transition-all duration-200'
       } ${isDragging ? 'select-none' : ''}`}
-      onMouseDownCapture={onFocus}
+      onPointerDownCapture={onFocus}
       onClick={(e) => {
         const selection = window.getSelection();
         if (selection && selection.toString().length > 0) return;
@@ -682,11 +740,12 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
       }}
     >
       <div
-        onMouseDown={handleMouseDown}
+        onPointerDown={handleMouseDown}
         className={`flex items-center justify-between gap-3 ${isCompactMobile ? 'cursor-default px-3 py-1' : 'cursor-move px-4 py-1'} select-none text-white`}
         style={{
           background: 'linear-gradient(90deg, var(--xp-blue) 0%, var(--xp-blue-light) 100%)',
           borderBottom: '2px solid #163d9d',
+          touchAction: isCompactMobile ? 'auto' : 'none',
         }}
       >
         <div className="flex items-center gap-2">
@@ -804,9 +863,9 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(({
 
       {!isMaximized && !isCompactMobile && (
         <div
-          onMouseDown={handleResizeDown}
+          onPointerDown={handleResizeDown}
           className="absolute bottom-0 right-0 cursor-nwse-resize p-1"
-          style={{ color: '#6a6a6a' }}
+          style={{ color: '#6a6a6a', touchAction: 'none' }}
         >
           <div className="h-3 w-3 border-b-2 border-r-2 border-[#7d7d7d]" />
         </div>

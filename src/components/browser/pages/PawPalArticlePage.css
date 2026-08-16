@@ -1,0 +1,299 @@
+.pawpal-article-page {
+  width: 100%;
+  min-height: 100%;
+  container-type: inline-size;
+  background: #ffffff;
+  color: #000000;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.pawpal-earth-header {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 2px 14px;
+}
+
+.pawpal-earth-logo {
+  display: block;
+  width: 100px;
+  height: auto;
+}
+
+.pawpal-earth-tagline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #1d7d35;
+  background: #dbeedc;
+  color: #000000;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 2px 5px;
+}
+
+.pawpal-earth-tagline span:last-child {
+  color: #48614b;
+  font-weight: 400;
+  font-size: 16px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.pawpal-earth-layout {
+  display: grid;
+  grid-template-columns: 170px minmax(360px, 1fr) 232px;
+  gap: 16px;
+  padding: 10px 6px 14px;
+}
+
+.pawpal-earth-leftnav {
+  border-right: 1px dotted #777777;
+  padding-left: 14px;
+}
+
+.pawpal-earth-leftnav a,
+.pawpal-earth-leftnav button,
+.pawpal-earth-sidebar a,
+.pawpal-earth-sidebar button,
+.pawpal-earth-main a,
+.pawpal-earth-footer button {
+  color: #0000ee;
+  text-decoration: underline;
+}
+
+.pawpal-earth-leftnav a,
+.pawpal-earth-leftnav button {
+  display: block;
+  margin: 0 0 6px;
+  text-align: left;
+}
+
+.pawpal-earth-leftnav button,
+.pawpal-earth-sidebar button,
+.pawpal-earth-footer button {
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.pawpal-earth-main {
+  min-width: 0;
+}
+
+.pawpal-earth-main h1 {
+  margin: 0 0 18px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.pawpal-earth-main h2 {
+  margin: 16px 0 12px;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.pawpal-earth-main h2 span {
+  font-weight: 400;
+}
+
+.pawpal-earth-intro p,
+.pawpal-earth-section p {
+  margin: 0 0 12px;
+}
+
+.pawpal-earth-feature-list {
+  list-style: none;
+  margin: 4px 0 18px 12px;
+  padding: 0;
+}
+
+.pawpal-earth-feature-list li {
+  position: relative;
+  margin: 7px 0;
+  padding-left: 20px;
+}
+
+.pawpal-earth-feature-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #1b4f9c;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #ffffff 0 22%, #78a6d7 24% 46%, #1d5aaa 48% 100%);
+}
+
+.pawpal-earth-product-feature,
+.pawpal-earth-product-card {
+  border: 1px solid #22833b;
+  background: #ffffff;
+}
+
+.pawpal-earth-product-feature {
+  padding: 0 8px 8px;
+  margin-bottom: 22px;
+}
+
+.pawpal-earth-card-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 -8px 8px;
+  padding: 3px 6px;
+  background: #dbeedc;
+  color: #000000;
+}
+
+.pawpal-earth-card-heading span {
+  color: #4b6c4f;
+  white-space: nowrap;
+}
+
+.pawpal-earth-product-feature ul {
+  margin: 8px 0 0;
+  padding-left: 0;
+  list-style-position: inside;
+}
+
+.pawpal-earth-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.pawpal-earth-product-card {
+  padding: 0 8px 12px;
+}
+
+.pawpal-earth-product-card a {
+  display: block;
+  margin-top: 4px;
+}
+
+.pawpal-earth-architecture {
+  border: 1px solid #a8a8a8;
+  background: #f3f7f3;
+  padding: 9px;
+  margin-bottom: 12px;
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+}
+
+.pawpal-earth-sidebar {
+  border-left: 1px dotted #777777;
+  padding-left: 10px;
+}
+
+.pawpal-earth-download {
+  border: 1px solid #22833b;
+  background: #dbeedc;
+  text-align: center;
+  padding: 14px 8px;
+  margin: 5px 0 24px;
+}
+
+.pawpal-earth-download a {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.pawpal-earth-preview {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.pawpal-earth-ad-link {
+  display: block;
+  margin: 0 auto 6px;
+}
+
+.pawpal-earth-ad-image {
+  display: block;
+  width: 100%;
+  max-width: 214px;
+  height: auto;
+  border: 1px solid #b5b5b5;
+}
+
+.pawpal-earth-sidebar h3 {
+  font-size: 14px;
+  margin: 18px 0 4px;
+}
+
+.pawpal-earth-links {
+  margin: 0 0 20px;
+  padding-left: 10px;
+}
+
+.pawpal-earth-links li {
+  margin: 3px 0;
+}
+
+.pawpal-earth-footer {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 28px 8px 18px;
+  color: #444444;
+  font-size: 12px;
+}
+
+@container (max-width: 860px) {
+  .pawpal-earth-header {
+    grid-template-columns: 110px minmax(0, 1fr);
+  }
+
+  .pawpal-earth-layout {
+    grid-template-columns: 132px minmax(0, 1fr);
+  }
+
+  .pawpal-earth-sidebar {
+    grid-column: 2;
+    border-left: 0;
+    border-top: 1px dotted #777777;
+    padding: 10px 0 0;
+  }
+
+}
+
+@container (max-width: 560px) {
+  .pawpal-earth-header,
+  .pawpal-earth-layout,
+  .pawpal-earth-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pawpal-earth-layout {
+    gap: 12px;
+    padding-top: 12px;
+  }
+
+  .pawpal-earth-leftnav,
+  .pawpal-earth-sidebar {
+    border: 0;
+    padding: 0;
+  }
+
+  .pawpal-earth-tagline {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .pawpal-earth-tagline span:last-child {
+    text-align: left;
+  }
+
+}

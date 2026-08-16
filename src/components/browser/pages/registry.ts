@@ -2,6 +2,7 @@ import { AboutPage } from './AboutPage';
 import { ProjectsPage } from './ProjectsPage';
 import { ExperiencePage } from './ExperiencePage';
 import { ContactPage } from './ContactPage';
+import { PawPalArticlePage } from './PawPalArticlePage';
 
 type BrowserPageSize = {
   width: number;
@@ -12,7 +13,7 @@ type BrowserPageConfig = {
   title: string;
   label: string;
   url: string;
-  Component: typeof AboutPage | typeof ProjectsPage | typeof ExperiencePage | typeof ContactPage;
+  Component: typeof AboutPage | typeof ProjectsPage | typeof ExperiencePage | typeof ContactPage | typeof PawPalArticlePage;
   preferredWindowSize: BrowserPageSize;
   minWindowSize?: BrowserPageSize;
 };
@@ -44,6 +45,20 @@ export const BROWSER_PAGES: Record<string, BrowserPageConfig> = {
     minWindowSize: {
       width: 620,
       height: 520,
+    },
+  },
+  pawpal: {
+    title: 'PawPal AI - Moongle Projects',
+    label: 'PawPal AI',
+    url: 'http://www.moongle.com/manushri/projects/pawpal-ai',
+    Component: PawPalArticlePage,
+    preferredWindowSize: {
+      width: 1080,
+      height: 760,
+    },
+    minWindowSize: {
+      width: 720,
+      height: 560,
     },
   },
   experience: {

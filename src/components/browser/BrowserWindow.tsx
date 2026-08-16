@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type PointerEvent as ReactPointerEvent } from 'react';
 import {
   Minus,
   Square,
@@ -12,6 +12,8 @@ import {
 
 const BROWSER_MIN_WINDOW_WIDTH = 400;
 const BROWSER_MIN_WINDOW_HEIGHT = 300;
+const WINDOW_VISIBLE_EDGE = 96;
+const WINDOW_VISIBLE_TITLE_BAR = 30;
 const XP_WINDOW_BORDER = '#80a5e7';
 const XP_WINDOW_INNER_BORDER = '#b9d0f6';
 const XP_WINDOW_FRAME = '#ece9d8';
@@ -55,6 +57,18 @@ interface BrowserWindowProps {
 const clampValue = (value: number, min: number, max: number) => {
   if (max < min) return max;
   return Math.min(Math.max(value, min), max);
+};
+
+const getLoosePositionBounds = (workspaceSize: WindowSize, size: WindowSize) => {
+  const visibleEdge = Math.min(WINDOW_VISIBLE_EDGE, Math.max(1, size.width));
+  const visibleTitleBar = Math.min(WINDOW_VISIBLE_TITLE_BAR, Math.max(1, size.height));
+
+  return {
+    minX: Math.min(0, visibleEdge - size.width),
+    maxX: Math.max(0, workspaceSize.width - visibleEdge),
+    minY: 0,
+    maxY: Math.max(0, workspaceSize.height - visibleTitleBar),
+  };
 };
 
 const getCompactRestoredWindowState = (
@@ -101,13 +115,12 @@ const normalizeWindowState = (
   const maxHeight = Math.max(minHeight, workspaceSize.height || minHeight);
   const width = clampValue(size.width, minWidth, maxWidth);
   const height = clampValue(size.height, minHeight, maxHeight);
-  const maxX = Math.max(0, workspaceSize.width - width);
-  const maxY = Math.max(0, workspaceSize.height - height);
+  const bounds = getLoosePositionBounds(workspaceSize, { width, height });
 
   return {
     position: {
-      x: clampValue(position.x, 0, maxX),
-      y: clampValue(position.y, 0, maxY),
+      x: clampValue(position.x, bounds.minX, bounds.maxX),
+      y: clampValue(position.y, bounds.minY, bounds.maxY),
     },
     size: { width, height },
   };
@@ -177,8 +190,6 @@ export const BrowserWindow = ({
     initialY,
     initialWidth,
     initialHeight,
-    workspaceWidth,
-    workspaceHeight,
     minWidth ?? '',
     minHeight ?? '',
   ].join(':');
@@ -226,9 +237,11 @@ export const BrowserWindow = ({
     workspaceWidth,
   ]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = (e: ReactPointerEvent) => {
     if (fillsWorkspace) return;
     if ((e.target as HTMLElement).closest('.browser-header-buttons')) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
     setIsDragging(true);
     onFocus?.();
     dragStart.current = {
@@ -237,10 +250,11 @@ export const BrowserWindow = ({
     };
   };
 
-  const handleResizeDown = (e: React.MouseEvent) => {
+  const handleResizeDown = (e: ReactPointerEvent) => {
     if (fillsWorkspace || isCompactMobile || !resizable) return;
     e.preventDefault();
     e.stopPropagation();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
     setIsResizing(true);
     resizeStart.current = {
       x: e.clientX,
@@ -251,7 +265,7 @@ export const BrowserWindow = ({
   };
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = (e: PointerEvent) => {
       if (isDragging && !fillsWorkspace) {
         setPosition(
           normalizeWindowState(
@@ -292,13 +306,15 @@ export const BrowserWindow = ({
     };
 
     if (isDragging || isResizing) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('pointermove', handleMouseMove);
+      window.addEventListener('pointerup', handleMouseUp);
+      window.addEventListener('pointercancel', handleMouseUp);
     }
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('pointermove', handleMouseMove);
+      window.removeEventListener('pointerup', handleMouseUp);
+      window.removeEventListener('pointercancel', handleMouseUp);
     };
   }, [
     defaultMinHeight,
@@ -326,7 +342,7 @@ export const BrowserWindow = ({
       setPosition(nextState.position);
       setSize(nextState.size);
     }
-  }, [defaultMinHeight, defaultMinWidth, fillsWorkspace, minSize, position, size, workspaceSize]);
+  }, [defaultMinHeight, defaultMinWidth, fillsWorkspace, isCompactMobile, minSize, position, size, workspaceSize]);
 
   const handleMaximizeToggle = () => {
     if (mobileFullScreen) {
@@ -357,7 +373,7 @@ export const BrowserWindow = ({
     <div
       style={{
         transform: fillsWorkspace ? 'none' : isCompactMobile? `translate3d(${mobileGap}px, ${mobileGap}px, 0)`: `translate3d(${position.x}px, ${position.y}px, 0)`,
-        width:  fillsWorkspace ? 'auto': isCompactMobile? `${size.width}px=` : `${size.width}px`,
+        width: fillsWorkspace ? 'auto' : isCompactMobile ? `${size.width}px` : `${size.width}px`,
         height: fillsWorkspace ? 'auto' : isCompactMobile ? 'calc(100% - 80px)' : `${size.height}px`,
         position: fillsWorkspace ? 'fixed' : 'absolute',
         top: 0,
@@ -380,10 +396,10 @@ export const BrowserWindow = ({
       className={`pointer-events-auto overflow-hidden flex flex-col ${
         fillsWorkspace ? '' : isDragging || isResizing ? '' : 'transition-all duration-200'
       } ${isDragging ? 'select-none' : ''}`}
-      onMouseDownCapture={onFocus}
+      onPointerDownCapture={onFocus}
     >
       <div
-        onMouseDown={handleMouseDown}
+        onPointerDown={handleMouseDown}
         className={`flex items-center justify-between ${fillsWorkspace ? 'cursor-default px-3 py-2' : 'cursor-move px-[7px] py-[3px]'} select-none`}
         style={{
           minHeight: fillsWorkspace ? '30px' : '24px',
@@ -391,6 +407,7 @@ export const BrowserWindow = ({
           background: XP_TITLE_BAR,
           borderBottom: '1px solid #08318d',
           boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.72), inset 1px 0 0 rgba(255,255,255,0.35), inset -1px 0 0 rgba(255,255,255,0.18)',
+          touchAction: fillsWorkspace ? 'auto' : 'none',
         }}
       >
         <span
@@ -595,9 +612,9 @@ export const BrowserWindow = ({
 
       {!fillsWorkspace && !isCompactMobile && resizable && (
         <div
-          onMouseDown={handleResizeDown}
+          onPointerDown={handleResizeDown}
           className="absolute bottom-0 right-0 h-4 w-4 cursor-nwse-resize"
-          style={{ backgroundColor: XP_WINDOW_FRAME }}
+          style={{ backgroundColor: XP_WINDOW_FRAME, touchAction: 'none' }}
         >
           <div
             className="h-full w-full"

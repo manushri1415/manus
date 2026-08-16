@@ -9,13 +9,12 @@ import { AboutPage } from '@/components/browser/pages/AboutPage';
 import { ProjectsPage } from '@/components/browser/pages/ProjectsPage';
 import { ExperiencePage } from '@/components/browser/pages/ExperiencePage';
 import { ContactPage } from '@/components/browser/pages/ContactPage';
+import { PawPalArticlePage } from '@/components/browser/pages/PawPalArticlePage';
 import { SnakeGame } from '@/components/games/SnakeGame';
 import { Image as ImageIcon } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const TASKBAR_HEIGHT = 32;
-const WORKSPACE_PADDING = 16;
-const MOBILE_WORKSPACE_PADDING = 8;
 const MOBILE_TERMINAL_TOP_GAP = 12;
 const MOBILE_TERMINAL_BOTTOM_CLEARANCE = 52;
 const DEFAULT_BROWSER_WIDTH = 980;
@@ -116,8 +115,8 @@ const getInitialWorkspaceSize = (): WorkspaceSize => {
   }
 
   return {
-    width: Math.max(0, window.innerWidth - WORKSPACE_PADDING * 2),
-    height: Math.max(0, window.innerHeight - TASKBAR_HEIGHT - WORKSPACE_PADDING * 2),
+    width: Math.max(0, window.innerWidth),
+    height: Math.max(0, window.innerHeight - TASKBAR_HEIGHT),
   };
 };
 
@@ -253,18 +252,38 @@ const Index = () => {
   const mobileIconAreaHeight = 28 + mobileIconRows * 78;
   const homeLayout = getHomeWindowLayout(workspaceSize, mobileIconAreaHeight, usesTouchOptimizedLayout);
   const isCompactViewport = homeLayout.mode === 'phone' || homeLayout.mode === 'tablet';
-  const terminalWorkspaceSize = {
-    width: homeLayout.workspace.width,
-    height: homeLayout.workspace.height,
-  };
-  const appWorkspace = isCompactViewport
+  const terminalWindowLayer = isCompactViewport
     ? {
+      x: homeLayout.workspace.x,
+      y: homeLayout.workspace.y,
+      width: homeLayout.workspace.width,
+      height: homeLayout.workspace.height,
+    }
+    : {
       x: 0,
       y: 0,
       width: workspaceSize.width,
       height: workspaceSize.height,
+    };
+  const terminalWorkspaceSize = {
+    width: terminalWindowLayer.width,
+    height: terminalWindowLayer.height,
+  };
+  const terminalInitialPosition = isCompactViewport
+    ? {
+      x: homeLayout.terminal.x,
+      y: homeLayout.terminal.y,
     }
-    : homeLayout.workspace;
+    : {
+      x: homeLayout.workspace.x + homeLayout.terminal.x,
+      y: homeLayout.workspace.y + homeLayout.terminal.y,
+    };
+  const appWorkspace = {
+    x: 0,
+    y: 0,
+    width: workspaceSize.width,
+    height: workspaceSize.height,
+  };
   const appWindowWorkspaceSize = {
     width: appWorkspace.width,
     height: appWorkspace.height,
@@ -719,6 +738,8 @@ const Index = () => {
         );
       case 'projects':
         return <ProjectsPage onNavigate={openBrowserPage} />;
+      case 'pawpal':
+        return <PawPalArticlePage onNavigate={openBrowserPage} />;
       case 'contact':
         return (
           <ContactPage
@@ -769,49 +790,38 @@ const Index = () => {
         <div
           ref={workspaceRef}
           className="absolute inset-0 pointer-events-none"
-          style={{
-            padding: isCompactViewport ? 0 : `${WORKSPACE_PADDING}px`,
-          }}
         >
           <div
             className="absolute pointer-events-none"
             style={{
-              left: `${homeLayout.workspace.x}px`,
-              top: `${homeLayout.workspace.y}px`,
-              width: `${homeLayout.workspace.width}px`,
-              height: `${homeLayout.workspace.height}px`,
+              left: `${terminalWindowLayer.x}px`,
+              top: `${terminalWindowLayer.y}px`,
+              width: `${terminalWindowLayer.width}px`,
+              height: `${terminalWindowLayer.height}px`,
             }}
           >
             {isTerminalOpen && (
-              <div
-                className="absolute pointer-events-none"
-                style={{
-                  left: `${homeLayout.terminal.x}px`,
-                  top: `${homeLayout.terminal.y}px`,
-                  zIndex: getWindowZIndex('terminal'),
+              <Terminal
+                ref={terminalRef}
+                themeId={currentTheme}
+                initialPosition={terminalInitialPosition}
+                workspaceSize={terminalWorkspaceSize}
+                preferredSize={{
+                  width: homeLayout.terminal.width,
+                  height: homeLayout.terminal.height,
                 }}
-              >
-                <Terminal
-                  ref={terminalRef}
-                  themeId={currentTheme}
-                  workspaceSize={terminalWorkspaceSize}
-                  preferredSize={{
-                    width: homeLayout.terminal.width,
-                    height: homeLayout.terminal.height,
-                  }}
-                  isMinimized={isTerminalMinimized}
-                  onMinimizedChange={setIsTerminalMinimized}
-                  onFocus={handleTerminalFocus}
-                  onClose={handleTerminalClose}
-                  onReboot={restoreDesktopWindows}
-                  zIndex={getWindowZIndex('terminal')}
-                  isCompactMobile={homeLayout.terminalCompact}
-                  welcomeVariant={homeLayout.welcomeVariant}
-                  showInitialHelp={false}
-                  showCompactCloseButton={homeLayout.mode === 'phone'}
-                  onPlay={openSnakeGame}
-                />
-              </div>
+                isMinimized={isTerminalMinimized}
+                onMinimizedChange={setIsTerminalMinimized}
+                onFocus={handleTerminalFocus}
+                onClose={handleTerminalClose}
+                onReboot={restoreDesktopWindows}
+                zIndex={getWindowZIndex('terminal')}
+                isCompactMobile={homeLayout.terminalCompact}
+                welcomeVariant={homeLayout.welcomeVariant}
+                showInitialHelp={false}
+                showCompactCloseButton={homeLayout.mode === 'phone'}
+                onPlay={openSnakeGame}
+              />
             )}
           </div>
 

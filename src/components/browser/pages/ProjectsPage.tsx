@@ -8,6 +8,7 @@ interface ProjectResult {
   displayUrl: string;
   highlight?: string;
   note?: string;
+  slug?: string;
   detailSections?: {
     label: string;
     items: string[];
@@ -15,13 +16,46 @@ interface ProjectResult {
 }
 
 interface ProjectsPageProps {
-  onNavigate?: (page: 'about' | 'experience' | 'contact') => void;
+  onNavigate?: (page: 'about' | 'experience' | 'contact' | 'pawpal') => void;
 }
 
 const DEFAULT_QUERY = "Manushri Muruga Kumar's projects";
 const SEARCH_NAME_PREFIX = 'Manushri Muruga Kumar';
 
 const PROJECTS: ProjectResult[] = [
+  {
+    title: 'PawPal AI - RAG-Based Pet Health Record & Reminder Assistant',
+    slug: 'pawpal-ai',
+    highlight: 'Source-grounded AI health records with human-approved reminders',
+    description:
+      'PawPal AI transforms veterinary documents into verified, source-grounded pet health records using RAG and a multi-step AI agent. It combines LLM-based document understanding with deterministic validation, human approval, contradiction detection, and reliable reminder generation.',
+    technologies: [
+      'Python',
+      'Streamlit',
+      'RAG',
+      'LLM Agents',
+      'Claude / Anthropic API',
+      'Pydantic',
+      'SQLite',
+      'Pytest',
+      'Vector Search',
+      'Cosine Similarity',
+      'Feature-Hashing Embeddings',
+      'Prompt Guardrails',
+      'Human-in-the-Loop AI',
+    ],
+    detailSections: [
+      {
+        label: 'Core features',
+        items: ['Document ingestion', 'Evidence grounding', 'Human review', 'Reminder engine'],
+      },
+      {
+        label: 'Engineering',
+        items: ['118 automated tests', '17/17 reliability evaluation cases passing'],
+      },
+    ],
+    displayUrl: 'www.moongle.com/manushri/projects/pawpal-ai',
+  },
   {
     title: 'Collegiate — AI-Powered College & Career Planning Platform',
     highlight: 'Client-sponsored full-stack project',
@@ -182,12 +216,16 @@ const popularSearchFilters: Record<(typeof popularSearches)[number], string[]> =
 const getProjectSearchText = (project: ProjectResult) =>
   [
     project.title,
+    project.slug,
     project.highlight,
     project.description,
     project.note,
     project.technologies.join(' '),
     project.detailSections?.map((section) => `${section.label} ${section.items.join(' ')}`).join(' '),
     project.displayUrl,
+    project.slug === 'pawpal-ai'
+      ? 'pet health records veterinary documents llm agents claude anthropic api pydantic vector search cosine similarity feature hashing embeddings prompt guardrails human in the loop ai evidence grounding approval workflow contradiction detection reminder engine'
+      : '',
     'project',
   ]
     .join(' ')
@@ -232,6 +270,15 @@ export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
   const handleSearch = (e?: FormEvent) => {
     e?.preventDefault();
     triggerSearch(searchQuery);
+  };
+
+  const handleProjectClick = (project: ProjectResult) => {
+    if (project.slug === 'pawpal-ai') {
+      onNavigate?.('pawpal');
+      return;
+    }
+
+    triggerSearch(project.title, 'Web');
   };
 
   const filteredProjects = selectedPopularSearch
@@ -316,11 +363,12 @@ export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
         <div className="moongle-layout">
           <div className="moongle-results">
             {filteredProjects.length > 0 ? (
-              filteredProjects.map((project) => (
+              filteredProjects.map((project) => {
+                return (
                 <div key={project.title} className="moongle-result">
                   <button
                     type="button"
-                    onClick={() => triggerSearch(project.title, 'Web')}
+                    onClick={() => handleProjectClick(project)}
                     className="moongle-result-title"
                   >
                     {project.title}
@@ -342,7 +390,8 @@ export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
                   ))}
                   <div className="moongle-result-url">{project.displayUrl}</div>
                 </div>
-              ))
+                );
+              })
             ) : (
               <div className="moongle-no-results">
                 No projects matched <strong>{selectedPopularSearch}</strong>. Try another popular search.
