@@ -106,18 +106,35 @@ const PROJECTS: ProjectResult[] = [
     displayUrl: 'www.moongle.com/manushri/projects/website-redesign',
   },
   {
-    title: 'SceneStack — Production Coordination for Student Filmmakers',
-    highlight: 'Currently in development',
+    title: 'ApplyAide — Full-Stack Job Application Assistant',
+    highlight: 'Production browser extension and web platform',
     description:
-      'Designing and developing a production-coordination platform for student filmmakers and small crews to manage projects, roles, call sheets, production documents, acknowledgements, and role-specific updates.',
-    technologies: ['React', 'TypeScript', 'Python', 'PostgreSQL'],
+      'Built a Manifest V3 browser extension and React web application that analyzes job postings, assists with application autofill, manages reusable profile information, and tracks saved applications in user-configured Google Sheets.',
+    technologies: [
+      'TypeScript',
+      'React',
+      'Vite',
+      'AWS Lambda',
+      'API Gateway',
+      'DynamoDB',
+      'S3',
+      'CloudFront',
+      'Google OAuth 2.0',
+      'Google Sheets API',
+      'GitHub Actions',
+      'Chrome/Edge Extension APIs',
+    ],
     detailSections: [
       {
-        label: 'Core concepts',
-        items: ['Authentication', 'Role-Based Access Control', 'Document Workflows'],
+        label: 'Core features',
+        items: ['Job Posting Analysis', 'Autofill', 'Profile Sync', 'Spreadsheet Mapping', 'Duplicate Prevention'],
+      },
+      {
+        label: 'Cloud architecture',
+        items: ['Serverless AWS Backend', 'Secure Sessions', 'OAuth Token Storage', 'CI/CD'],
       },
     ],
-    displayUrl: 'www.moongle.com/manushri/projects/scenestack',
+    displayUrl: 'www.moongle.com/manushri/projects/applyaide',
   },
 ];
 
@@ -146,7 +163,7 @@ const popularSearches = [
   'Databases',
   'Testing',
   'AWS',
-  'Filmmaking Technology',
+  'Browser Extensions',
 ] as const;
 
 const popularSearchFilters: Record<(typeof popularSearches)[number], string[]> = {
@@ -159,7 +176,7 @@ const popularSearchFilters: Record<(typeof popularSearches)[number], string[]> =
   Databases: ['database', 'databases', 'sql', 'mysql', 'postgresql', 'supabase', 'drizzle'],
   Testing: ['testing', 'test', 'tests', 'pytest', 'junit', 'usability'],
   AWS: ['aws', 'cloud', 'cloudflare'],
-  'Filmmaking Technology': ['filmmaking', 'filmmakers', 'film', 'production'],
+  'Browser Extensions': ['extension', 'extensions', 'chrome', 'edge', 'manifest'],
 };
 
 const getProjectSearchText = (project: ProjectResult) =>
@@ -373,15 +390,15 @@ export const ProjectsPage = ({ onNavigate }: ProjectsPageProps) => {
               <div className="moongle-sponsored-link">
                 <button
                   type="button"
-                  onClick={() => triggerSearch('SceneStack production coordination platform', 'Web')}
+                  onClick={() => triggerSearch('ApplyAide job application assistant', 'Web')}
                   className="moongle-sponsored-title"
                 >
-                  SceneStack - Coming Soon
+                  ApplyAide
                 </button>
                 <div className="moongle-sponsored-description">
-                  Production coordination software for student filmmakers and indie crews.
+                  Browser extension and web dashboard for job analysis, autofill, and application tracking.
                 </div>
-                <div className="moongle-sponsored-url">www.manushri.dev/scenestack</div>
+                <div className="moongle-sponsored-url">applyaide.manushri.dev</div>
               </div>
 
               <div className="moongle-sponsored-link">
