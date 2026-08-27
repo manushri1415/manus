@@ -127,20 +127,20 @@ export const SocialLinks = ({
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setIsStartOpen(!isStartOpen)}
-            className={`flex h-full ${isMobile ? 'min-w-[78px] pr-3' : 'min-w-[84px] pr-4'} items-center gap-1.5 rounded-r-[10px] border border-[#2f7d2d] px-2.5 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),inset_0_-1px_0_rgba(0,0,0,0.25)] transition-all ${
+            className={`flex h-full ${isMobile ? 'min-w-[78px] pr-3' : 'min-w-[84px] pr-4'} items-center gap-1.5 rounded-r-[5px] border border-[#2f7d2d] px-2.5 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),inset_0_-1px_0_rgba(0,0,0,0.25)] transition-all ${
               isStartOpen
                 ? 'bg-[linear-gradient(180deg,#6edb6f_0%,#40a93f_40%,#2e882d_100%)] brightness-95'
                 : 'bg-[linear-gradient(180deg,#72de73_0%,#40a93f_42%,#2f8c30_100%)] hover:brightness-105'
             }`}
           >
-            <img src={startLogoSrc} alt="Start" className="h-8 w-8 object-contain" />
-            <span className={`${isMobile ? 'text-[15px]' : 'text-[17px]'} font-bold italic leading-none [text-shadow:1px_1px_1px_rgba(0,0,0,0.45)]`}>
+            <img src={startLogoSrc} alt="Start" className="h-6 w-6 object-contain" />
+            <span className={`${isMobile ? 'text-[12px]' : 'text-[14px]'} font-bold italic leading-none [text-shadow:1px_1px_1px_rgba(0,0,0,0.45)]`}>
               Start
             </span>
           </button>
 
           {isStartOpen && (
-            <div className={`absolute bottom-[32px] left-0 ${isMobile ? 'w-[min(310px,calc(100vw-12px))]' : 'w-[310px]'} overflow-hidden rounded-t-[3px] border border-[#08319a] bg-[#245ada] shadow-[2px_0_18px_rgba(0,0,0,0.55)] animate-in slide-in-from-bottom-2 duration-200`}>
+            <div className={`absolute bottom-[22px] left-0 ${isMobile ? 'w-[min(310px,calc(100vw-12px))]' : 'w-[310px]'} overflow-hidden rounded-t-[3px] border border-[#08319a] bg-[#245ada] shadow-[2px_0_18px_rgba(0,0,0,0.55)] animate-in slide-in-from-bottom-2 duration-200`}>
               <div className="border-b border-[#88b5ff] bg-[linear-gradient(180deg,#4f94ff_0%,#245ada_58%,#173b99_100%)] px-2 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center">

@@ -92,12 +92,12 @@ const DesktopIcon = ({
             onMouseDown={handleMouseDown}
             onClick={handleClick}
         >
-            <div className={`${isMobile ? 'h-12 w-12' : 'w-14 h-14'} flex items-center justify-center`}>
+            <div className={`${isMobile ? 'h-8 w-8' : 'w-8 h-8'} flex items-center justify-center`}>
                 {iconSrc ? (
                     <img
                         src={iconSrc}
                         alt={label}
-                        className={`${isMobile ? 'h-10 w-10' : 'w-12 h-12'} object-contain drop-shadow-md`}
+                        className={`${isMobile ? 'h-10 w-10' : 'w-10 h-10'} object-contain drop-shadow-md`}
                     />
                 ) : (
                     Icon ? <Icon className="w-12 h-12 text-white drop-shadow-md" /> : null
@@ -127,11 +127,11 @@ export const DesktopIcons = ({
     const terminalIconSrc = `${import.meta.env.BASE_URL}assets/icons/terminal.png`;
     const icons = [
         { icon: null, label: 'My Story', command: 'about', pos: { x: 20, y: 10 ,},iconSrc: profileIconSrc },
-        { icon: null, label: 'Projects', command: 'projects', pos: { x: 20, y: 110 }, iconSrc: projectsIconSrc },
-        { icon: null, label: 'Experience', command: 'experience', pos: { x: 20, y: 210 }, iconSrc: experienceIconSrc },
-        { icon: null, label: 'Resume', command: 'resume', pos: { x: 20, y: 310 },iconSrc: resumeIconSrc },
-        { icon: null, label: 'Contact', command: 'contact', pos: { x: 20, y: 410 }, iconSrc: phoneIconSrc },
-        { icon: null, label: 'Terminal', command: 'terminal', pos: { x: 20, y: 510 }, iconSrc: terminalIconSrc },
+        { icon: null, label: 'Projects', command: 'projects', pos: { x: 20, y: 85 }, iconSrc: projectsIconSrc },
+        { icon: null, label: 'Experience', command: 'experience', pos: { x: 20, y: 155 }, iconSrc: experienceIconSrc },
+        { icon: null, label: 'Resume', command: 'resume', pos: { x: 20, y: 225 },iconSrc: resumeIconSrc },
+        { icon: null, label: 'Contact', command: 'contact', pos: { x: 20, y: 295 }, iconSrc: phoneIconSrc },
+        { icon: null, label: 'Terminal', command: 'terminal', pos: { x: 20, y: 365 }, iconSrc: terminalIconSrc },
     ];
 
     return (

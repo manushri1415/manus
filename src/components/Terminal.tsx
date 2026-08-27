@@ -55,13 +55,6 @@ const DESKTOP_WELCOME_MESSAGE = `Hello, and welcome to my OS! :)
 
 I'm Manushri, and I'm genuinely happy you're here.
 
-This portfolio is inspired by early-2000s computers and websites. Instead of using a traditional portfolio template, I built something that feels like opening an old personal computer and wandering through the internet of 2005.
-
-Every icon, window, and page reveals a different part of my projects, experience, personality, and creative interests.
-
-Built with:
-React | TypeScript | CSS | curiosity | too much attention to detail
-
 Single-click a desktop icon to begin exploring.
 Use the Start menu to view all available programs.
 

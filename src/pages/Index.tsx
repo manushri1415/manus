@@ -14,7 +14,7 @@ import { SnakeGame } from '@/components/games/SnakeGame';
 import { Image as ImageIcon } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const TASKBAR_HEIGHT = 32;
+const TASKBAR_HEIGHT = 26;
 const MOBILE_TERMINAL_TOP_GAP = 12;
 const MOBILE_TERMINAL_BOTTOM_CLEARANCE = 52;
 const DEFAULT_BROWSER_WIDTH = 980;
@@ -187,18 +187,17 @@ const getHomeWindowLayout = (
   const terminalX = mode === 'desktop'
     ? Math.round(clampValue(workspace.width * 0.06, 18, 52))
     : 18;
-  const terminalMaxWidth = mode === 'desktop' ? 1180 : 920;
+  const terminalMaxWidth = mode === 'desktop' ? 900 : 900;
   const terminalWidth = Math.round(
     clampValue(
-      workspace.width * (mode === 'desktop' ? 0.8 : 0.78),
-      mode === 'desktop' ? 700 : 560,
+      workspace.width * 0.58, 560,
       Math.min(terminalMaxWidth, workspace.width - terminalX - rightMargin),
     ),
   );
   const rawTerminalHeight = Math.round(
-    clampValue(workspace.height * (mode === 'desktop' ? 0.8 : 0.76), 460, mode === 'desktop' ? 680 : 600),
+    clampValue(workspace.height * (mode === 'desktop' ? 0.45 : 0.76), 300, mode === 'desktop' ? 480 : 500),
   );
-  const terminalHeight = Math.min(rawTerminalHeight, Math.max(460, workspace.height - 20));
+  const terminalHeight = Math.min(rawTerminalHeight, Math.max(300, workspace.height - 20));
   const terminalY = Math.round(clampValue(workspace.height * (mode === 'desktop' ? 0.09 : 0.11), 20, 60));
 
   return {
@@ -889,7 +888,7 @@ const Index = () => {
         </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-50 flex h-[32px] items-stretch border-t border-[#7abaf8] bg-[linear-gradient(180deg,var(--xp-blue-light)_0%,var(--xp-blue)_45%,var(--xp-blue-dark)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+      <footer className="fixed bottom-0 left-0 right-0 z-50 flex h-[26px] items-stretch border-t border-[#7abaf8] bg-[linear-gradient(180deg,var(--xp-blue-light)_0%,var(--xp-blue)_45%,var(--xp-blue-dark)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
         <SocialLinks
           onReset={handleReset}
           onOpenPage={openBrowserPage}
@@ -963,7 +962,7 @@ const Index = () => {
             />
           </label>
 
-          <div className={`select-none ${usesTouchOptimizedLayout ? 'px-2.5 text-[10px]' : 'px-4 text-[11px]'} py-[3px] text-right font-sans font-medium leading-tight text-white [text-shadow:1px_1px_1px_rgba(0,0,0,0.45)]`}>
+          <div className={`select-none ${usesTouchOptimizedLayout ? 'px-2.5 text-[8px]' : 'px-4 text-[9px]'} py-[1px] text-right font-sans font-medium leading-tight text-white [text-shadow:1px_1px_1px_rgba(0,0,0,0.45)]`}>
             {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             <br />
             {time.toLocaleDateString()}
