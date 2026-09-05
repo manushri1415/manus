@@ -6,8 +6,9 @@
 .experience-profile-page {
   --themanubook-blue: #3b5998;
   width: 100%;
+  /* Grow with the content so the browser window body scrolls the whole page,
+     like a real site. min-height keeps the background filling short windows. */
   min-height: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   container-type: inline-size;
@@ -16,7 +17,6 @@
   font-family: Arial, Verdana, Tahoma, sans-serif;
   font-size: 11px;
   line-height: 1.4;
-  overflow: hidden;
 }
 
 /* ========================================
@@ -150,37 +150,29 @@
   display: grid;
   grid-template-columns: minmax(220px, 248px) minmax(280px, 332px) minmax(0, 1fr);
   flex: 1 1 auto;
-  height: 100%;
-  min-height: 0;
   gap: 12px;
   padding: 10px 12px 12px;
   max-width: 1000px;
   margin: 0 auto;
   width: 100%;
   align-items: stretch;
-  overflow: hidden;
 }
 
-.themanubook-section-left {
-  width: 100%;
-  min-width: 0;
-  align-self: start;
-}
-
+/* The Picture and Information columns scroll with the page until all of
+   their content is visible, then stick while the experience column goes on.
+   --sticky-top is measured by useStickyUntilEnd in ExperiencePage.tsx. */
+.themanubook-section-left,
 .themanubook-section-middle {
   width: 100%;
   min-width: 0;
   align-self: start;
+  position: sticky;
+  top: var(--sticky-top, 10px);
 }
 
 .themanubook-section-right {
   width: 100%;
   min-width: 0;
-  height: 100%;
-  min-height: 0;
-  max-height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
   padding-right: 8px;
 }
 
@@ -472,22 +464,20 @@
   }
 
   .themanubook-content {
-    flex: 1 1 auto;
-    height: 100%;
-    min-height: 0;
     grid-template-columns: 1fr;
     align-items: flex-start;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
   }
 
   .themanubook-section-left,
   .themanubook-section-middle,
   .themanubook-section-right {
     width: 100%;
-    max-height: none;
-    overflow: visible;
+  }
+
+  /* Columns stack here, so sticky sidebars would just block the content. */
+  .themanubook-section-left,
+  .themanubook-section-middle {
+    position: static;
   }
 
   .themanubook-section-right {

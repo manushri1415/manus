@@ -1,5 +1,9 @@
 import './ExperiencePage.css';
 import { EXPERIENCE_CATEGORIES } from './experienceData';
+import { useStickyUntilEnd } from '@/hooks/use-sticky-until-end';
+
+// Matches the vertical padding on .themanubook-content.
+const STICKY_EDGE_GAP = 10;
 
 interface ExperiencePageProps {
   onClose?: () => void;
@@ -14,6 +18,9 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
   const profilePicPath = `${basePath}assets/icons/M-photos/Manu-profile-pic.jpeg`;
   const headerArtPath = `${basePath}assets/icons/M-photos/facebook-left.png`;
   const linkedInUrl = 'https://linkedin.com/in/manushrimurugakumar';
+
+  const leftColumnRef = useStickyUntilEnd<HTMLDivElement>(STICKY_EDGE_GAP);
+  const middleColumnRef = useStickyUntilEnd<HTMLDivElement>(STICKY_EDGE_GAP);
 
   return (
     <div className="experience-profile-page">
@@ -59,7 +66,7 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
 
       {/* Main Content */}
       <div className="themanubook-content">
-        <div className="themanubook-section-left">
+        <div className="themanubook-section-left" ref={leftColumnRef}>
           <div className="themanubook-box">
             <div className="themanubook-box-title">Picture</div>
             <div className="themanubook-picture-box">
@@ -81,7 +88,7 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
           </div>
         </div>
 
-        <div className="themanubook-section-middle">
+        <div className="themanubook-section-middle" ref={middleColumnRef}>
           <div className="themanubook-info-panel">
             <div className="themanubook-info-title">Information</div>
 

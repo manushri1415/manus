@@ -52,6 +52,8 @@ interface BrowserWindowProps {
   onForward?: () => void;
   onRefresh?: () => void;
   mobileFullScreen?: boolean;
+  /** Fires whenever the window starts or stops filling the whole workspace. */
+  onFillsWorkspaceChange?: (fillsWorkspace: boolean) => void;
 }
 
 const clampValue = (value: number, min: number, max: number) => {
@@ -151,6 +153,7 @@ export const BrowserWindow = ({
   onForward,
   onRefresh,
   mobileFullScreen = false,
+  onFillsWorkspaceChange,
 }: BrowserWindowProps) => {
   const defaultMinWidth = chromeMode === 'utility' ? 240 : BROWSER_MIN_WINDOW_WIDTH;
   const defaultMinHeight = chromeMode === 'utility' ? 140 : BROWSER_MIN_WINDOW_HEIGHT;
@@ -193,6 +196,12 @@ export const BrowserWindow = ({
     minWidth ?? '',
     minHeight ?? '',
   ].join(':');
+
+  useEffect(() => {
+    onFillsWorkspaceChange?.(fillsWorkspace);
+    // Closing the window unmounts it, so make sure the parent hears "false".
+    return () => onFillsWorkspaceChange?.(false);
+  }, [fillsWorkspace, onFillsWorkspaceChange]);
 
   useEffect(() => {
     if (mobileFullScreen && !previousMobileFullScreen.current) {
@@ -375,7 +384,9 @@ export const BrowserWindow = ({
         transform: fillsWorkspace ? 'none' : isCompactMobile? `translate3d(${mobileGap}px, ${mobileGap}px, 0)`: `translate3d(${position.x}px, ${position.y}px, 0)`,
         width: fillsWorkspace ? 'auto' : isCompactMobile ? `${size.width}px` : `${size.width}px`,
         height: fillsWorkspace ? 'auto' : isCompactMobile ? 'calc(100% - 80px)' : `${size.height}px`,
-        position: fillsWorkspace ? 'fixed' : 'absolute',
+        // When maximized, stretch to every edge of the workspace layer. That
+        // layer already stops at the taskbar, so no bottom offset is needed.
+        position: 'absolute',
         top: 0,
         left: 0,
         right: fillsWorkspace ? 0 : 'auto',
@@ -383,7 +394,7 @@ export const BrowserWindow = ({
         boxSizing: 'border-box',
         maxWidth: '100%',
         maxHeight: '100%',
-        bottom: fillsWorkspace ? '34px' : 'auto',
+        bottom: fillsWorkspace ? 0 : 'auto',
         willChange: isDragging || isResizing ? 'transform, width, height' : 'auto',
         backgroundColor: XP_WINDOW_FRAME,
         borderTop: `1px solid ${XP_WINDOW_BORDER}`,

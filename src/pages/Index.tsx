@@ -241,6 +241,8 @@ const Index = () => {
   const terminalRef = useRef<TerminalHandle | null>(null);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [workspaceSize, setWorkspaceSize] = useState<WorkspaceSize>(getInitialWorkspaceSize);
+  const [isBrowserMaximized, setIsBrowserMaximized] = useState(false);
+  const [isGameMaximized, setIsGameMaximized] = useState(false);
   const [isCoarsePointer, setIsCoarsePointer] = useState(() => {
     if (typeof window === 'undefined') {
       return false;
@@ -297,6 +299,13 @@ const Index = () => {
     width: appWorkspace.width,
     height: appWorkspace.height,
   };
+  // Auto-hide the taskbar while a maximized window is actually on screen.
+  // (A minimized window keeps its maximized flag but isn't visible, so it
+  // shouldn't hide anything.)
+  const isTaskbarHidden =
+    (browserWindow.isOpen && !browserWindow.isMinimized && isBrowserMaximized) ||
+    (gameWindow.isOpen && !gameWindow.isMinimized && isGameMaximized);
+  const effectiveTaskbarHeight = isTaskbarHidden ? 0 : TASKBAR_HEIGHT;
 
   useEffect(() => {
     const savedWallpaper = localStorage.getItem('terminal-wallpaper');
@@ -804,7 +813,7 @@ const Index = () => {
 
       <main
         className="relative z-10 overflow-hidden pointer-events-none"
-        style={{ height: `calc(100vh - ${TASKBAR_HEIGHT}px)` }}
+        style={{ height: `calc(100vh - ${effectiveTaskbarHeight}px)` }}
       >
         <div
           ref={workspaceRef}
@@ -872,6 +881,7 @@ const Index = () => {
                 onForward={handleBrowserForward}
                 onRefresh={handleBrowserRefresh}
                 mobileFullScreen={workspaceSize.width <= 600}
+                onFillsWorkspaceChange={setIsBrowserMaximized}
               >
                 <div key={`${currentBrowserPageKey}:${browserWindow.refreshKey}`} className="h-full">
                   {renderBrowserPage()}
@@ -896,6 +906,7 @@ const Index = () => {
                 onFocus={() => bringWindowToFront('game')}
                 onClose={handleGameClose}
                 mobileFullScreen={isCompactViewport}
+                onFillsWorkspaceChange={setIsGameMaximized}
               >
                 <SnakeGame
                   isWindowActive={activeWindow === 'game'}
@@ -908,7 +919,12 @@ const Index = () => {
         </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-50 flex h-[26px] items-stretch border-t border-[#7abaf8] bg-[linear-gradient(180deg,var(--xp-blue-light)_0%,var(--xp-blue)_45%,var(--xp-blue-dark)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+      <footer
+        aria-hidden={isTaskbarHidden}
+        className={`fixed bottom-0 left-0 right-0 z-50 flex h-[26px] items-stretch border-t border-[#7abaf8] bg-[linear-gradient(180deg,var(--xp-blue-light)_0%,var(--xp-blue)_45%,var(--xp-blue-dark)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] transition-transform duration-200 ${
+          isTaskbarHidden ? 'translate-y-full pointer-events-none' : 'translate-y-0'
+        }`}
+      >
         <SocialLinks
           onReset={handleReset}
           onOpenPage={openBrowserPage}
