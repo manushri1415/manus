@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef, type ChangeEvent } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Terminal, type TerminalHandle } from '@/components/Terminal';
 import { SocialLinks } from '@/components/SocialLinks';
 import { BootSequence } from '@/components/BootSequence';
 import { DesktopIcons } from '@/components/DesktopIcons';
 import { BrowserWindow } from '@/components/browser/BrowserWindow';
-import { BROWSER_PAGES, type BrowserPageKey } from '@/components/browser/pages/registry';
+import { BROWSER_PAGES, getPageKeyForPath, getRouteForPageKey, type BrowserPageKey } from '@/components/browser/pages/registry';
 import { AboutPage } from '@/components/browser/pages/AboutPage';
 import { ProjectsPage } from '@/components/browser/pages/ProjectsPage';
 import { ExperiencePage } from '@/components/browser/pages/ExperiencePage';
@@ -216,8 +217,13 @@ const getHomeWindowLayout = (
 
 const Index = () => {
   const isMobile = useIsMobile();
+  const location = useLocation();
+  const navigate = useNavigate();
   const DEFAULT_WALLPAPER = `${import.meta.env.BASE_URL}frieren.jpg`;
   const resumePdfPath = `${import.meta.env.BASE_URL}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`;
+  // A direct link to a page (e.g. /projects) should skip the boot animation and land
+  // straight on the desktop with that window already open — see the mount effect below.
+  const initialDeepLinkPageKey = getPageKeyForPath(location.pathname);
 
   const [currentTheme, setCurrentTheme] = useState('cmd');
   const [wallpaper, setWallpaper] = useState<string | null>(DEFAULT_WALLPAPER);
@@ -225,6 +231,18 @@ const Index = () => {
   const [appState, setAppState] = useState<'booting' | 'desktop'>(() => {
     if (typeof window === 'undefined') {
       return 'booting';
+    }
+
+    if (initialDeepLinkPageKey) {
+      // A direct link to a page skips the boot animation entirely — but still counts
+      // as "booted" for the rest of this session, same as watching it play out, so a
+      // later plain visit to "/" (e.g. after closing this window) doesn't replay it.
+      try {
+        sessionStorage.setItem('has-booted', 'true');
+      } catch {
+        // ignore storage failures (e.g. private browsing)
+      }
+      return 'desktop';
     }
 
     try {
@@ -663,6 +681,56 @@ const Index = () => {
   const canGoForward =
     browserWindow.historyIndex >= 0 && browserWindow.historyIndex < browserWindow.history.length - 1;
 
+  // --- Real-URL sync ---------------------------------------------------------------
+  // The desktop/window visuals never change; these two effects only keep the real
+  // browser URL and the (already-existing) fake browser-window history in sync, so
+  // pages are shareable/bookmarkable and the real back/forward buttons work.
+
+  // URL -> app state: resolves a direct link on first load, and reconciles state when
+  // the real back/forward buttons change the URL out from under us.
+  useEffect(() => {
+    const pageKey = getPageKeyForPath(location.pathname);
+
+    if (pageKey) {
+      if (!browserWindow.isOpen || currentBrowserPageKey !== pageKey) {
+        openBrowserPage(pageKey);
+      }
+    } else if (browserWindow.isOpen) {
+      handleBrowserClose();
+    }
+    // Only re-run when the real URL changes — the branches above read the latest
+    // browser-window state from this render's closure.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  // App state -> URL: whenever the open/current page changes (icon click, in-window
+  // navigation, fake back/forward buttons), reflect it in the real address bar.
+  //
+  // Deliberately NOT keyed on `location.pathname`: this must only react to genuine
+  // app-state changes. If it also re-ran whenever the URL changed, a real back/forward
+  // navigation (which updates `location` before the effect above has had a chance to
+  // reconcile `currentBrowserPageKey` to match) would be read here with a stale page
+  // key against the already-new URL, and "correct" the URL right back to the stale
+  // page — fighting the effect above forever. Reading `location.pathname` inside the
+  // body (just for the redundant-navigate check) is fine; it just must not be a dep.
+  const wasBrowserOpenRef = useRef(false);
+  useEffect(() => {
+    if (browserWindow.isOpen && currentBrowserPageKey) {
+      const route = getRouteForPageKey(currentBrowserPageKey);
+      if (route && route !== location.pathname) {
+        navigate(route);
+      }
+    } else if (!browserWindow.isOpen && wasBrowserOpenRef.current && location.pathname !== '/') {
+      // Only auto-navigate home once the window was actually open and just closed —
+      // guards against firing on first mount, before the effect above has resolved
+      // a direct link (browserWindow.isOpen still false at that point).
+      navigate('/');
+    }
+
+    wasBrowserOpenRef.current = browserWindow.isOpen;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [browserWindow.isOpen, currentBrowserPageKey]);
+
   const activeWindow = [...windowStack].reverse().find((windowKey) => {
     switch (windowKey) {
       case 'terminal':
@@ -861,6 +929,7 @@ const Index = () => {
                 initialSize={browserWindow.initialSize}
                 workspaceSize={appWindowWorkspaceSize}
                 minSize={currentBrowserPage.minWindowSize}
+                startMaximized
                 zIndex={getWindowZIndex('browser')}
                 isMinimized={browserWindow.isMinimized}
                 onMinimizedChange={handleBrowserMinimize}

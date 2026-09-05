@@ -16,6 +16,14 @@ const App = () => (
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/about" element={<Index />} />
+          <Route path="/projects" element={<Index />} />
+          {/* Project write-ups (e.g. /projects/pawpal-ai) all render the same desktop —
+              Index resolves which one from the URL via the registry, so new articles
+              never need a new route here. */}
+          <Route path="/projects/:slug" element={<Index />} />
+          <Route path="/experience" element={<Index />} />
+          <Route path="/contact" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
