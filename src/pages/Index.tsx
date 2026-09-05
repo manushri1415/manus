@@ -222,7 +222,17 @@ const Index = () => {
   const [currentTheme, setCurrentTheme] = useState('cmd');
   const [wallpaper, setWallpaper] = useState<string | null>(DEFAULT_WALLPAPER);
   const [time] = useState(new Date('2005-02-15T09:39:00'));
-  const [appState, setAppState] = useState<'booting' | 'desktop'>('booting');
+  const [appState, setAppState] = useState<'booting' | 'desktop'>(() => {
+    if (typeof window === 'undefined') {
+      return 'booting';
+    }
+
+    try {
+      return sessionStorage.getItem('has-booted') === 'true' ? 'desktop' : 'booting';
+    } catch {
+      return 'booting';
+    }
+  });
   const [browserWindow, setBrowserWindow] = useState<BrowserWindowState>(createDefaultBrowserWindowState);
   const [gameWindow, setGameWindow] = useState<GameWindowState>(createDefaultGameWindowState);
   const [isTerminalOpen, setIsTerminalOpen] = useState(true);
@@ -367,11 +377,21 @@ const Index = () => {
   }, [DEFAULT_WALLPAPER]);
 
   const handleBootComplete = useCallback(() => {
+    try {
+      sessionStorage.setItem('has-booted', 'true');
+    } catch {
+      // ignore storage failures (e.g. private browsing)
+    }
     setAppState('desktop');
   }, []);
 
   const handlePowerOff = useCallback(() => {
     restoreDesktopWindows();
+    try {
+      sessionStorage.removeItem('has-booted');
+    } catch {
+      // ignore storage failures (e.g. private browsing)
+    }
     setAppState('booting');
   }, [restoreDesktopWindows]);
 
