@@ -38,6 +38,8 @@ interface BrowserWindowProps {
   chromeMode?: 'browser' | 'utility';
   showMinimizeButton?: boolean;
   showMaximizeButton?: boolean;
+  /** Open already maximized (filling the workspace) instead of the normal floating size. */
+  startMaximized?: boolean;
   resizable?: boolean;
   bodyClassName?: string;
   bodyStyle?: React.CSSProperties;
@@ -139,6 +141,7 @@ export const BrowserWindow = ({
   chromeMode = 'browser',
   showMinimizeButton = true,
   showMaximizeButton = true,
+  startMaximized = false,
   resizable = true,
   bodyClassName,
   bodyStyle,
@@ -175,7 +178,7 @@ export const BrowserWindow = ({
   );
   const [position, setPosition] = useState(initialState.position);
   const [size, setSize] = useState(initialState.size);
-  const [isMaximized, setIsMaximized] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(startMaximized);
   const [isViewportFullscreen, setIsViewportFullscreen] = useState(mobileFullScreen);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
