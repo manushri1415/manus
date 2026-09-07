@@ -397,7 +397,9 @@ const Index = () => {
   }, []);
 
   const handleReset = useCallback(() => {
-    localStorage.clear();
+    // Only clear desktop-customization state. localStorage.clear() used to wipe
+    // everything, including unrelated keys like Snake's high scores.
+    localStorage.removeItem('terminal-wallpaper');
     setWallpaper(DEFAULT_WALLPAPER);
     setCurrentTheme('cmd');
     window.location.reload();
