@@ -26,19 +26,19 @@ export const EXPERIENCE_PHOTOS: ExperiencePhoto[] = [
   {
     id: 'capstone-showcase',
     caption: 'Capstone Showcase',
-    thumbnail: 'assets/icons/M-photos/capstone-showcase-collegiate.jpeg',
+    thumbnail: 'assets/icons/M-photos/capstone-showcase-collegiate.webp',
     alt: 'Capstone showcase poster for Collegiate 2.0 platform',
   },
   {
     id: 'camp-counselor',
     caption: 'Camp Counselor',
-    thumbnail: 'assets/icons/M-photos/Camp-counselor.jpeg',
+    thumbnail: 'assets/icons/M-photos/Camp-counselor.webp',
     alt: 'STEM camp counselor with students',
   },
   {
     id: 'production-assistant',
     caption: 'Production Assistant',
-    thumbnail: 'assets/icons/M-photos/Production-Assistant-AFA.jpeg',
+    thumbnail: 'assets/icons/M-photos/Production-Assistant-AFA.webp',
     alt: 'Production assistant on film set',
   },
 ];

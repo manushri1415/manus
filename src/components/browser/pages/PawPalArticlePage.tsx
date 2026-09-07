@@ -46,7 +46,7 @@ const commonQuestions = [
 
 export const PawPalArticlePage = ({ onNavigate }: PawPalArticlePageProps) => {
   const logoPath = `${import.meta.env.BASE_URL}assets/icons/moongle-projects.png`;
-  const adPath = `${import.meta.env.BASE_URL}assets/icons/M-photos/ads.png`;
+  const adPath = `${import.meta.env.BASE_URL}assets/icons/M-photos/ads.webp`;
   const resumePdfPath = `${import.meta.env.BASE_URL}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`;
 
   return (
