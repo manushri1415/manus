@@ -29,15 +29,15 @@ As of July 18, 2026, the app currently includes:
 
 <table>
   <tr>
-    <td><img src="../public/assets/icons/M-photos/1.png" width="100%" alt="Desktop view with terminal open" /></td>
-    <td><img src="../public/assets/icons/M-photos/2.png" width="100%" alt="MTube about page" /></td>
+    <td><img src="../public/assets/icons/M-photos/1.webp" width="100%" alt="Desktop view with terminal open" /></td>
+    <td><img src="../public/assets/icons/M-photos/2.webp" width="100%" alt="MTube about page" /></td>
   </tr>
   <tr>
-    <td><img src="../public/assets/icons/M-photos/3.png" width="100%" alt="themanubook experience page" /></td>
-    <td><img src="../public/assets/icons/M-photos/4.png" width="100%" alt="Moogle projects page" /></td>
+    <td><img src="../public/assets/icons/M-photos/3.webp" width="100%" alt="themanubook experience page" /></td>
+    <td><img src="../public/assets/icons/M-photos/4.webp" width="100%" alt="Moogle projects page" /></td>
   </tr>
   <tr>
-    <td colspan="2"><img src="../public/assets/icons/M-photos/5.png" width="100%" alt="Snake mini-game window" /></td>
+    <td colspan="2"><img src="../public/assets/icons/M-photos/5.webp" width="100%" alt="Snake mini-game window" /></td>
   </tr>
 </table>
 
