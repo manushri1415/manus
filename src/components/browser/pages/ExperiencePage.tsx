@@ -14,9 +14,9 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
   const basePath = import.meta.env.BASE_URL;
 
   const resumePdfPath = `${basePath}assets/icons/M-photos/Muruga_Kumar_Manu.pdf`;
-  const logoPath = `${basePath}assets/icons/M-photos/themanubook-logo.png`;
-  const profilePicPath = `${basePath}assets/icons/M-photos/Manu-profile-pic.jpeg`;
-  const headerArtPath = `${basePath}assets/icons/M-photos/facebook-left.png`;
+  const logoPath = `${basePath}assets/icons/M-photos/themanubook-logo.webp`;
+  const profilePicPath = `${basePath}assets/icons/M-photos/Manu-profile-pic.webp`;
+  const headerArtPath = `${basePath}assets/icons/M-photos/facebook-left.webp`;
   const linkedInUrl = 'https://linkedin.com/in/manushrimurugakumar';
 
   const leftColumnRef = useStickyUntilEnd<HTMLDivElement>(STICKY_EDGE_GAP);
@@ -209,7 +209,7 @@ export const ExperiencePage = ({ onClose, onNavigate }: ExperiencePageProps) => 
               aria-label="Open Manushri Muruga Kumar's resume"
             >
               <img
-                src={`${basePath}assets/icons/M-photos/ads.png`}
+                src={`${basePath}assets/icons/M-photos/ads.webp`}
                 alt="Congratulations! You discovered a new-grad software engineer. Click here to hire."
                 className="themanubook-ad-image"
               />
