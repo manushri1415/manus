@@ -17,6 +17,8 @@ export interface FeaturedExperience {
   date: string;
   description: string;
   thumbnail: string;
+  /** CSS object-position for the card crop, e.g. to keep faces in frame in a portrait photo. */
+  thumbnailPosition?: string;
   recognition?: string;
   category: 'hackathon' | 'competition' | 'capstone';
 }
@@ -34,6 +36,8 @@ export interface VideoResponse {
   title: string;
   description: string;
   thumbnail: string;
+  /** CSS object-position for the card crop, e.g. to keep faces in frame in a portrait photo. */
+  thumbnailPosition?: string;
   category: 'film-production' | 'campus-life';
   date?: string;
 }
@@ -144,6 +148,7 @@ export const FEATURED_EXPERIENCES: FeaturedExperience[] = [
     date: 'Spring 2026',
     description: 'Showcased Collegiate 2.0, an AI-powered college and career planning platform developed as part of an ASU capstone design project.',
     thumbnail: 'assets/icons/M-photos/capstone-showcase-collegiate.webp',
+    thumbnailPosition: 'center 35%',
     category: 'capstone',
   },
 ];
@@ -199,6 +204,7 @@ export const VIDEO_RESPONSES: VideoResponse[] = [
     title: 'Safety — Season 1 Champion',
     description: 'Won Season 1 of the student-made reality show Safety, an Arizona Film Association production.',
     thumbnail: 'assets/icons/M-photos/IMG_0807.webp',
+    thumbnailPosition: 'center 38%',
     category: 'film-production',
     date: '2023',
   },

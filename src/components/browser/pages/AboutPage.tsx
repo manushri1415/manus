@@ -188,7 +188,7 @@ export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
                       onClick={() => openLightbox(item.thumbnail, item.title)}
                       className="mtube-thumbnail-button"
                     >
-                      <img src={`${basePath}${item.thumbnail}`} alt={item.title} className="mtube-thumbnail-image" />
+                      <img src={`${basePath}${item.thumbnail}`} alt={item.title} className="mtube-thumbnail-image" style={{ objectPosition: item.thumbnailPosition }} />
                     </button>
                     <h4 className="mtube-card-title">{item.title}</h4>
                     {item.date && <p className="mtube-card-date">{item.date}</p>}
@@ -208,7 +208,7 @@ export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
                       onClick={() => openLightbox(exp.thumbnail, exp.title)}
                       className="mtube-thumbnail-button"
                     >
-                      <img src={`${basePath}${exp.thumbnail}`} alt={exp.title} className="mtube-thumbnail-image" />
+                      <img src={`${basePath}${exp.thumbnail}`} alt={exp.title} className="mtube-thumbnail-image" style={{ objectPosition: exp.thumbnailPosition }} />
                     </button>
                     <h4 className="mtube-card-title">{exp.title}</h4>
                     <p className="mtube-card-date">{exp.date}</p>
@@ -229,7 +229,7 @@ export const AboutPage = ({ onClose, onNavigate }: AboutPageProps) => {
                       onClick={() => openLightbox(item.thumbnail, item.title)}
                       className="mtube-thumbnail-button"
                     >
-                      <img src={`${basePath}${item.thumbnail}`} alt={item.title} className="mtube-thumbnail-image" />
+                      <img src={`${basePath}${item.thumbnail}`} alt={item.title} className="mtube-thumbnail-image" style={{ objectPosition: item.thumbnailPosition }} />
                     </button>
                     <h4 className="mtube-card-title">{item.title}</h4>
                     {item.date && <p className="mtube-card-date">{item.date}</p>}
