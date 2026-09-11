@@ -443,11 +443,18 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false, de
           ref={rootRef}
           tabIndex={0}
           role="application"
-          aria-label={`${copy.boardAriaLabel}. ${usesTouchLayout ? 'Use the touch controls or Arrow Keys or WASD to move.' : 'Use Arrow Keys or WASD to move.'} Press Space to pause.`}
+          aria-label={`${copy.boardAriaLabel}. ${usesTouchLayout ? 'Use the touch controls or Arrow Keys or WASD to move. Tap the board or press Space to pause.' : 'Use Arrow Keys or WASD to move. Press Space to pause.'}`}
           onKeyDown={handleKeyDown}
           onMouseDown={(event) => {
             event.stopPropagation();
             focusBoard();
+          }}
+          onClick={() => {
+            // On touch layouts the board itself is the pause button. Desktop keeps
+            // Space only, since clicking the board there is how it gets focus.
+            if (usesTouchLayout && canTogglePause) {
+              setIsPaused((prev) => !prev);
+            }
           }}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -546,14 +553,14 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false, de
                   <p key={idx}>{line}</p>
                 ))}
                 <p>{usesTouchLayout ? 'Tap any direction to start' : 'Use Arrow Keys or WASD to start'}</p>
-                <p>Pause anytime with Space or the pause button</p>
+                <p>{usesTouchLayout ? 'Tap the board to pause' : 'Pause anytime with Space'}</p>
               </div>
             )}
 
             {hasStarted && isPaused && !gameOver && !hasWon && (
               <div className="manu-snake__overlay">
                 <div className="manu-snake__overlay-title">GAME PAUSED</div>
-                <p>Press Space or Resume to continue</p>
+                <p>{usesTouchLayout ? 'Tap the board to resume' : 'Press Space to continue'}</p>
               </div>
             )}
 
@@ -584,7 +591,7 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false, de
         </div>
 
         <p className="manu-snake__hint">
-          {usesTouchLayout ? 'Touch pad or Arrow Keys / WASD to move. Use Space or Pause to stop.' : 'Arrow Keys / WASD to move. Space to pause.'}
+          {usesTouchLayout ? 'Touch pad or Arrow Keys / WASD to move. Tap the board to pause.' : 'Arrow Keys / WASD to move. Space to pause.'}
         </p>
 
         {usesTouchLayout && (
@@ -628,23 +635,6 @@ export const SnakeGame = ({ isWindowActive = true, isCompactViewport = false, de
               onClick={() => handleMoveInput('RIGHT')}
             >
               Right
-            </button>
-            <button
-              type="button"
-              className="manu-snake__touch-button manu-snake__touch-button--pause"
-              aria-label={isPaused ? 'Resume game' : 'Pause game'}
-              onMouseDown={(event) => event.stopPropagation()}
-              onTouchStart={(event) => event.stopPropagation()}
-              onClick={() => {
-                if (!canTogglePause) {
-                  return;
-                }
-
-                focusBoard();
-                setIsPaused((prev) => !prev);
-              }}
-            >
-              {isPaused ? 'Resume' : 'Pause'}
             </button>
           </div>
         )}

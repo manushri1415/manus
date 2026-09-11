@@ -280,6 +280,9 @@
 .manu-snake--compact .manu-snake__board-shell {
   width: min(100cqw, 100cqh, 620px);
   height: min(100cqw, 100cqh, 620px);
+  /* the board is tapped to pause/resume: no double-tap zoom or tap flash */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .manu-snake--compact .manu-snake__hint {
@@ -289,7 +292,7 @@
 .manu-snake__touch-controls {
   display: grid;
   grid-template-columns: repeat(3, minmax(56px, 76px));
-  grid-template-rows: repeat(3, 42px);
+  grid-template-rows: repeat(2, 42px);
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -328,15 +331,10 @@
   grid-row: 2;
 }
 
-.manu-snake__touch-button--pause {
-  grid-column: 1 / -1;
-  grid-row: 3;
-}
-
 .manu-snake--compact .manu-snake__touch-controls {
   width: min(100%, 360px);
   grid-template-columns: repeat(3, minmax(74px, 96px));
-  grid-template-rows: repeat(3, 50px);
+  grid-template-rows: repeat(2, 50px);
 }
 
 .manu-snake--compact .manu-snake__touch-button {
@@ -363,7 +361,7 @@
 .manu-snake--tablet .manu-snake__touch-controls {
   width: min(100%, 420px);
   grid-template-columns: repeat(3, minmax(88px, 116px));
-  grid-template-rows: repeat(3, 58px);
+  grid-template-rows: repeat(2, 58px);
   gap: 12px;
 }
 
@@ -414,7 +412,7 @@
 
   .manu-snake__touch-controls {
     grid-template-columns: repeat(3, minmax(48px, 64px));
-    grid-template-rows: repeat(3, 38px);
+    grid-template-rows: repeat(2, 38px);
   }
 
   .manu-snake__touch-button {
@@ -425,7 +423,7 @@
   .manu-snake--compact .manu-snake__touch-controls {
     width: 100%;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: repeat(3, 48px);
+    grid-template-rows: repeat(2, 48px);
   }
 
   .manu-snake--compact .manu-snake__touch-button {
