@@ -859,9 +859,12 @@ const Index = () => {
     return <BootSequence onComplete={handleBootComplete} />;
   }
 
+  // Size the desktop to the *visible* viewport (dvh). On phones 100vh also counts the
+  // area behind the browser's toolbars, which pushed the bottom of full-screen windows
+  // (e.g. Snake's touch pad) out of reach. h-screen stays as the fallback.
   return (
     <div
-      className="relative h-screen overflow-hidden bg-background text-foreground animate-in fade-in duration-1000"
+      className="relative h-screen supports-[height:100dvh]:h-dvh overflow-hidden bg-background text-foreground animate-in fade-in duration-1000"
       style={{
         backgroundImage: wallpaper ? `url(${wallpaper})` : 'none',
         backgroundSize: 'cover',
@@ -881,7 +884,7 @@ const Index = () => {
 
       <main
         className="relative z-10 overflow-hidden pointer-events-none"
-        style={{ height: `calc(100vh - ${effectiveTaskbarHeight}px)` }}
+        style={{ height: `calc(100% - ${effectiveTaskbarHeight}px)` }}
       >
         <div
           ref={workspaceRef}
