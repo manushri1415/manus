@@ -307,15 +307,9 @@ const Index = () => {
       x: homeLayout.workspace.x + homeLayout.terminal.x,
       y: homeLayout.workspace.y + homeLayout.terminal.y,
     };
-  const appWorkspace = {
-    x: 0,
-    y: 0,
+  const appWindowWorkspaceSize = {
     width: workspaceSize.width,
     height: workspaceSize.height,
-  };
-  const appWindowWorkspaceSize = {
-    width: appWorkspace.width,
-    height: appWorkspace.height,
   };
   // Auto-hide the taskbar while a maximized window is actually on screen.
   // (A minimized window keeps its maximized flag but isn't visible, so it
@@ -333,6 +327,10 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
+    // The workspace only exists once the desktop is showing — it's null while the
+    // boot animation plays. Re-running on appState attaches the observer after
+    // boot; without it workspaceSize stays frozen at its first guess for the whole
+    // session (so a maximized window stops short once the taskbar hides).
     const workspace = workspaceRef.current;
     if (!workspace) return;
 
@@ -353,7 +351,7 @@ const Index = () => {
       resizeObserver.disconnect();
       window.removeEventListener('resize', updateWorkspaceSize);
     };
-  }, []);
+  }, [appState]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(pointer: coarse)');
@@ -923,15 +921,10 @@ const Index = () => {
             )}
           </div>
 
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              left: `${appWorkspace.x}px`,
-              top: `${appWorkspace.y}px`,
-              width: `${appWorkspace.width}px`,
-              height: `${appWorkspace.height}px`,
-            }}
-          >
+          {/* App windows get the whole workspace. Sized by CSS rather than from
+              workspaceSize so a maximized window follows the taskbar hiding in the
+              same frame, not one ResizeObserver round-trip later. */}
+          <div className="absolute inset-0 pointer-events-none">
             {browserWindow.isOpen && currentBrowserPage && (
               <BrowserWindow
                 title={currentBrowserPage.title || `${currentBrowserPage.label} - Microsoft Internet Explorer`}
